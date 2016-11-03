@@ -1,3 +1,9 @@
+//********************************************************************************************
+//Author: Sergey Stoyan, CliverSoft.com
+//        http://cliversoft.com
+//        sergey.stoyan@gmail.com
+//        stoyan@cliversoft.com
+//********************************************************************************************
 
 #include "BonjourService.h"
 

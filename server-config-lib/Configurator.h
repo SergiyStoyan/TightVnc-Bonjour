@@ -92,6 +92,9 @@ private:
   bool saveVideoRegionConfig(SettingsManager *sm);
   bool loadVideoRegionConfig(SettingsManager *sm, ServerConfig *config);
 
+  bool saveBonjourConfig(SettingsManager *sm);
+  bool loadBonjourConfig(SettingsManager *sm, ServerConfig *config);
+
   bool save(SettingsManager *sm);
   bool load(SettingsManager *sm);
 

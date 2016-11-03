@@ -422,6 +422,15 @@ private:
   //
 
   LocalMutex m_objectCS;
+
+  //
+  // Configurator from Bonjour tab
+  //
+  bool m_enableBonjourService;
+  StringStorage m_BonjourAgentName;
+public:
+  bool isBonjourServiceEnabled();
+  void enableBonjourService(bool enabled);
 };
 
 #endif

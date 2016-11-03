@@ -142,7 +142,10 @@ bool Configurator::save(SettingsManager *sm)
     saveResult = false;
   }
   if (!saveVideoRegionConfig(sm)) {
-    saveResult = false;
+	  saveResult = false;
+  }
+  if (!saveBonjourConfig(sm)) {
+	  saveResult = false;
   }
   return saveResult;
 }
@@ -178,7 +181,10 @@ bool Configurator::load(SettingsManager *sm)
     loadResult = false;
   }
   if (!loadVideoRegionConfig(sm, &m_serverConfig)) {
-    loadResult = false;
+	  loadResult = false;
+  }
+  if (!loadBonjourConfig(sm, &m_serverConfig)) {
+	  loadResult = false;
   }
 
   m_isFirstLoad = false;
@@ -499,8 +505,7 @@ bool Configurator::saveIpAccessControlContainer(SettingsManager *storage)
   return true;
 }
 
-bool
-Configurator::loadIpAccessControlContainer(SettingsManager *sm, IpAccessControl *rules)
+bool Configurator::loadIpAccessControlContainer(SettingsManager *sm, IpAccessControl *rules)
 {
   bool wasError = false;
   rules->clear();
@@ -831,4 +836,29 @@ void Configurator::updateLogDirPath()
     m_serverConfig.isSaveLogToAllUsersPathFlagEnabled(),
     &pathToLogDirectory);
   m_serverConfig.setLogFileDir(pathToLogDirectory.getString());
+}
+
+bool Configurator::saveBonjourConfig(SettingsManager *sm)
+{
+	//AutoLock l(&m_serverConfig);
+	bool saveResult = true;
+	if (!sm->setBoolean(_T("EnableBonjourService"), m_serverConfig.isBonjourServiceEnabled())) 
+		saveResult = false;
+	
+	return saveResult;
+}
+
+bool Configurator::loadBonjourConfig(SettingsManager *sm, ServerConfig *config)
+{
+	bool loadResult = true;
+
+	bool boolVal;
+	if (!sm->getBoolean(_T("EnableBonjourService"), &boolVal))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.enableBonjourService(boolVal);
+	}
+
+	return loadResult;
 }

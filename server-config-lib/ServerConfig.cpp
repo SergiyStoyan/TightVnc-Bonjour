@@ -44,7 +44,7 @@ ServerConfig::ServerConfig()
   m_allowLoopbackConnections(false),
   m_videoRecognitionInterval(3000), m_grabTransparentWindows(true),
   m_saveLogToAllUsersPath(false), m_hasControlPassword(false),
-  m_showTrayIcon(true),
+  m_showTrayIcon(true),m_enableBonjourService(true),
   m_idleTimeout(0)
 {
   memset(m_primaryPassword,  0, sizeof(m_primaryPassword));
@@ -120,6 +120,8 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt8(m_hasControlPassword ? 1 : 0);
   output->writeInt8(m_showTrayIcon ? 1 : 0);
 
+  output->writeInt8(m_enableBonjourService ? 1 : 0);
+
   output->writeUTF8(m_logFilePath.getString());
 }
 
@@ -187,6 +189,8 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_hasReadOnlyPassword = input->readInt8() == 1;
   m_hasControlPassword = input->readInt8() == 1;
   m_showTrayIcon = input->readInt8() == 1;
+
+  m_enableBonjourService = input->readInt8() == 1;
 
   input->readUTF8(&m_logFilePath);
 }
@@ -735,4 +739,16 @@ bool ServerConfig::getGrabTransparentWindowsFlag()
 {
   AutoLock lock(&m_objectCS);
   return m_grabTransparentWindows;
+}
+
+void ServerConfig::enableBonjourService(bool enabled)
+{
+	AutoLock lock(&m_objectCS);
+	m_enableBonjourService = enabled;
+}
+
+bool ServerConfig::isBonjourServiceEnabled()
+{
+	AutoLock lock(&m_objectCS);
+	return m_enableBonjourService;
 }

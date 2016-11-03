@@ -50,7 +50,7 @@ protected:
 	// Configuration
 	ServerConfig *m_config;
 	// Controls
-  CheckBox m_BonjourEnabledCheckBox;
+  CheckBox m_enableBonjourService;
   TextBox m_BonjourServiceNameTextBox;
 
   BaseDialog *m_parent;
