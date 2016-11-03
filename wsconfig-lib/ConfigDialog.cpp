@@ -299,7 +299,7 @@ bool ConfigDialog::validateInput()
 	  return false;
   }
   if (!m_BonjourConfigDialog.validateInput()) {
-	  m_tabControl.showTab(&m_ipAccessControlDialog);
+	  m_tabControl.showTab(&m_BonjourConfigDialog);
 	  return false;
   }
 #ifdef USE_EXTRA_TABS
