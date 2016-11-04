@@ -7,24 +7,36 @@
 
 #include "BonjourService.h"
 
-#include "ServerCommandLine.h"
-#include "tvnserver-app/NamingDefs.h"
-
-#include "win-system/SCMClient.h"
-#include "win-system/Environment.h"
-
-BonjourService::BonjourService()
+void BonjourServiceConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
 {
+	if (serverConfig->isBonjourServiceEnabled())
+	{
+		StringStorage ss;
+		Configurator::getInstance()->getServerConfig()->getBonjourAgentName(&ss);
+		BonjourService::Start(ss.getString());
+	}
+	else
+		BonjourService::Stop();
 }
 
-BonjourService::~BonjourService()
+BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
+bool BonjourService::started = false;
+
+void BonjourService::Initialize()
 {
+	Configurator::getInstance()->addListener(&BonjourService::bonjourServiceConfigReloadListener);
 }
 
-void BonjourService::Start()
+void BonjourService::Start(const TCHAR *bonjourAgentName)
 {
+	if (BonjourService::started)
+		return;
+	BonjourService::started = true;
 }
 
 void BonjourService::Stop()
 {
+	if (!BonjourService::started)
+		return;
+	BonjourService::started = false;
 }

@@ -30,16 +30,26 @@
 #include "win-system/SCMClient.h"
 #include "win-system/Environment.h"
 
+#include "BonjourService.h"
+
 const TCHAR TvnService::SERVICE_COMMAND_LINE_KEY[] = _T("-service");
 
 TvnService::TvnService(WinServiceEvents *winServiceEvents,
-                       NewConnectionEvents *newConnectionEvents)
-: Service(ServiceNames::SERVICE_NAME), m_tvnServer(0),
-  m_winServiceEvents(winServiceEvents),
-  m_newConnectionEvents(newConnectionEvents),
-  m_logServer(LogNames::LOG_PIPE_PUBLIC_NAME),
-  m_clientLogger(LogNames::LOG_PIPE_PUBLIC_NAME, LogNames::SERVER_LOG_FILE_STUB_NAME)
+	NewConnectionEvents *newConnectionEvents)
+	: Service(ServiceNames::SERVICE_NAME), m_tvnServer(0),
+	m_winServiceEvents(winServiceEvents),
+	m_newConnectionEvents(newConnectionEvents),
+	m_logServer(LogNames::LOG_PIPE_PUBLIC_NAME),
+	m_clientLogger(LogNames::LOG_PIPE_PUBLIC_NAME, LogNames::SERVER_LOG_FILE_STUB_NAME)
 {
+	try
+	{
+		BonjourService::Initialize();
+	}
+	catch (Exception &ex)
+	{
+		//m_log.interror(_T("%s"), ex.getMessage());
+	}
 }
 
 TvnService::~TvnService()

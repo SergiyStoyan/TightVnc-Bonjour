@@ -8,14 +8,23 @@
 #ifndef _BONJOUR_SERVICE_H_
 #define _BONJOUR_SERVICE_H_
 
-class BonjourService 
+#include "server-config-lib/Configurator.h"
+
+class BonjourServiceConfigReloadListener : public ConfigReloadListener
 {
 public:
-	BonjourService();
-   ~BonjourService();
+	void onConfigReload(ServerConfig *serverConfig);
+};
 
-   static void Start();
-   static void Stop();
+class BonjourService
+{
+public:
+	static void Initialize();
+	static void Start(const TCHAR *bonjourAgentName);
+	static void Stop();
+private:
+	static BonjourServiceConfigReloadListener bonjourServiceConfigReloadListener;
+	static bool started;
 };
 
 #endif

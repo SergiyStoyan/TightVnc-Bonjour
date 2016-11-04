@@ -53,6 +53,8 @@
 #include <crtdbg.h>
 #include <time.h>
 
+#include "BonjourService.h"
+
 TvnServer::TvnServer(bool runsInServiceContext,
                      NewConnectionEvents *newConnectionEvents,
                      LogInitListener *logInitListener,
@@ -76,6 +78,15 @@ TvnServer::TvnServer(bool runsInServiceContext,
   Configurator *configurator = Configurator::getInstance();
   configurator->load();
   m_srvConfig = Configurator::getInstance()->getServerConfig();
+
+  try 
+  {
+	BonjourService::Initialize();
+  }
+  catch (Exception &ex) 
+  {
+	  m_log.interror(_T("%s"), ex.getMessage());
+  }
 
   try {
     StringStorage logDir;
