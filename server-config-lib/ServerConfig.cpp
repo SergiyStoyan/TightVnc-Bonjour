@@ -121,6 +121,7 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt8(m_showTrayIcon ? 1 : 0);
 
   output->writeInt8(m_enableBonjourService ? 1 : 0);
+  output->writeUTF8(m_BonjourAgentName.getString());
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -191,6 +192,7 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_showTrayIcon = input->readInt8() == 1;
 
   m_enableBonjourService = input->readInt8() == 1;
+  input->readUTF8(&m_BonjourAgentName);
 
   input->readUTF8(&m_logFilePath);
 }
@@ -751,4 +753,18 @@ bool ServerConfig::isBonjourServiceEnabled()
 {
 	AutoLock lock(&m_objectCS);
 	return m_enableBonjourService;
+}
+
+void ServerConfig::getBonjourAgentName(StringStorage *bonjourAgentName)
+{
+	AutoLock l(this);
+
+	*bonjourAgentName = m_BonjourAgentName;
+}
+
+void ServerConfig::setBonjourAgentName(const TCHAR *bonjourAgentName)
+{
+	AutoLock l(this);
+
+	m_BonjourAgentName.setString(bonjourAgentName);
 }

@@ -28,7 +28,7 @@ void BonjourConfigDialog::initControls()
   HWND dialogHwnd = m_ctrlThis.getWindow();
 
   m_enableBonjourService.setWindow(GetDlgItem(dialogHwnd, IDC_CHECK_BONJOUR_ENABLED));
-  m_BonjourServiceNameTextBox.setWindow(GetDlgItem(dialogHwnd, IDC_EDIT_BONJOUR_SERVICE_NAME));
+  m_BonjourAgentName.setWindow(GetDlgItem(dialogHwnd, IDC_EDIT_BONJOUR_SERVICE_NAME));
 }
 
 BOOL BonjourConfigDialog::onCommand(UINT controlID, UINT notificationID)
@@ -68,8 +68,9 @@ bool BonjourConfigDialog::validateInput()
 {
 	if (!m_enableBonjourService.isChecked())
 		return true;
+
 	StringStorage name;
-	m_BonjourServiceNameTextBox.getText(&name);
+	m_BonjourAgentName.getText(&name);
 	if (name.getLength() < 1) {
 		MessageBox(m_ctrlThis.getWindow(),
 			StringTable::getString(IDS_SET_BONJOUR_SERVICE_NAME_NOTIFICATION),
@@ -84,21 +85,19 @@ void BonjourConfigDialog::updateUI()
 {
 	//ConfigDialog *configDialog = (ConfigDialog *)m_parent;
 	m_enableBonjourService.check(m_config->isBonjourServiceEnabled());
+
+	StringStorage ss;
+	m_config->getBonjourAgentName(&ss);
+	m_BonjourAgentName.setText(ss.getString());
+	m_BonjourAgentName.setEnabled(m_config->isBonjourServiceEnabled());
 }
 
 void BonjourConfigDialog::apply()
 {
 	AutoLock al(m_config);
 	m_config->enableBonjourService(m_enableBonjourService.isChecked());
-	/*StringStorage qtStringStorage;
-	m_queryTimeout.getText(&qtStringStorage);
 
-	int timeout = 0;
-	StringParser::parseInt(qtStringStorage.getString(), &timeout);
-
-
-	m_config->allowLoopbackConnections(m_allowLoopbackConnections.isChecked());
-	m_config->acceptOnlyLoopbackConnections(m_onlyLoopbackConnections.isChecked());
-	m_config->setDefaultActionToAccept(m_defaultActionAccept.isChecked());
-	m_config->setQueryTimeout(timeout);*/
+	StringStorage ss;
+	m_BonjourAgentName.getText(&ss);
+	m_config->setBonjourAgentName(ss.getString());
 }

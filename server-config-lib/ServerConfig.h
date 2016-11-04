@@ -431,6 +431,9 @@ private:
 public:
   bool isBonjourServiceEnabled();
   void enableBonjourService(bool enabled);
+
+  void getBonjourAgentName(StringStorage *bonjourAgentName);
+  void setBonjourAgentName(const TCHAR *bonjourAgentName);
 };
 
 #endif

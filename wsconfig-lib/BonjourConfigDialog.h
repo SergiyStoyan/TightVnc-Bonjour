@@ -51,7 +51,7 @@ protected:
 	ServerConfig *m_config;
 	// Controls
   CheckBox m_enableBonjourService;
-  TextBox m_BonjourServiceNameTextBox;
+  TextBox m_BonjourAgentName;
 
   BaseDialog *m_parent;
 };

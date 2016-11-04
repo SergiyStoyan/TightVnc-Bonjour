@@ -842,7 +842,13 @@ bool Configurator::saveBonjourConfig(SettingsManager *sm)
 {
 	//AutoLock l(&m_serverConfig);
 	bool saveResult = true;
-	if (!sm->setBoolean(_T("EnableBonjourService"), m_serverConfig.isBonjourServiceEnabled())) 
+
+	if (!sm->setBoolean(_T("EnableBonjourService"), m_serverConfig.isBonjourServiceEnabled()))
+		saveResult = false;
+
+	StringStorage ss;
+	m_serverConfig.getBonjourAgentName(&ss);
+	if (!sm->setString(_T("BonjourAgentName"), ss.getString()))
 		saveResult = false;
 	
 	return saveResult;
@@ -852,12 +858,20 @@ bool Configurator::loadBonjourConfig(SettingsManager *sm, ServerConfig *config)
 {
 	bool loadResult = true;
 
-	bool boolVal;
-	if (!sm->getBoolean(_T("EnableBonjourService"), &boolVal))
+	bool b;
+	if (!sm->getBoolean(_T("EnableBonjourService"), &b))
 		loadResult = false;
 	else {
 		m_isConfigLoadedPartly = true;
-		m_serverConfig.enableBonjourService(boolVal);
+		m_serverConfig.enableBonjourService(b);
+	}
+
+	StringStorage ss;
+	if (!sm->getString(_T("BonjourAgentName"), &ss))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setBonjourAgentName(ss.getString());
 	}
 
 	return loadResult;
