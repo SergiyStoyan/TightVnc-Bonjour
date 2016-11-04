@@ -42,6 +42,7 @@ protected:
   //
 
   void onBonjourEnabledClick();
+  void onBonjourAgentNameChange();
 
 private:
   void initControls();

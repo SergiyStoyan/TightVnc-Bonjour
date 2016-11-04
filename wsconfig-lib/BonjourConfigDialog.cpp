@@ -36,14 +36,12 @@ BOOL BonjourConfigDialog::onCommand(UINT controlID, UINT notificationID)
 	switch (controlID)
 	{
 	case IDC_CHECK_BONJOUR_ENABLED:
+		if (notificationID == BN_CLICKED) 
 			onBonjourEnabledClick();
-		switch (notificationID)
-		{
-		case LBN_SELCHANGE:
-			break;
-		case LBN_DBLCLK:
-			break;
-		}
+		break;
+	case IDC_EDIT_BONJOUR_SERVICE_NAME:
+		if (notificationID == EN_UPDATE)
+			onBonjourAgentNameChange();
 		break;
 	}
 	return TRUE;
@@ -61,7 +59,13 @@ BOOL BonjourConfigDialog::onInitDialog()
 
 void BonjourConfigDialog::onBonjourEnabledClick()
 {
-    ((ConfigDialog *)m_parent)->updateApplyButtonState();
+	m_BonjourAgentName.setEnabled(m_enableBonjourService.isChecked());
+	((ConfigDialog *)m_parent)->updateApplyButtonState();
+}
+
+void BonjourConfigDialog::onBonjourAgentNameChange()
+{
+	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
 
 bool BonjourConfigDialog::validateInput()
