@@ -25,6 +25,7 @@ bool BonjourService::started = false;
 void BonjourService::Initialize()
 {
 	Configurator::getInstance()->addListener(&BonjourService::bonjourServiceConfigReloadListener);
+	BonjourService::bonjourServiceConfigReloadListener.onConfigReload(Configurator::getInstance()->getServerConfig());
 }
 
 void BonjourService::Start(const TCHAR *bonjourAgentName)
