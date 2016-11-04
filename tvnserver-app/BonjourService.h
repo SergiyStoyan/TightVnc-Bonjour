@@ -9,17 +9,19 @@
 #define _BONJOUR_SERVICE_H_
 
 #include "server-config-lib/Configurator.h"
+#include "TvnServer.h"
 
-class BonjourServiceConfigReloadListener : public ConfigReloadListener
+class BonjourServiceConfigReloadListener : public ConfigReloadListener, public TvnServerListener
 {
 public:
 	void onConfigReload(ServerConfig *serverConfig);
+	void onTvnServerShutdown();
 };
 
 class BonjourService
 {
 public:
-	static void Initialize();
+	static void Initialize(TvnServer *tvnServer, Configurator *configurator);
 	static void Start(const TCHAR *bonjourAgentName);
 	static void Stop();
 private:

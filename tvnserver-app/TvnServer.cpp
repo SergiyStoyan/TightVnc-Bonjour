@@ -79,15 +79,6 @@ TvnServer::TvnServer(bool runsInServiceContext,
   configurator->load();
   m_srvConfig = Configurator::getInstance()->getServerConfig();
 
-  try 
-  {
-	BonjourService::Initialize();
-  }
-  catch (Exception &ex) 
-  {
-	  m_log.interror(_T("%s"), ex.getMessage());
-  }
-
   try {
     StringStorage logDir;
     m_srvConfig->getLogFileDir(&logDir);
@@ -133,6 +124,15 @@ TvnServer::TvnServer(bool runsInServiceContext,
     (void)m_extraRfbServers.reload(m_runAsService, m_rfbClientManager);
     restartHttpServer();
     restartControlServer();
+  }
+
+  try
+  {
+	  BonjourService::Initialize(this, Configurator::getInstance());
+  }
+  catch (Exception &ex)
+  {
+	  m_log.interror(_T("%s"), ex.getMessage());
   }
 }
 

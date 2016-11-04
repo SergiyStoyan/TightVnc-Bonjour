@@ -19,13 +19,19 @@ void BonjourServiceConfigReloadListener::onConfigReload(ServerConfig *serverConf
 		BonjourService::Stop();
 }
 
+void BonjourServiceConfigReloadListener::onTvnServerShutdown()
+{
+	BonjourService::Stop();
+}
+
 BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
 bool BonjourService::started = false;
 
-void BonjourService::Initialize()
+void BonjourService::Initialize(TvnServer *tvnServer, Configurator *configurator)
 {
-	Configurator::getInstance()->addListener(&BonjourService::bonjourServiceConfigReloadListener);
-	BonjourService::bonjourServiceConfigReloadListener.onConfigReload(Configurator::getInstance()->getServerConfig());
+	tvnServer->addListener(&BonjourService::bonjourServiceConfigReloadListener);
+	configurator->addListener(&BonjourService::bonjourServiceConfigReloadListener);
+	BonjourService::bonjourServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());
 }
 
 void BonjourService::Start(const TCHAR *bonjourAgentName)
