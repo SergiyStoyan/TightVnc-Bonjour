@@ -428,12 +428,16 @@ private:
   //
   bool m_enableBonjourService;
   StringStorage m_BonjourAgentName;
+  bool m_useWindowsUserNameAsBonjourAgentName;
 public:
   bool isBonjourServiceEnabled();
   void enableBonjourService(bool enabled);
 
   void getBonjourAgentName(StringStorage *bonjourAgentName);
   void setBonjourAgentName(const TCHAR *bonjourAgentName);
+
+  bool isWindowsUserNameAsBonjourAgentNameUsed();
+  void useWindowsUserNameAsBonjourAgentName(bool enabled);
 };
 
 #endif

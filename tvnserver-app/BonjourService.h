@@ -22,11 +22,16 @@ class BonjourService
 {
 public:
 	static void Initialize(TvnServer *tvnServer, Configurator *configurator);
-	static void Start(const TCHAR *bonjourAgentName);
+	static void Start();
 	static void Stop();
 private:
 	static BonjourServiceConfigReloadListener bonjourServiceConfigReloadListener;
+	static bool initialized;
 	static bool started;
+	static StringStorage currentAgentName;
+	static void start();
+	static void getAgentName(StringStorage *agentName);
+	static HWND WINAPI bogus_hwnd;//used for WTSRegisterSessionNotificationEx to monitor user logon
 };
 
 #endif
