@@ -30,8 +30,9 @@ private:
 	static bool started;
 	static StringStorage currentAgentName;
 	static void start();
+	static void stop();
 	static void getAgentName(StringStorage *agentName);
-	static HWND WINAPI bogus_hwnd;//used for WTSRegisterSessionNotificationEx to monitor user logon
+	//static HWND WINAPI bogus_hwnd;//used for WTSRegisterSessionNotificationEx to monitor user logon
 };
 
 #endif
