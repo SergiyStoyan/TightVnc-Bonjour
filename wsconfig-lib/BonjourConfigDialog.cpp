@@ -131,7 +131,7 @@ void BonjourConfigDialog::apply()
 {
 	AutoLock al(m_config);
 	m_config->enableBonjourService(m_enableBonjourService.isChecked());
-
+	m_config->useWindowsUserAsBonjourServiceName(m_useWindowsUserAsBonjourServiceName.isChecked());
 	StringStorage ss;
 	m_BonjourServiceName.getText(&ss);
 	m_config->setBonjourServiceName(ss.getString());

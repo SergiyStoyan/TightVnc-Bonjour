@@ -221,8 +221,9 @@ void ConfigDialog::onApplyButtonClick()
     m_ipAccessControlDialog.apply();
     m_videoRegionsConfigDialog.apply();
 	m_BonjourConfigDialog.apply();
-  } else {
-    return ;
+  }
+  else {
+	  return;
   }
 
   // If reload command is specified then we're working in online mode
