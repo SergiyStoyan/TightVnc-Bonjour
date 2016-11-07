@@ -436,8 +436,8 @@ public:
   void getBonjourAgentName(StringStorage *bonjourAgentName);
   void setBonjourAgentName(const TCHAR *bonjourAgentName);
 
-  bool isWindowsUserNameAsBonjourAgentNameUsed();
-  void useWindowsUserNameAsBonjourAgentName(bool enabled);
+  bool isWindowsUserAsBonjourAgentNameUsed();
+  void useWindowsUserAsBonjourAgentName(bool enabled);
 };
 
 #endif

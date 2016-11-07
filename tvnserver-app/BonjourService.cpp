@@ -26,10 +26,10 @@ bool BonjourService::initialized = false;
 bool BonjourService::started = false;
 StringStorage BonjourService::currentAgentName = NULL;
 
-HWND WINAPI bogus_hwnd = NULL;//used for WTSRegisterSessionNotificationEx to monitor user logon
-HANDLE bogus_window_thread = NULL;
+HWND WINAPI BonjourService::bogus_hwnd = NULL;//used for WTSRegisterSessionNotificationEx to monitor user logon
+HANDLE BonjourService::bogus_window_thread = NULL;
 
-LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK BonjourService::WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (uMsg == WM_WTSSESSION_CHANGE)
 	{
@@ -41,7 +41,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-DWORD WINAPI BogusWindowRun(void* Param)
+DWORD WINAPI BonjourService::BogusWindowRun(void* Param)
 {
 	LPCWSTR class_name = _T("MESSAGE_ONLY_CLASS");
 	HINSTANCE hInstance = NULL;
@@ -92,7 +92,7 @@ void BonjourService::Start()
 		throw Exception(_T("BonjourService is not initialized."));
 
 	StringStorage agent_name;
-	getAgentName(&agent_name);
+	GetAgentName(&agent_name);
 	if (currentAgentName.isEqualTo(&agent_name))
 	{
 		if (started)
@@ -117,19 +117,18 @@ void BonjourService::Start()
 
 	start();
 	started = true;
-
-	//test
-	//SendMessage(bogus_hwnd, WM_WTSSESSION_CHANGE, WTS_SESSION_LOGON, 0);
+		
+	//SendMessage(bogus_hwnd, WM_WTSSESSION_CHANGE, WTS_SESSION_LOGON, 0);//test
 }
 
 void BonjourService::start()
 {
 }
 
-void BonjourService::getAgentName(StringStorage *agentName)
+void BonjourService::GetAgentName(StringStorage *agentName)
 {
 	ServerConfig *sc = Configurator::getInstance()->getServerConfig();
-	if (sc->isWindowsUserNameAsBonjourAgentNameUsed())
+	if (sc->isWindowsUserAsBonjourAgentNameUsed())
 	{
 		TCHAR user_name[255];
 		DWORD user_name_size = sizeof(user_name);

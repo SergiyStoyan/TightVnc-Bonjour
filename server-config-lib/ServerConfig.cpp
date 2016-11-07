@@ -769,13 +769,13 @@ void ServerConfig::setBonjourAgentName(const TCHAR *bonjourAgentName)
 	m_BonjourAgentName.setString(bonjourAgentName);
 }
 
-void ServerConfig::useWindowsUserNameAsBonjourAgentName(bool enabled)
+void ServerConfig::useWindowsUserAsBonjourAgentName(bool enabled)
 {
 	AutoLock lock(&m_objectCS);
 	m_useWindowsUserNameAsBonjourAgentName = enabled;
 }
 
-bool ServerConfig::isWindowsUserNameAsBonjourAgentNameUsed()
+bool ServerConfig::isWindowsUserAsBonjourAgentNameUsed()
 {
 	AutoLock lock(&m_objectCS);
 	return m_useWindowsUserNameAsBonjourAgentName;

@@ -8,6 +8,7 @@
 #include "BonjourConfigDialog.h"
 #include "ConfigDialog.h"
 #include "tvnserver/resource.h"
+#include "tvnserver-app/BonjourService.h"
 
 BonjourConfigDialog::BonjourConfigDialog()
 : BaseDialog(IDD_CONFIG_BONJOUR_PAGE), m_parent(NULL)
@@ -25,10 +26,11 @@ void BonjourConfigDialog::setParentDialog(BaseDialog *dialog)
 
 void BonjourConfigDialog::initControls()
 {
-  HWND dialogHwnd = m_ctrlThis.getWindow();
+	HWND dialogHwnd = m_ctrlThis.getWindow();
 
-  m_enableBonjourService.setWindow(GetDlgItem(dialogHwnd, IDC_CHECK_BONJOUR_ENABLED));
-  m_BonjourAgentName.setWindow(GetDlgItem(dialogHwnd, IDC_EDIT_BONJOUR_SERVICE_NAME));
+	m_enableBonjourService.setWindow(GetDlgItem(dialogHwnd, IDC_CHECK_BONJOUR_ENABLED));
+	m_useWindowsUserAsBonjourAgentName.setWindow(GetDlgItem(dialogHwnd, IDC_CHECK_BONJOUR_USE_WINDOWS_USER_NAME_AS_AGENT_NAME));
+	m_BonjourAgentName.setWindow(GetDlgItem(dialogHwnd, IDC_EDIT_BONJOUR_SERVICE_NAME));
 }
 
 BOOL BonjourConfigDialog::onCommand(UINT controlID, UINT notificationID)
@@ -39,11 +41,15 @@ BOOL BonjourConfigDialog::onCommand(UINT controlID, UINT notificationID)
 		if (notificationID == BN_CLICKED) 
 			onBonjourEnabledClick();
 		break;
+	case IDC_CHECK_BONJOUR_USE_WINDOWS_USER_NAME_AS_AGENT_NAME:
+		if (notificationID == EN_UPDATE)
+			onUseWindowsUserAsBonjourAgentNameClick();
+		break;
 	case IDC_EDIT_BONJOUR_SERVICE_NAME:
 		if (notificationID == EN_UPDATE)
 			onBonjourAgentNameChange();
 		break;
-	}
+}
 	return TRUE;
 }
 
@@ -59,8 +65,21 @@ BOOL BonjourConfigDialog::onInitDialog()
 
 void BonjourConfigDialog::onBonjourEnabledClick()
 {
-	m_BonjourAgentName.setEnabled(m_enableBonjourService.isChecked());
+	m_useWindowsUserAsBonjourAgentName.setEnabled(m_enableBonjourService.isChecked());
+	m_BonjourAgentName.setEnabled(m_enableBonjourService.isChecked() && !m_useWindowsUserAsBonjourAgentName.isChecked());
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
+}
+
+void BonjourConfigDialog::onUseWindowsUserAsBonjourAgentNameClick()
+{
+	m_BonjourAgentName.setEnabled(!m_useWindowsUserAsBonjourAgentName.isChecked());
+	if (m_useWindowsUserAsBonjourAgentName.isChecked())
+	{
+		StringStorage agent_name;
+		BonjourService::GetAgentName(&agent_name);
+		m_BonjourAgentName.setText(agent_name.getString());
+	}
+	((ConfigDialog *)m_parent)->updateApplyButtonState();	
 }
 
 void BonjourConfigDialog::onBonjourAgentNameChange()
@@ -87,13 +106,25 @@ bool BonjourConfigDialog::validateInput()
 
 void BonjourConfigDialog::updateUI()
 {
-	//ConfigDialog *configDialog = (ConfigDialog *)m_parent;
 	m_enableBonjourService.check(m_config->isBonjourServiceEnabled());
 
-	StringStorage ss;
-	m_config->getBonjourAgentName(&ss);
-	m_BonjourAgentName.setText(ss.getString());
-	m_BonjourAgentName.setEnabled(m_config->isBonjourServiceEnabled());
+	m_useWindowsUserAsBonjourAgentName.setEnabled(m_enableBonjourService.isChecked());
+
+	m_useWindowsUserAsBonjourAgentName.check(m_config->isWindowsUserAsBonjourAgentNameUsed());
+	if (m_useWindowsUserAsBonjourAgentName.isChecked())
+	{
+		m_BonjourAgentName.setEnabled(false);
+		StringStorage agent_name;
+		BonjourService::GetAgentName(&agent_name);
+		m_BonjourAgentName.setText(agent_name.getString());
+	}
+	else
+	{
+		m_BonjourAgentName.setEnabled(m_config->isBonjourServiceEnabled());
+		StringStorage ss;
+		m_config->getBonjourAgentName(&ss);
+		m_BonjourAgentName.setText(ss.getString());
+	}
 }
 
 void BonjourConfigDialog::apply()

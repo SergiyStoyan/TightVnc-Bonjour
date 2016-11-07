@@ -18,43 +18,45 @@ class BonjourConfigDialog : public BaseDialog
 {
 public:
 	BonjourConfigDialog();
-  virtual ~BonjourConfigDialog();
+	virtual ~BonjourConfigDialog();
 
-  void setParentDialog(BaseDialog *dialog);
+	void setParentDialog(BaseDialog *dialog);
 
-  bool validateInput();
-  void updateUI();
-  void apply();
+	bool validateInput();
+	void updateUI();
+	void apply();
 
 protected:
 
-  //
-  // Inherited from BaseDialog.
-  //
+	//
+	// Inherited from BaseDialog.
+	//
 
-  virtual BOOL onInitDialog();
-  virtual BOOL onCommand(UINT controlID, UINT notificationID);
-  virtual BOOL onNotify(UINT controlID, LPARAM data) { return TRUE; }
-  virtual BOOL onDestroy() { return TRUE; }
+	virtual BOOL onInitDialog();
+	virtual BOOL onCommand(UINT controlID, UINT notificationID);
+	virtual BOOL onNotify(UINT controlID, LPARAM data) { return TRUE; }
+	virtual BOOL onDestroy() { return TRUE; }
 
-  //
-  // Controls event handlers.
-  //
+	//
+	// Controls event handlers.
+	//
 
-  void onBonjourEnabledClick();
-  void onBonjourAgentNameChange();
+	void onBonjourEnabledClick();
+	void onUseWindowsUserAsBonjourAgentNameClick();
+	void onBonjourAgentNameChange();
 
 private:
-  void initControls();
+	void initControls();
 
 protected:
 	// Configuration
 	ServerConfig *m_config;
 	// Controls
-  CheckBox m_enableBonjourService;
-  TextBox m_BonjourAgentName;
+	CheckBox m_enableBonjourService;
+	CheckBox m_useWindowsUserAsBonjourAgentName;
+	TextBox m_BonjourAgentName;
 
-  BaseDialog *m_parent;
+	BaseDialog *m_parent;
 };
 
 #endif
