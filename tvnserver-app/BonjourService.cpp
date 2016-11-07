@@ -92,7 +92,7 @@ void BonjourService::Start()
 		throw Exception(_T("BonjourService is not initialized."));
 
 	StringStorage agent_name;
-	GetAgentName(&agent_name);
+	GetServiceName(&agent_name);
 	if (currentAgentName.isEqualTo(&agent_name))
 	{
 		if (started)
@@ -125,10 +125,10 @@ void BonjourService::start()
 {
 }
 
-void BonjourService::GetAgentName(StringStorage *agentName)
+void BonjourService::GetServiceName(StringStorage *agentName)
 {
 	ServerConfig *sc = Configurator::getInstance()->getServerConfig();
-	if (sc->isWindowsUserAsBonjourAgentNameUsed())
+	if (sc->isWindowsUserAsBonjourServiceNameUsed())
 	{
 		TCHAR user_name[255];
 		DWORD user_name_size = sizeof(user_name);
@@ -137,7 +137,7 @@ void BonjourService::GetAgentName(StringStorage *agentName)
 		agentName->setString(user_name);
 	}
 	else
-		sc->getBonjourAgentName(agentName);
+		sc->getBonjourServiceName(agentName);
 }
 
 void BonjourService::Stop()

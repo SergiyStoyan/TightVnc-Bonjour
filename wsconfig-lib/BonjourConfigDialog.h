@@ -42,8 +42,8 @@ protected:
 	//
 
 	void onBonjourEnabledClick();
-	void onUseWindowsUserAsBonjourAgentNameClick();
-	void onBonjourAgentNameChange();
+	void onUseWindowsUserAsBonjourServiceNameClick();
+	void onBonjourServiceNameChange();
 
 private:
 	void initControls();
@@ -53,8 +53,8 @@ protected:
 	ServerConfig *m_config;
 	// Controls
 	CheckBox m_enableBonjourService;
-	CheckBox m_useWindowsUserAsBonjourAgentName;
-	TextBox m_BonjourAgentName;
+	CheckBox m_useWindowsUserAsBonjourServiceName;
+	TextBox m_BonjourServiceName;
 
 	BaseDialog *m_parent;
 };

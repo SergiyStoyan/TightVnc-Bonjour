@@ -847,7 +847,7 @@ bool Configurator::saveBonjourConfig(SettingsManager *sm)
 		saveResult = false;
 
 	StringStorage ss;
-	m_serverConfig.getBonjourAgentName(&ss);
+	m_serverConfig.getBonjourServiceName(&ss);
 	if (!sm->setString(_T("BonjourAgentName"), ss.getString()))
 		saveResult = false;
 	
@@ -871,7 +871,7 @@ bool Configurator::loadBonjourConfig(SettingsManager *sm, ServerConfig *config)
 		loadResult = false;
 	else {
 		m_isConfigLoadedPartly = true;
-		m_serverConfig.setBonjourAgentName(ss.getString());
+		m_serverConfig.setBonjourServiceName(ss.getString());
 	}
 
 	return loadResult;

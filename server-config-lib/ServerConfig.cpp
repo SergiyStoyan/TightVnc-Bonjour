@@ -121,7 +121,7 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt8(m_showTrayIcon ? 1 : 0);
 
   output->writeInt8(m_enableBonjourService ? 1 : 0);
-  output->writeUTF8(m_BonjourAgentName.getString());
+  output->writeUTF8(m_BonjourServiceName.getString());
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -192,7 +192,7 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_showTrayIcon = input->readInt8() == 1;
 
   m_enableBonjourService = input->readInt8() == 1;
-  input->readUTF8(&m_BonjourAgentName);
+  input->readUTF8(&m_BonjourServiceName);
 
   input->readUTF8(&m_logFilePath);
 }
@@ -755,28 +755,28 @@ bool ServerConfig::isBonjourServiceEnabled()
 	return m_enableBonjourService;
 }
 
-void ServerConfig::getBonjourAgentName(StringStorage *bonjourAgentName)
+void ServerConfig::getBonjourServiceName(StringStorage *bonjourServiceName)
 {
 	AutoLock l(this);
 
-	*bonjourAgentName = m_BonjourAgentName;
+	*bonjourServiceName = m_BonjourServiceName;
 }
 
-void ServerConfig::setBonjourAgentName(const TCHAR *bonjourAgentName)
+void ServerConfig::setBonjourServiceName(const TCHAR *bonjourServiceName)
 {
 	AutoLock l(this);
 
-	m_BonjourAgentName.setString(bonjourAgentName);
+	m_BonjourServiceName.setString(bonjourServiceName);
 }
 
-void ServerConfig::useWindowsUserAsBonjourAgentName(bool enabled)
+void ServerConfig::useWindowsUserAsBonjourServiceName(bool enabled)
 {
 	AutoLock lock(&m_objectCS);
-	m_useWindowsUserNameAsBonjourAgentName = enabled;
+	m_useWindowsUserAsBonjourServiceName = enabled;
 }
 
-bool ServerConfig::isWindowsUserAsBonjourAgentNameUsed()
+bool ServerConfig::isWindowsUserAsBonjourServiceNameUsed()
 {
 	AutoLock lock(&m_objectCS);
-	return m_useWindowsUserNameAsBonjourAgentName;
+	return m_useWindowsUserAsBonjourServiceName;
 }

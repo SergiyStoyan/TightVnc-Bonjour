@@ -427,17 +427,17 @@ private:
   // Configurator from Bonjour tab
   //
   bool m_enableBonjourService;
-  StringStorage m_BonjourAgentName;
-  bool m_useWindowsUserNameAsBonjourAgentName;
+  StringStorage m_BonjourServiceName;
+  bool m_useWindowsUserAsBonjourServiceName;
 public:
   bool isBonjourServiceEnabled();
   void enableBonjourService(bool enabled);
 
-  void getBonjourAgentName(StringStorage *bonjourAgentName);
-  void setBonjourAgentName(const TCHAR *bonjourAgentName);
+  void getBonjourServiceName(StringStorage *bonjourAgentName);
+  void setBonjourServiceName(const TCHAR *bonjourAgentName);
 
-  bool isWindowsUserAsBonjourAgentNameUsed();
-  void useWindowsUserAsBonjourAgentName(bool enabled);
+  bool isWindowsUserAsBonjourServiceNameUsed();
+  void useWindowsUserAsBonjourServiceName(bool enabled);
 };
 
 #endif

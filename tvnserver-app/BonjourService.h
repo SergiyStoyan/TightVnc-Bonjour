@@ -24,7 +24,7 @@ public:
 	static void Initialize(TvnServer *tvnServer, Configurator *configurator);
 	static void Start();
 	static void Stop();
-	static void GetAgentName(StringStorage *agentName);
+	static void GetServiceName(StringStorage *agentName);
 private:
 	static BonjourServiceConfigReloadListener bonjourServiceConfigReloadListener;
 	static bool initialized;
