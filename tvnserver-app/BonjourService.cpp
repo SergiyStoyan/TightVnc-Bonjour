@@ -146,13 +146,11 @@ void BonjourService::GetServiceName(StringStorage *agentName)
 			agentName->setString(_T("-NO_PHYSICAL_CONSOLE_SESSION-"));
 		else
 		{
-			LPWSTR user_name[255];
+			LPWSTR user_name;
 			DWORD user_name_size = sizeof(user_name);
-			if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, user_name, &user_name_size))
+			if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, &user_name, &user_name_size))
 				throw Exception(_T("Could not WTSQuerySessionInformation!"));
-			TCHAR user_name_[255];
-			wcscpy(*user_name, user_name_);
-			agentName->setString(user_name_);
+			agentName->setString(user_name);
 		}
 
 		/*TCHAR user_name[255];
@@ -165,7 +163,7 @@ void BonjourService::GetServiceName(StringStorage *agentName)
 	}
 	else
 		sc->getBonjourServiceName(agentName);
-	MessageBox(0, agentName->getString(), _T("qqqqq"), MB_OK | MB_ICONERROR);
+	//MessageBox(0, agentName->getString(), _T("qqqqq"), MB_OK | MB_ICONERROR);
 }
 
 void BonjourService::Stop()
