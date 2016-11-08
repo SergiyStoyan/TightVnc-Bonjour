@@ -138,6 +138,7 @@ void BonjourService::GetServiceName(StringStorage *agentName)
 	}
 	else
 		sc->getBonjourServiceName(agentName);
+	//MessageBox(0, agentName->getString(), _T("qqqqq"), MB_OK | MB_ICONERROR);
 }
 
 void BonjourService::Stop()
