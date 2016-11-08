@@ -24,7 +24,8 @@ void BonjourServiceConfigReloadListener::onTvnServerShutdown()
 BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
 bool BonjourService::initialized = false;
 bool BonjourService::started = false;
-StringStorage BonjourService::currentAgentName = NULL;
+StringStorage BonjourService::current_service_name = NULL;
+LogWriter *BonjourService::log;
 
 HWND WINAPI BonjourService::bogus_hwnd = NULL;//used for WTSRegisterSessionNotificationEx to monitor user logon
 HANDLE BonjourService::bogus_window_thread = NULL;
@@ -36,10 +37,12 @@ LRESULT CALLBACK BonjourService::WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wP
 		switch (wParam)
 		{
 		case WTS_SESSION_LOGON:
+			log->message(_T("BonjourService: WTS_SESSION_LOGON."));
 			//DWORD sessionId = lParam;
 			BonjourService::Start();
 			break;
 		case WTS_SESSION_LOGOFF:
+			log->message(_T("BonjourService: WTS_SESSION_LOGOFF."));
 			BonjourService::Start();
 			break;
 			/*	WTS_CONSOLE_CONNECT
@@ -62,17 +65,26 @@ DWORD WINAPI BonjourService::BogusWindowRun(void* Param)
 	wx.hInstance = hInstance;
 	wx.lpszClassName = class_name;
 	if (!RegisterClassEx(&wx))
-		throw Exception(_T("Could not RegisterClassEx!"));
+	{
+		log->interror(_T("BonjourService: Could not RegisterClassEx!"));
+		throw Exception(_T("BonjourService: Could not RegisterClassEx!"));
+	}
 	bogus_hwnd = CreateWindowEx(0, class_name, _T("Bogus Window For Listening Messages"), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, hInstance, NULL);
 	if (!bogus_hwnd)
-		throw Exception(_T("Could not create a bogus window!"));
+	{
+		log->interror(_T("BonjourService: Could not CreateWindowEx!"));
+		throw Exception(_T("BonjourService: Could not CreateWindowEx!"));
+	}
 
 	MSG msg; 
 	BOOL bRet;
 	while ((bRet = GetMessage(&msg, bogus_hwnd, 0, 0)) != 0)
 	{
 		if (bRet == -1)
-			throw Exception(_T("GetMessage returned -1"));
+		{
+			log->interror(_T("BonjourService: GetMessage returned -1"));
+			throw Exception(_T("BonjourService: GetMessage returned -1"));
+		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
@@ -80,19 +92,26 @@ DWORD WINAPI BonjourService::BogusWindowRun(void* Param)
 	return 0;
 }
 
-void BonjourService::Initialize(TvnServer *tvnServer, Configurator *configurator)
+void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator *configurator)
 {
-	if(initialized)
-		throw Exception(_T("BonjourService is already initialized."));
+	BonjourService::log = log;
+	if (initialized)
+	{
+		BonjourService::log->interror(_T("BonjourService: Is already initialized!"));
+		throw Exception(_T("BonjourService: Is already initialized!"));
+	}
 		
 	bogus_window_thread = CreateThread(0, 0, BogusWindowRun, 0, 0, 0);
 	if (!bogus_window_thread)
-		throw Exception(_T("Could not CreateThread."));
+	{
+		BonjourService::log->interror(_T("BonjourService: Could not CreateThread!"));
+		throw Exception(_T("BonjourService: Could not CreateThread!"));
+	}
 
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
 	configurator->addListener(&bonjourServiceConfigReloadListener);
 	started = false;
-	currentAgentName = NULL;
+	current_service_name = NULL;
 	initialized = true;
 	bonjourServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());
 }
@@ -100,11 +119,14 @@ void BonjourService::Initialize(TvnServer *tvnServer, Configurator *configurator
 void BonjourService::Start()
 {
 	if (!initialized)
-		throw Exception(_T("BonjourService is not initialized."));
+	{
+		log->interror(_T("BonjourService: Is not initialized!"));
+		throw Exception(_T("BonjourService: Is not initialized!"));
+	}
 
-	StringStorage agent_name;
-	GetServiceName(&agent_name);
-	if (currentAgentName.isEqualTo(&agent_name))
+	StringStorage service_name;
+	GetServiceName(&service_name);
+	if (current_service_name.isEqualTo(&service_name))
 	{
 		if (started)
 			return;
@@ -113,27 +135,36 @@ void BonjourService::Start()
 	{
 		if (started)
 			Stop();
-		currentAgentName = agent_name;
+		current_service_name = service_name;
 	}
 	
 	int i = 0;
 	while (!bogus_hwnd)//the window is created by another thread
 	{
 		if (i++ > 20)
-			throw Exception(_T("bogus_hwnd is not created too long!"));
+		{
+			log->interror(_T("BonjourService: bogus_hwnd is not created for too long time!"));
+			throw Exception(_T("BonjourService: bogus_hwnd is not created for too long time!"));
+		}
 		Sleep(100);
 	}
 	if (!WTSRegisterSessionNotification(bogus_hwnd, NOTIFY_FOR_ALL_SESSIONS))
-		throw Exception(_T("Could not WTSRegisterSessionNotification!"));
+	{
+		log->interror(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
+		throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
+	}
 
 	start();
-	started = true;
-		
-	//SendMessage(bogus_hwnd, WM_WTSSESSION_CHANGE, WTS_SESSION_LOGON, 0);//test
 }
 
 void BonjourService::start()
 {
+
+
+
+	started = true;
+
+	log->message(_T("BonjourService: Started. Service name: %s"), current_service_name.getString());
 }
 
 void BonjourService::GetServiceName(StringStorage *agentName)
@@ -149,7 +180,10 @@ void BonjourService::GetServiceName(StringStorage *agentName)
 			LPWSTR user_name;
 			DWORD user_name_size = sizeof(user_name);
 			if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, &user_name, &user_name_size))
-				throw Exception(_T("Could not WTSQuerySessionInformation!"));
+			{
+				log->interror(_T("BonjourService: Could not WTSQuerySessionInformation!"));
+				throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation!"));
+			}
 			agentName->setString(user_name);
 		}
 
@@ -169,18 +203,28 @@ void BonjourService::GetServiceName(StringStorage *agentName)
 void BonjourService::Stop()
 {
 	if (!initialized)
-		throw Exception(_T("BonjourService is not initialized."));
+	{
+		log->interror(_T("BonjourService: Is not initialized!"));
+		throw Exception(_T("BonjourService: Is not initialized!"));
+	}
 
 	if (!started)
 		return;
 
-	if(!WTSUnRegisterSessionNotification(bogus_hwnd))
-		throw Exception(_T("Could not WTSUnRegisterSessionNotification!"));
-
-	stop();
-	started = false;
+	if (!WTSUnRegisterSessionNotification(bogus_hwnd))
+	{
+		log->interror(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
+		throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
+	}
 }
 
 void BonjourService::stop()
 {
+
+
+
+	stop();
+	started = false;
+
+	log->message(_T("BonjourService: Stopped."));
 }

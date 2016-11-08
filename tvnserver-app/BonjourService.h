@@ -21,7 +21,7 @@ public:
 class BonjourService
 {
 public:
-	static void Initialize(TvnServer *tvnServer, Configurator *configurator);
+	static void Initialize(LogWriter *log, TvnServer *tvnServer, Configurator *configurator);
 	static void Start();
 	static void Stop();
 	static void GetServiceName(StringStorage *agentName);
@@ -29,13 +29,14 @@ private:
 	static BonjourServiceConfigReloadListener bonjourServiceConfigReloadListener;
 	static bool initialized;
 	static bool started;
-	static StringStorage currentAgentName;
+	static StringStorage current_service_name;
 	static void start();
 	static void stop();
 	static HWND WINAPI bogus_hwnd;//used for WTSRegisterSessionNotificationEx to monitor user logon
 	static HANDLE bogus_window_thread;
 	static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	static DWORD WINAPI BogusWindowRun(void* Param);
+	static LogWriter *log;
 };
 
 #endif

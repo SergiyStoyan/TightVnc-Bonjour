@@ -128,7 +128,7 @@ TvnServer::TvnServer(bool runsInServiceContext,
 
   try
   {
-	  BonjourService::Initialize(this, Configurator::getInstance());
+	  BonjourService::Initialize(&m_log, this, Configurator::getInstance());
   }
   catch (Exception &ex)
   {
