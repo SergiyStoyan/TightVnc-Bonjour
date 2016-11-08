@@ -33,9 +33,20 @@ LRESULT CALLBACK BonjourService::WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wP
 {
 	if (uMsg == WM_WTSSESSION_CHANGE)
 	{
-		if (wParam == WTS_SESSION_LOGON)
+		switch (wParam)
 		{
+		case WTS_SESSION_LOGON:
+			//DWORD sessionId = lParam;
 			BonjourService::Start();
+			break;
+		case WTS_SESSION_LOGOFF:
+			BonjourService::Start();
+			break;
+			/*	WTS_CONSOLE_CONNECT
+				WTS_CONSOLE_DISCONNECT
+				WTS_REMOTE_CONNECT
+				WTS_REMOTE_DISCONNECT
+				WTS_SESSION_LOGON*/
 		}
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -130,15 +141,31 @@ void BonjourService::GetServiceName(StringStorage *agentName)
 	ServerConfig *sc = Configurator::getInstance()->getServerConfig();
 	if (sc->isWindowsUserAsBonjourServiceNameUsed())
 	{
-		TCHAR user_name[255];
+		DWORD session_id = WTSGetActiveConsoleSessionId();
+		if (session_id == 0xFFFFFFFF)
+			agentName->setString(_T("-NO_PHYSICAL_CONSOLE_SESSION-"));
+		else
+		{
+			LPWSTR user_name[255];
+			DWORD user_name_size = sizeof(user_name);
+			if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, user_name, &user_name_size))
+				throw Exception(_T("Could not WTSQuerySessionInformation!"));
+			TCHAR user_name_[255];
+			wcscpy(*user_name, user_name_);
+			agentName->setString(user_name_);
+		}
+
+		/*TCHAR user_name[255];
 		DWORD user_name_size = sizeof(user_name);
 		if (!GetUserName(user_name, &user_name_size))
 			throw Exception(_T("Could not GetUserName!"));
-		agentName->setString(user_name);
+		if (user_name_size < 1)
+			_tcscpy(user_name, _T("-NOBODY-"));
+		agentName->setString(user_name);*/
 	}
 	else
 		sc->getBonjourServiceName(agentName);
-	//MessageBox(0, agentName->getString(), _T("qqqqq"), MB_OK | MB_ICONERROR);
+	MessageBox(0, agentName->getString(), _T("qqqqq"), MB_OK | MB_ICONERROR);
 }
 
 void BonjourService::Stop()
