@@ -184,7 +184,10 @@ void BonjourService::GetServiceName(StringStorage *agentName)
 				log->interror(_T("BonjourService: Could not WTSQuerySessionInformation!"));
 				throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation!"));
 			}
-			agentName->setString(user_name);
+			if (user_name_size < 1)
+				agentName->setString(_T("-UNKNOWN-"));
+			else
+				agentName->setString(user_name);
 		}
 
 		/*TCHAR user_name[255];
