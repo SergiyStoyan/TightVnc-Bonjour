@@ -11,21 +11,23 @@
 #include "server-config-lib/Configurator.h"
 #include "TvnServer.h"
 
-class BonjourServiceConfigReloadListener : public ConfigReloadListener, public TvnServerListener
-{
-public:
-	void onConfigReload(ServerConfig *serverConfig);
-	void onTvnServerShutdown();
-};
 
 class BonjourService
 {
+	class BonjourServiceConfigReloadListener : public ConfigReloadListener, public TvnServerListener
+	{
+	public:
+		void onConfigReload(ServerConfig *serverConfig);
+		void onTvnServerShutdown();
+	};
+
 public:
 	static void Initialize(LogWriter *log, TvnServer *tvnServer, Configurator *configurator);
+	static void GetWindowsUserName(StringStorage *serviceName);
+private:
+	static void get_service_name(StringStorage *serviceName);
 	static void Start();
 	static void Stop();
-	static void GetServiceName(StringStorage *agentName);
-private:
 	static BonjourServiceConfigReloadListener bonjourServiceConfigReloadListener;
 	static bool initialized;
 	static bool started;

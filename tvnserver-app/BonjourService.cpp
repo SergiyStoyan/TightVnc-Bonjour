@@ -8,7 +8,7 @@
 #include "BonjourService.h"
 #include <tchar.h>
 
-void BonjourServiceConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
+void BonjourService::BonjourServiceConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
 {
 	if (serverConfig->isBonjourServiceEnabled())
 		BonjourService::Start();
@@ -16,17 +16,16 @@ void BonjourServiceConfigReloadListener::onConfigReload(ServerConfig *serverConf
 		BonjourService::Stop();
 }
 
-void BonjourServiceConfigReloadListener::onTvnServerShutdown()
+void BonjourService::BonjourServiceConfigReloadListener::onTvnServerShutdown()
 {
 	BonjourService::Stop();
 }
 
-BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
+BonjourService::BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
 bool BonjourService::initialized = false;
 bool BonjourService::started = false;
 StringStorage BonjourService::current_service_name = NULL;
 LogWriter *BonjourService::log;
-
 HWND WINAPI BonjourService::bogus_hwnd = NULL;//used for WTSRegisterSessionNotificationEx to monitor user logon
 HANDLE BonjourService::bogus_window_thread = NULL;
 
@@ -125,7 +124,7 @@ void BonjourService::Start()
 	}
 
 	StringStorage service_name;
-	GetServiceName(&service_name);
+	get_service_name(&service_name);
 	if (current_service_name.isEqualTo(&service_name))
 	{
 		if (started)
@@ -167,40 +166,43 @@ void BonjourService::start()
 	log->message(_T("BonjourService: Started. Service name: %s"), current_service_name.getString());
 }
 
-void BonjourService::GetServiceName(StringStorage *agentName)
+void BonjourService::get_service_name(StringStorage *serviceName)
 {
 	ServerConfig *sc = Configurator::getInstance()->getServerConfig();
 	if (sc->isWindowsUserAsBonjourServiceNameUsed())
-	{
-		DWORD session_id = WTSGetActiveConsoleSessionId();
-		if (session_id == 0xFFFFFFFF)
-			agentName->setString(_T("-NO_PHYSICAL_CONSOLE_SESSION-"));
-		else
-		{
-			LPWSTR user_name;
-			DWORD user_name_size = sizeof(user_name);
-			if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, &user_name, &user_name_size))
-			{
-				log->interror(_T("BonjourService: Could not WTSQuerySessionInformation!"));
-				throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation!"));
-			}
-			if (user_name_size < 1)
-				agentName->setString(_T("-UNKNOWN-"));
-			else
-				agentName->setString(user_name);
-		}
-
-		/*TCHAR user_name[255];
-		DWORD user_name_size = sizeof(user_name);
-		if (!GetUserName(user_name, &user_name_size))
-			throw Exception(_T("Could not GetUserName!"));
-		if (user_name_size < 1)
-			_tcscpy(user_name, _T("-NOBODY-"));
-		agentName->setString(user_name);*/
-	}
+		GetWindowsUserName(serviceName);
 	else
-		sc->getBonjourServiceName(agentName);
+		sc->getBonjourServiceName(serviceName);
 	//MessageBox(0, agentName->getString(), _T("qqqqq"), MB_OK | MB_ICONERROR);
+}
+
+void BonjourService::GetWindowsUserName(StringStorage *serviceName)
+{
+	DWORD session_id = WTSGetActiveConsoleSessionId();
+	if (session_id == 0xFFFFFFFF)
+		serviceName->setString(_T("-NO_PHYSICAL_CONSOLE_SESSION-"));
+	else
+	{
+		LPWSTR user_name;
+		DWORD user_name_size = sizeof(user_name);
+		if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, &user_name, &user_name_size))
+		{
+			log->interror(_T("BonjourService: Could not WTSQuerySessionInformation!"));
+			throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation!"));
+		}
+		if (user_name_size < 1)
+			serviceName->setString(_T("-UNKNOWN-"));
+		else
+			serviceName->setString(user_name);
+	}
+
+	/*TCHAR user_name[255];
+	DWORD user_name_size = sizeof(user_name);
+	if (!GetUserName(user_name, &user_name_size))
+	throw Exception(_T("Could not GetUserName!"));
+	if (user_name_size < 1)
+	_tcscpy(user_name, _T("-NOBODY-"));
+	agentName->setString(user_name);*/
 }
 
 void BonjourService::Stop()

@@ -75,9 +75,9 @@ void BonjourConfigDialog::onUseWindowsUserAsBonjourServiceNameClick()
 	m_BonjourServiceName.setEnabled(!m_useWindowsUserAsBonjourServiceName.isChecked());
 	if (m_useWindowsUserAsBonjourServiceName.isChecked())
 	{
-		StringStorage agent_name;
-		BonjourService::GetServiceName(&agent_name);
-		m_BonjourServiceName.setText(agent_name.getString());
+		StringStorage service_name;
+		BonjourService::GetWindowsUserName(&service_name);
+		m_BonjourServiceName.setText(service_name.getString());
 	}
 	((ConfigDialog *)m_parent)->updateApplyButtonState();	
 }
@@ -114,9 +114,9 @@ void BonjourConfigDialog::updateUI()
 	if (m_useWindowsUserAsBonjourServiceName.isChecked())
 	{
 		m_BonjourServiceName.setEnabled(false);
-		StringStorage agent_name;
-		BonjourService::GetServiceName(&agent_name);
-		m_BonjourServiceName.setText(agent_name.getString());
+		StringStorage service_name;
+		BonjourService::GetWindowsUserName(&service_name);
+		m_BonjourServiceName.setText(service_name.getString());
 	}
 	else
 	{
