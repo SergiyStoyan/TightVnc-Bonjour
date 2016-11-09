@@ -216,6 +216,8 @@ void BonjourService::Stop()
 		log->interror(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
 		throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
 	}
+
+	stop();
 }
 
 void BonjourService::stop()
@@ -223,7 +225,7 @@ void BonjourService::stop()
 
 
 
-	stop();
+	
 	started = false;
 
 	log->message(_T("BonjourService: Stopped."));
