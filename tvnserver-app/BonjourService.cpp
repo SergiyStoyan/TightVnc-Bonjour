@@ -66,13 +66,15 @@ DWORD WINAPI BonjourService::BogusWindowRun(void* Param)
 	if (!RegisterClassEx(&wx))
 	{
 		log->interror(_T("BonjourService: Could not RegisterClassEx!"));
-		throw Exception(_T("BonjourService: Could not RegisterClassEx!"));
+		return 1;
+		//throw Exception(_T("BonjourService: Could not RegisterClassEx!"));
 	}
 	bogus_hwnd = CreateWindowEx(0, class_name, _T("Bogus Window For Listening Messages"), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, hInstance, NULL);
 	if (!bogus_hwnd)
 	{
 		log->interror(_T("BonjourService: Could not CreateWindowEx!"));
-		throw Exception(_T("BonjourService: Could not CreateWindowEx!"));
+		return 1;
+		//throw Exception(_T("BonjourService: Could not CreateWindowEx!"));
 	}
 
 	MSG msg; 
@@ -82,7 +84,8 @@ DWORD WINAPI BonjourService::BogusWindowRun(void* Param)
 		if (bRet == -1)
 		{
 			log->interror(_T("BonjourService: GetMessage returned -1"));
-			throw Exception(_T("BonjourService: GetMessage returned -1"));
+			return 1;
+			//throw Exception(_T("BonjourService: GetMessage returned -1"));
 		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -97,14 +100,16 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 	if (initialized)
 	{
 		BonjourService::log->interror(_T("BonjourService: Is already initialized!"));
-		throw Exception(_T("BonjourService: Is already initialized!"));
+		return;
+		//throw Exception(_T("BonjourService: Is already initialized!"));
 	}
 		
 	bogus_window_thread = CreateThread(0, 0, BogusWindowRun, 0, 0, 0);
 	if (!bogus_window_thread)
 	{
 		BonjourService::log->interror(_T("BonjourService: Could not CreateThread!"));
-		throw Exception(_T("BonjourService: Could not CreateThread!"));
+		return;
+		//throw Exception(_T("BonjourService: Could not CreateThread!"));
 	}
 
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
@@ -120,7 +125,8 @@ void BonjourService::Start()
 	if (!initialized)
 	{
 		log->interror(_T("BonjourService: Is not initialized!"));
-		throw Exception(_T("BonjourService: Is not initialized!"));
+		return;
+		//throw Exception(_T("BonjourService: Is not initialized!"));
 	}
 
 	StringStorage service_name;
@@ -143,14 +149,16 @@ void BonjourService::Start()
 		if (i++ > 20)
 		{
 			log->interror(_T("BonjourService: bogus_hwnd is not created for too long time!"));
-			throw Exception(_T("BonjourService: bogus_hwnd is not created for too long time!"));
+			return;
+			//throw Exception(_T("BonjourService: bogus_hwnd is not created for too long time!"));
 		}
 		Sleep(100);
 	}
 	if (!WTSRegisterSessionNotification(bogus_hwnd, NOTIFY_FOR_ALL_SESSIONS))
 	{
 		log->interror(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
-		throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
+		return;
+		//throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
 	}
 
 	start();
@@ -188,7 +196,8 @@ void BonjourService::GetWindowsUserName(StringStorage *serviceName)
 		if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, &user_name, &user_name_size))
 		{
 			log->interror(_T("BonjourService: Could not WTSQuerySessionInformation!"));
-			throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation!"));
+			return;
+			//throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation!"));
 		}
 		if (user_name_size < 1)
 			serviceName->setString(_T("-UNKNOWN-"));
@@ -210,7 +219,8 @@ void BonjourService::Stop()
 	if (!initialized)
 	{
 		log->interror(_T("BonjourService: Is not initialized!"));
-		throw Exception(_T("BonjourService: Is not initialized!"));
+		return;
+		//throw Exception(_T("BonjourService: Is not initialized!"));
 	}
 
 	if (!started)
@@ -219,7 +229,8 @@ void BonjourService::Stop()
 	if (!WTSUnRegisterSessionNotification(bogus_hwnd))
 	{
 		log->interror(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
-		throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
+		return;
+		//throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
 	}
 
 	stop();
