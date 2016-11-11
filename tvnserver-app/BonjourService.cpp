@@ -7,24 +7,56 @@
 
 #include "BonjourService.h"
 #include <tchar.h>
+#include "dns_sd.h"
+
+struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
+{
+	static DNSServiceRef service;
+
+	static void DNSSD_API serviceRegisterReply(
+		DNSServiceRef                       sdRef,
+		DNSServiceFlags                     flags,
+		DNSServiceErrorType                 errorCode,
+		const char                          *name,
+		const char                          *regtype,
+		const char                          *domain,
+		void                                *context
+	)
+	{
+		if (errorCode == kDNSServiceErr_NoError)
+		{
+			if (flags & kDNSServiceFlagsAdd)
+				log->info(_T("BonjourService: Service %s is registered and active\n"), name);
+			else
+				log->info(_T("BonjourService: Service %s registration removed\n"), name);
+		}
+		else if (errorCode == kDNSServiceErr_NameConflict)
+			log->error(_T("BonjourService: Service name %s is in use, please choose another\n"), name);
+		else
+			log->error(_T("BonjourService: Error: %d\n"), errorCode);
+	}
+};
+
+DNSServiceRef BonjourService::dns_sd::service = NULL;
 
 void BonjourService::BonjourServiceConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
 {
 	if (serverConfig->isBonjourServiceEnabled())
-		BonjourService::Start();
+		BonjourService::start();
 	else
-		BonjourService::Stop();
+		BonjourService::stop();
 }
 
 void BonjourService::BonjourServiceConfigReloadListener::onTvnServerShutdown()
 {
-	BonjourService::Stop();
+	BonjourService::stop();
 }
 
 BonjourService::BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
 bool BonjourService::initialized = false;
 bool BonjourService::started = false;
-StringStorage BonjourService::current_service_name = NULL;
+StringStorage BonjourService::service_name = StringStorage(_T("NULL"));
+uint16_t BonjourService::port = 5353;
 LogWriter *BonjourService::log;
 HWND WINAPI BonjourService::bogus_hwnd = NULL;//used for WTSRegisterSessionNotificationEx to monitor user logon
 HANDLE BonjourService::bogus_window_thread = NULL;
@@ -38,11 +70,11 @@ LRESULT CALLBACK BonjourService::WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wP
 		case WTS_SESSION_LOGON:
 			log->message(_T("BonjourService: WTS_SESSION_LOGON."));
 			//DWORD sessionId = lParam;
-			BonjourService::Start();
+			BonjourService::start();
 			break;
 		case WTS_SESSION_LOGOFF:
 			log->message(_T("BonjourService: WTS_SESSION_LOGOFF."));
-			BonjourService::Start();
+			BonjourService::start();
 			break;
 			/*	WTS_CONSOLE_CONNECT
 				WTS_CONSOLE_DISCONNECT
@@ -115,12 +147,11 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
 	configurator->addListener(&bonjourServiceConfigReloadListener);
 	started = false;
-	current_service_name = NULL;
 	initialized = true;
 	bonjourServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());
 }
 
-void BonjourService::Start()
+void BonjourService::start()
 {
 	if (!initialized)
 	{
@@ -129,9 +160,9 @@ void BonjourService::Start()
 		//throw Exception(_T("BonjourService: Is not initialized!"));
 	}
 
-	StringStorage service_name;
-	get_service_name(&service_name);
-	if (current_service_name.isEqualTo(&service_name))
+	StringStorage service_name2;
+	get_service_name(&service_name2);
+	if (service_name.isEqualTo(&service_name2))
 	{
 		if (started)
 			return;
@@ -139,8 +170,8 @@ void BonjourService::Start()
 	else
 	{
 		if (started)
-			Stop();
-		current_service_name = service_name;
+			stop();
+		service_name = service_name2;
 	}
 	
 	int i = 0;
@@ -161,17 +192,53 @@ void BonjourService::Start()
 		//throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
 	}
 
-	start();
+	start_();
 }
 
-void BonjourService::start()
+void BonjourService::start_()
 {
+	DNSServiceFlags flags = 0;// kDNSServiceFlagsDefault;
+	uint32_t interfaceIndex = 0;
+	char service_name_[255];
+#ifdef UNICODE1
+	//It means TCHAR == WCHAR.
+	//WideCharToMultiByte();
+	wcstombs(service_name_, service_name.getString(), strlen(service_name));
+#else
+	//It means TCHAR == char.	
+	strcpy(service_name_, (char *)service_name.getString());
+#endif
+		
+	const char* regType = "_rfb._tcp";
+	const char* domain = NULL; // default domain
+	const char* host = NULL; // default host	
+	uint16_t txtLen = 0;
+	const char* txtRecord = NULL;
+	DNSServiceRegisterReply callBack = callBack;
+	void* context = NULL;
 
-
+	int err = DNSServiceRegister(
+		&dns_sd::service,
+		flags,
+		interfaceIndex,
+		service_name_,
+		regType,
+		domain,
+		host,
+		htons(port),
+		txtLen,
+		txtRecord,
+		dns_sd::serviceRegisterReply,
+		context
+	);
+	if (err != kDNSServiceErr_NoError)
+	{
+		log->interror(_T("BonjourService: Could not DNSServiceRegister. Error code: %d!"), err);
+		return;
+	}
 
 	started = true;
-
-	log->message(_T("BonjourService: Started. Service name: %s"), current_service_name.getString());
+	log->message(_T("BonjourService: Started. Service name: %s"), service_name.getString());
 }
 
 void BonjourService::get_service_name(StringStorage *serviceName)
@@ -181,7 +248,6 @@ void BonjourService::get_service_name(StringStorage *serviceName)
 		GetWindowsUserName(serviceName);
 	else
 		sc->getBonjourServiceName(serviceName);
-	//MessageBox(0, agentName->getString(), _T("qqqqq"), MB_OK | MB_ICONERROR);
 }
 
 void BonjourService::GetWindowsUserName(StringStorage *serviceName)
@@ -214,7 +280,7 @@ void BonjourService::GetWindowsUserName(StringStorage *serviceName)
 	agentName->setString(user_name);*/
 }
 
-void BonjourService::Stop()
+void BonjourService::stop()
 {
 	if (!initialized)
 	{
@@ -233,16 +299,15 @@ void BonjourService::Stop()
 		//throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
 	}
 
-	stop();
+	stop_();
 }
 
-void BonjourService::stop()
+void BonjourService::stop_()
 {
-
-
-
+	if (dns_sd::service != NULL)
+		DNSServiceRefDeallocate(dns_sd::service);
+	dns_sd::service = NULL;
 	
 	started = false;
-
 	log->message(_T("BonjourService: Stopped."));
 }
