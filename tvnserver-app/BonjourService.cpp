@@ -216,7 +216,6 @@ void BonjourService::start_()
 	const char* host = NULL; // default host	
 	uint16_t txtLen = 0;
 	const char* txtRecord = NULL;
-	DNSServiceRegisterReply callBack = callBack;
 	void* context = NULL;
 
 	int err = DNSServiceRegister(
