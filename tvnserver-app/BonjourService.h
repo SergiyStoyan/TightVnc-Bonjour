@@ -29,7 +29,7 @@ private:
 	static void stop();
 	static BonjourServiceConfigReloadListener bonjourServiceConfigReloadListener;
 	static bool initialized;
-	static bool started;
+	static bool is_started();
 	static StringStorage service_name;
 	static uint16_t port;
 	static void start_();

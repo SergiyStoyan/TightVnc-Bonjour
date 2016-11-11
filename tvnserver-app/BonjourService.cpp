@@ -37,6 +37,10 @@ struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
 	}
 };
 
+bool BonjourService::is_started()
+{
+	return dns_sd::service != NULL;
+}
 DNSServiceRef BonjourService::dns_sd::service = NULL;
 
 void BonjourService::BonjourServiceConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
@@ -54,7 +58,6 @@ void BonjourService::BonjourServiceConfigReloadListener::onTvnServerShutdown()
 
 BonjourService::BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
 bool BonjourService::initialized = false;
-bool BonjourService::started = false;
 StringStorage BonjourService::service_name = StringStorage(_T("NULL"));
 uint16_t BonjourService::port = 5353;
 LogWriter *BonjourService::log;
@@ -146,7 +149,6 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
 	configurator->addListener(&bonjourServiceConfigReloadListener);
-	started = false;
 	initialized = true;
 	bonjourServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());
 }
@@ -164,12 +166,12 @@ void BonjourService::start()
 	get_service_name(&service_name2);
 	if (service_name.isEqualTo(&service_name2))
 	{
-		if (started)
+		if (is_started())
 			return;
 	}
 	else
 	{
-		if (started)
+		if (is_started())
 			stop();
 		service_name = service_name2;
 	}
@@ -200,10 +202,10 @@ void BonjourService::start_()
 	DNSServiceFlags flags = 0;// kDNSServiceFlagsDefault;
 	uint32_t interfaceIndex = 0;
 	char service_name_[255];
-#ifdef UNICODE1
+#ifdef UNICODE
 	//It means TCHAR == WCHAR.
 	//WideCharToMultiByte();
-	wcstombs(service_name_, service_name.getString(), strlen(service_name));
+	wcstombs(service_name_, service_name.getString(), strlen(service_name_));
 #else
 	//It means TCHAR == char.	
 	strcpy(service_name_, (char *)service_name.getString());
@@ -237,7 +239,6 @@ void BonjourService::start_()
 		return;
 	}
 
-	started = true;
 	log->message(_T("BonjourService: Started. Service name: %s"), service_name.getString());
 }
 
@@ -289,7 +290,7 @@ void BonjourService::stop()
 		//throw Exception(_T("BonjourService: Is not initialized!"));
 	}
 
-	if (!started)
+	if (!is_started())
 		return;
 
 	if (!WTSUnRegisterSessionNotification(bogus_hwnd))
@@ -308,6 +309,5 @@ void BonjourService::stop_()
 		DNSServiceRefDeallocate(dns_sd::service);
 	dns_sd::service = NULL;
 	
-	started = false;
 	log->message(_T("BonjourService: Stopped."));
 }
