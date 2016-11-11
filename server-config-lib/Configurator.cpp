@@ -846,9 +846,19 @@ bool Configurator::saveBonjourConfig(SettingsManager *sm)
 	if (!sm->setBoolean(_T("EnableBonjourService"), m_serverConfig.isBonjourServiceEnabled()))
 		saveResult = false;
 
+	if (!sm->setBoolean(_T("UseWindowsUserAsBonjourServiceName"), m_serverConfig.isWindowsUserAsBonjourServiceNameUsed()))
+		saveResult = false;
+
 	StringStorage ss;
 	m_serverConfig.getBonjourServiceName(&ss);
-	if (!sm->setString(_T("BonjourAgentName"), ss.getString()))
+	if (!sm->setString(_T("BonjourServiceName"), ss.getString()))
+		saveResult = false;
+
+	if (!sm->setUINT(_T("BonjourServicePort"), m_serverConfig.getBonjourServicePort()))
+		saveResult = false;
+
+	m_serverConfig.getBonjourServiceType(&ss);
+	if (!sm->setString(_T("BonjourServiceType"), ss.getString()))
 		saveResult = false;
 	
 	return saveResult;
@@ -866,12 +876,34 @@ bool Configurator::loadBonjourConfig(SettingsManager *sm, ServerConfig *config)
 		m_serverConfig.enableBonjourService(b);
 	}
 
+	if (!sm->getBoolean(_T("UseWindowsUserAsBonjourServiceName"), &b))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.useWindowsUserAsBonjourServiceName(b);
+	}
+
 	StringStorage ss;
-	if (!sm->getString(_T("BonjourAgentName"), &ss))
+	if (!sm->getString(_T("BonjourServiceName"), &ss))
 		loadResult = false;
 	else {
 		m_isConfigLoadedPartly = true;
 		m_serverConfig.setBonjourServiceName(ss.getString());
+	}
+
+	UINT ui;
+	if (!sm->getUINT(_T("BonjourServicePort"), &ui))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setBonjourServicePort(ui);
+	}
+
+	if (!sm->getString(_T("BonjourServiceType"), &ss))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setBonjourServiceType(ss.getString());
 	}
 
 	return loadResult;
