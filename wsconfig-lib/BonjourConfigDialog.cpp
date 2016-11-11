@@ -9,6 +9,7 @@
 #include "ConfigDialog.h"
 #include "tvnserver/resource.h"
 #include "tvnserver-app/BonjourService.h"
+#include "CommonInputValidation.h"
 
 BonjourConfigDialog::BonjourConfigDialog()
 : BaseDialog(IDD_CONFIG_BONJOUR_PAGE), m_parent(NULL)
@@ -114,6 +115,8 @@ bool BonjourConfigDialog::validateInput()
 			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 		return false;
 	}
+	if(!CommonInputValidation::validatePort(&m_BonjourServicePort))
+		return false;
 
 	m_BonjourServiceType.getText(&ss);
 	if (ss.getLength() < 1) {
@@ -131,7 +134,8 @@ void BonjourConfigDialog::updateUI()
 	m_enableBonjourService.check(m_config->isBonjourServiceEnabled());
 
 	m_useWindowsUserAsBonjourServiceName.setEnabled(m_enableBonjourService.isChecked());
-
+	
+	StringStorage ss;
 	m_useWindowsUserAsBonjourServiceName.check(m_config->isWindowsUserAsBonjourServiceNameUsed());
 	if (m_useWindowsUserAsBonjourServiceName.isChecked())
 	{
@@ -143,14 +147,17 @@ void BonjourConfigDialog::updateUI()
 	else
 	{
 		m_BonjourServiceName.setEnabled(m_config->isBonjourServiceEnabled());
-		StringStorage ss;
 		m_config->getBonjourServiceName(&ss);
 		m_BonjourServiceName.setText(ss.getString());
 	}
 
 	m_BonjourServicePort.setEnabled(m_enableBonjourService.isChecked());
+	TCHAR ts[255];
+	m_BonjourServicePort.setText(_itot(m_config->getBonjourServicePort(), ts, 10));
 
 	m_BonjourServiceType.setEnabled(m_enableBonjourService.isChecked());
+	m_config->getBonjourServiceType(&ss);
+	m_BonjourServiceType.setText(ss.getString());
 }
 
 void BonjourConfigDialog::apply()

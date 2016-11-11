@@ -755,16 +755,16 @@ bool ServerConfig::getGrabTransparentWindowsFlag()
   return m_grabTransparentWindows;
 }
 
-void ServerConfig::enableBonjourService(bool enabled)
-{
-	AutoLock lock(&m_objectCS);
-	m_enableBonjourService = enabled;
-}
-
 bool ServerConfig::isBonjourServiceEnabled()
 {
 	AutoLock lock(&m_objectCS);
 	return m_enableBonjourService;
+}
+
+void ServerConfig::enableBonjourService(bool enabled)
+{
+	AutoLock lock(&m_objectCS);
+	m_enableBonjourService = enabled;
 }
 
 void ServerConfig::getBonjourServiceName(StringStorage *bonjourServiceName)
