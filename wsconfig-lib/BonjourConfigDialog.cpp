@@ -28,26 +28,30 @@ void BonjourConfigDialog::initControls()
 {
 	HWND dialogHwnd = m_ctrlThis.getWindow();
 
-	m_enableBonjourService.setWindow(GetDlgItem(dialogHwnd, IDC_CHECK_BONJOUR_ENABLED));
-	m_useWindowsUserAsBonjourServiceName.setWindow(GetDlgItem(dialogHwnd, IDC_CHECK_BONJOUR_USE_WINDOWS_USER_NAME_AS_AGENT_NAME));
-	m_BonjourServiceName.setWindow(GetDlgItem(dialogHwnd, IDC_EDIT_BONJOUR_SERVICE_NAME));
+	m_enableBonjourService.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_ENABLED));
+	m_useWindowsUserAsBonjourServiceName.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_USE_WINDOWS_USER_AS_SERVICE_NAME));
+	m_BonjourServiceName.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_SERVICE_NAME));
+	m_BonjourServicePort.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_SERVICE_PORT));
+	m_BonjourServiceType.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_SERVICE_TYPE));
 }
 
 BOOL BonjourConfigDialog::onCommand(UINT controlID, UINT notificationID)
 {
 	switch (controlID)
 	{
-	case IDC_CHECK_BONJOUR_ENABLED:
+	case IDC_BONJOUR_ENABLED:
 		if (notificationID == BN_CLICKED)
 			onBonjourEnabledClick();
 		break;
-	case IDC_CHECK_BONJOUR_USE_WINDOWS_USER_NAME_AS_AGENT_NAME:
+	case IDC_BONJOUR_USE_WINDOWS_USER_AS_SERVICE_NAME:
 		if (notificationID == BN_CLICKED)
 			onUseWindowsUserAsBonjourServiceNameClick();
 		break;
-	case IDC_EDIT_BONJOUR_SERVICE_NAME:
+	case IDC_BONJOUR_SERVICE_NAME:
+	case IDC_BONJOUR_SERVICE_PORT:
+	case IDC_BONJOUR_SERVICE_TYPE:
 		if (notificationID == EN_UPDATE)
-			onBonjourServiceNameChange();
+			onBonjourTextChange();
 		break;
 	}
 	return TRUE;
@@ -67,6 +71,8 @@ void BonjourConfigDialog::onBonjourEnabledClick()
 {
 	m_useWindowsUserAsBonjourServiceName.setEnabled(m_enableBonjourService.isChecked());
 	m_BonjourServiceName.setEnabled(m_enableBonjourService.isChecked() && !m_useWindowsUserAsBonjourServiceName.isChecked());
+	m_BonjourServicePort.setEnabled(m_enableBonjourService.isChecked());
+	m_BonjourServiceType.setEnabled(m_enableBonjourService.isChecked());
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
 
@@ -82,7 +88,7 @@ void BonjourConfigDialog::onUseWindowsUserAsBonjourServiceNameClick()
 	((ConfigDialog *)m_parent)->updateApplyButtonState();	
 }
 
-void BonjourConfigDialog::onBonjourServiceNameChange()
+void BonjourConfigDialog::onBonjourTextChange()
 {
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
@@ -92,11 +98,27 @@ bool BonjourConfigDialog::validateInput()
 	if (!m_enableBonjourService.isChecked())
 		return true;
 
-	StringStorage name;
-	m_BonjourServiceName.getText(&name);
-	if (name.getLength() < 1) {
+	StringStorage ss;
+	m_BonjourServiceName.getText(&ss);
+	if (ss.getLength() < 1) {
 		MessageBox(m_ctrlThis.getWindow(),
 			StringTable::getString(IDS_SET_BONJOUR_SERVICE_NAME_NOTIFICATION),
+			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+		return false;
+	}
+
+	m_BonjourServicePort.getText(&ss);
+	if (ss.getLength() < 1 || _ttoi(ss.getString()) < 1) {
+		MessageBox(m_ctrlThis.getWindow(),
+			StringTable::getString(IDS_SET_BONJOUR_SERVICE_PORT_NOTIFICATION),
+			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+		return false;
+	}
+
+	m_BonjourServiceType.getText(&ss);
+	if (ss.getLength() < 1) {
+		MessageBox(m_ctrlThis.getWindow(),
+			StringTable::getString(IDS_SET_BONJOUR_SERVICE_TYPE_NOTIFICATION),
 			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 		return false;
 	}
@@ -125,6 +147,10 @@ void BonjourConfigDialog::updateUI()
 		m_config->getBonjourServiceName(&ss);
 		m_BonjourServiceName.setText(ss.getString());
 	}
+
+	m_BonjourServicePort.setEnabled(m_enableBonjourService.isChecked());
+
+	m_BonjourServiceType.setEnabled(m_enableBonjourService.isChecked());
 }
 
 void BonjourConfigDialog::apply()
@@ -135,4 +161,8 @@ void BonjourConfigDialog::apply()
 	StringStorage ss;
 	m_BonjourServiceName.getText(&ss);
 	m_config->setBonjourServiceName(ss.getString());
+	m_BonjourServicePort.getText(&ss);
+	m_config->setBonjourServicePort(_ttoi(ss.getString()));
+	m_BonjourServiceType.getText(&ss);
+	m_config->setBonjourServiceType(ss.getString());
 }

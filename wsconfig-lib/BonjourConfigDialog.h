@@ -43,7 +43,7 @@ protected:
 
 	void onBonjourEnabledClick();
 	void onUseWindowsUserAsBonjourServiceNameClick();
-	void onBonjourServiceNameChange();
+	void onBonjourTextChange();
 
 private:
 	void initControls();
@@ -55,6 +55,8 @@ protected:
 	CheckBox m_enableBonjourService;
 	CheckBox m_useWindowsUserAsBonjourServiceName;
 	TextBox m_BonjourServiceName;
+	TextBox m_BonjourServicePort;
+	TextBox m_BonjourServiceType;
 
 	BaseDialog *m_parent;
 };

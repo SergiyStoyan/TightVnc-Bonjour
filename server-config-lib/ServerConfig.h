@@ -428,13 +428,21 @@ private:
   //
   bool m_enableBonjourService;
   StringStorage m_BonjourServiceName;
+  uint16_t m_BonjourServicePort;
+  StringStorage m_BonjourServiceType;
   bool m_useWindowsUserAsBonjourServiceName;
 public:
   bool isBonjourServiceEnabled();
   void enableBonjourService(bool enabled);
 
-  void getBonjourServiceName(StringStorage *bonjourAgentName);
-  void setBonjourServiceName(const TCHAR *bonjourAgentName);
+  void getBonjourServiceName(StringStorage *bonjourServiceName);
+  void setBonjourServiceName(const TCHAR *bonjourServiceName);
+
+  uint16_t getBonjourServicePort();
+  void setBonjourServicePort(uint16_t bonjourServicePort);
+
+  void getBonjourServiceType(StringStorage *bonjourServiceType);
+  void setBonjourServiceType(const TCHAR *bonjourServiceType);
 
   bool isWindowsUserAsBonjourServiceNameUsed();
   void useWindowsUserAsBonjourServiceName(bool enabled);

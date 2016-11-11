@@ -44,12 +44,18 @@ ServerConfig::ServerConfig()
   m_allowLoopbackConnections(false),
   m_videoRecognitionInterval(3000), m_grabTransparentWindows(true),
   m_saveLogToAllUsersPath(false), m_hasControlPassword(false),
-  m_showTrayIcon(true),//m_enableBonjourService(true),
+  m_showTrayIcon(true),
   m_idleTimeout(0)
 {
   memset(m_primaryPassword,  0, sizeof(m_primaryPassword));
   memset(m_readonlyPassword, 0, sizeof(m_readonlyPassword));
   memset(m_controlPassword,  0, sizeof(m_controlPassword));
+  
+  m_enableBonjourService = true;
+  m_useWindowsUserAsBonjourServiceName = true;
+  m_BonjourServiceName = StringStorage(_T("-UNKNOWN-"));
+  m_BonjourServicePort = 5353;
+  m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
 }
 
 ServerConfig::~ServerConfig()
@@ -123,6 +129,8 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt8(m_enableBonjourService ? 1 : 0);
   output->writeInt8(m_useWindowsUserAsBonjourServiceName ? 1 : 0);
   output->writeUTF8(m_BonjourServiceName.getString());
+  output->writeInt16(m_BonjourServicePort);
+  output->writeUTF8(m_BonjourServiceType.getString());
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -195,6 +203,8 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_enableBonjourService = input->readInt8() == 1;
   m_useWindowsUserAsBonjourServiceName = input->readInt8() == 1;
   input->readUTF8(&m_BonjourServiceName);
+  m_BonjourServicePort = input->readInt16();
+  input->readUTF8(&m_BonjourServiceType);
 
   input->readUTF8(&m_logFilePath);
 }
@@ -759,16 +769,38 @@ bool ServerConfig::isBonjourServiceEnabled()
 
 void ServerConfig::getBonjourServiceName(StringStorage *bonjourServiceName)
 {
-	AutoLock l(this);
-
+	AutoLock lock(&m_objectCS);
 	*bonjourServiceName = m_BonjourServiceName;
 }
 
 void ServerConfig::setBonjourServiceName(const TCHAR *bonjourServiceName)
 {
-	AutoLock l(this);
-
+	AutoLock lock(&m_objectCS);
 	m_BonjourServiceName.setString(bonjourServiceName);
+}
+
+uint16_t ServerConfig::getBonjourServicePort()
+{
+	AutoLock lock(&m_objectCS);
+	return m_BonjourServicePort;
+}
+
+void ServerConfig::setBonjourServicePort(uint16_t bonjourServicePort)
+{
+	AutoLock lock(&m_objectCS);
+	m_BonjourServicePort = bonjourServicePort;
+}
+
+void ServerConfig::getBonjourServiceType(StringStorage *bonjourServiceType)
+{
+	AutoLock lock(&m_objectCS);
+	*bonjourServiceType = m_BonjourServiceType;
+}
+
+void ServerConfig::setBonjourServiceType(const TCHAR *bonjourServiceType)
+{
+	AutoLock lock(&m_objectCS);
+	m_BonjourServiceType.setString(bonjourServiceType);
 }
 
 void ServerConfig::useWindowsUserAsBonjourServiceName(bool enabled)
