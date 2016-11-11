@@ -58,8 +58,9 @@ void BonjourService::BonjourServiceConfigReloadListener::onTvnServerShutdown()
 
 BonjourService::BonjourServiceConfigReloadListener BonjourService::bonjourServiceConfigReloadListener = BonjourServiceConfigReloadListener();
 bool BonjourService::initialized = false;
-StringStorage BonjourService::service_name = StringStorage(_T("NULL"));
-//uint16_t BonjourService::port = 5353;
+StringStorage BonjourService::service_name = StringStorage(_T("-UNKNOWN-"));
+uint16_t BonjourService::port = 5353;
+StringStorage BonjourService::service_type = StringStorage(_T("_rfb._tcp"));
 LogWriter *BonjourService::log;
 HWND WINAPI BonjourService::bogus_hwnd = NULL;//used for WTSRegisterSessionNotificationEx to monitor user logon
 HANDLE BonjourService::bogus_window_thread = NULL;
@@ -164,7 +165,11 @@ void BonjourService::start()
 
 	StringStorage service_name2;
 	get_service_name(&service_name2);
-	if (service_name.isEqualTo(&service_name2))
+	ServerConfig *sc = Configurator::getInstance()->getServerConfig();
+	uint16_t port2 = sc->getBonjourServicePort();
+	StringStorage service_type2;
+	sc->getBonjourServiceType(&service_type2);
+	if (service_name.isEqualTo(&service_name2) && port == port2 && service_type.isEqualTo(&service_type2))
 	{
 		if (is_started())
 			return;
@@ -174,6 +179,8 @@ void BonjourService::start()
 		if (is_started())
 			stop();
 		service_name = service_name2;
+		port = port2;
+		service_type = service_type2;
 	}
 	
 	int i = 0;
@@ -204,12 +211,8 @@ void BonjourService::start_()
 
 	char service_name_[255];
 	char service_type_[255];
-	ServerConfig *sc = Configurator::getInstance()->getServerConfig();
-	StringStorage service_type;
-	sc->getBonjourServiceType(&service_type);
 #ifdef UNICODE
 	//It means TCHAR == WCHAR.
-	//WideCharToMultiByte();
 	wcstombs(service_name_, service_name.getString(), strlen(service_name_));
 	wcstombs(service_type_, service_type.getString(), strlen(service_type_));
 #else
@@ -220,7 +223,6 @@ void BonjourService::start_()
 
 	const char* domain = NULL; // default domain
 	const char* host = NULL; // default host
-	uint16_t port = sc->getBonjourServicePort();
 	uint16_t txtLen = 0;
 	const char* txtRecord = NULL;
 	void* context = NULL;
@@ -233,7 +235,7 @@ void BonjourService::start_()
 		service_type_,
 		domain,
 		host,
-		htons(port),
+		port, //htons(port),
 		txtLen,
 		txtRecord,
 		dns_sd::serviceRegisterReply,

@@ -31,7 +31,8 @@ private:
 	static bool initialized;
 	static bool is_started();
 	static StringStorage service_name;
-	//static uint16_t port;
+	static uint16_t port;
+	static StringStorage service_type;
 	static void start_();
 	static void stop_();
 	static HWND WINAPI bogus_hwnd;//used for WTSRegisterSessionNotificationEx to monitor user logon
