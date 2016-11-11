@@ -23,15 +23,17 @@ struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
 		void                                *context
 	)
 	{
+		TCHAR name_[255];
+		mbstowcs(name_, name, sizeof(name_));
 		if (errorCode == kDNSServiceErr_NoError)
 		{
 			if (flags & kDNSServiceFlagsAdd)
-				log->info(_T("BonjourService: Service %s is registered and active\n"), name);
+				log->info(_T("BonjourService: Service %s is registered and active\n"), name_);
 			else
-				log->info(_T("BonjourService: Service %s registration removed\n"), name);
+				log->info(_T("BonjourService: Service %s registration removed\n"), name_);
 		}
 		else if (errorCode == kDNSServiceErr_NameConflict)
-			log->error(_T("BonjourService: Service name %s is in use, please choose another\n"), name);
+			log->error(_T("BonjourService: Service name %s is in use, please choose another\n"), name_);
 		else
 			log->error(_T("BonjourService: Error: %d\n"), errorCode);
 	}
@@ -101,16 +103,16 @@ DWORD WINAPI BonjourService::BogusWindowRun(void* Param)
 	wx.lpszClassName = class_name;
 	if (!RegisterClassEx(&wx))
 	{
-		log->interror(_T("BonjourService: Could not RegisterClassEx!"));
+		log->interror(_T("BonjourService: Could not RegisterClassEx"));
 		return 1;
-		//throw Exception(_T("BonjourService: Could not RegisterClassEx!"));
+		//throw Exception(_T("BonjourService: Could not RegisterClassEx"));
 	}
 	bogus_hwnd = CreateWindowEx(0, class_name, _T("Bogus Window For Listening Messages"), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, hInstance, NULL);
 	if (!bogus_hwnd)
 	{
-		log->interror(_T("BonjourService: Could not CreateWindowEx!"));
+		log->interror(_T("BonjourService: Could not CreateWindowEx"));
 		return 1;
-		//throw Exception(_T("BonjourService: Could not CreateWindowEx!"));
+		//throw Exception(_T("BonjourService: Could not CreateWindowEx"));
 	}
 
 	MSG msg; 
@@ -135,17 +137,17 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 	BonjourService::log = log;
 	if (initialized)
 	{
-		BonjourService::log->interror(_T("BonjourService: Is already initialized!"));
+		BonjourService::log->interror(_T("BonjourService: Is already initialized"));
 		return;
-		//throw Exception(_T("BonjourService: Is already initialized!"));
+		//throw Exception(_T("BonjourService: Is already initialized"));
 	}
 		
 	bogus_window_thread = CreateThread(0, 0, BogusWindowRun, 0, 0, 0);
 	if (!bogus_window_thread)
 	{
-		BonjourService::log->interror(_T("BonjourService: Could not CreateThread!"));
+		BonjourService::log->interror(_T("BonjourService: Could not CreateThread"));
 		return;
-		//throw Exception(_T("BonjourService: Could not CreateThread!"));
+		//throw Exception(_T("BonjourService: Could not CreateThread"));
 	}
 
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
@@ -158,9 +160,9 @@ void BonjourService::start()
 {
 	if (!initialized)
 	{
-		log->interror(_T("BonjourService: Is not initialized!"));
+		log->interror(_T("BonjourService: Is not initialized"));
 		return;
-		//throw Exception(_T("BonjourService: Is not initialized!"));
+		//throw Exception(_T("BonjourService: Is not initialized"));
 	}
 
 	StringStorage service_name2;
@@ -188,17 +190,17 @@ void BonjourService::start()
 	{
 		if (i++ > 20)
 		{
-			log->interror(_T("BonjourService: bogus_hwnd is not created for too long time!"));
+			log->interror(_T("BonjourService: bogus_hwnd is not created for too long time."));
 			return;
-			//throw Exception(_T("BonjourService: bogus_hwnd is not created for too long time!"));
+			//throw Exception(_T("BonjourService: bogus_hwnd is not created for too long time."));
 		}
 		Sleep(100);
 	}
 	if (!WTSRegisterSessionNotification(bogus_hwnd, NOTIFY_FOR_ALL_SESSIONS))
 	{
-		log->interror(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
+		log->interror(_T("BonjourService: Could not WTSRegisterSessionNotification"));
 		return;
-		//throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification!"));
+		//throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification"));
 	}
 
 	start_();
@@ -243,7 +245,7 @@ void BonjourService::start_()
 	);
 	if (err != kDNSServiceErr_NoError)
 	{
-		log->interror(_T("BonjourService: Could not DNSServiceRegister. Error code: %d. Service name: %s. Port: %d. Service type: %s!"), err, service_name_, port, service_type_);
+		log->error(_T("BonjourService: Could not DNSServiceRegister. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
 		return;
 	}
 
@@ -270,9 +272,9 @@ void BonjourService::GetWindowsUserName(StringStorage *serviceName)
 		DWORD user_name_size = sizeof(user_name);
 		if (!WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, session_id, WTSUserName, &user_name, &user_name_size))
 		{
-			log->interror(_T("BonjourService: Could not WTSQuerySessionInformation!"));
+			log->interror(_T("BonjourService: Could not WTSQuerySessionInformation"));
 			return;
-			//throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation!"));
+			//throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation"));
 		}
 		if (user_name_size < 1)
 			serviceName->setString(_T("-UNKNOWN-"));
@@ -283,7 +285,7 @@ void BonjourService::GetWindowsUserName(StringStorage *serviceName)
 	/*TCHAR user_name[255];
 	DWORD user_name_size = sizeof(user_name);
 	if (!GetUserName(user_name, &user_name_size))
-	throw Exception(_T("Could not GetUserName!"));
+	throw Exception(_T("Could not GetUserName"));
 	if (user_name_size < 1)
 	_tcscpy(user_name, _T("-NOBODY-"));
 	agentName->setString(user_name);*/
@@ -303,9 +305,9 @@ void BonjourService::stop()
 
 	if (!WTSUnRegisterSessionNotification(bogus_hwnd))
 	{
-		log->interror(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
+		log->interror(_T("BonjourService: Could not WTSUnRegisterSessionNotification"));
 		return;
-		//throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification!"));
+		//throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification"));
 	}
 
 	stop_();
