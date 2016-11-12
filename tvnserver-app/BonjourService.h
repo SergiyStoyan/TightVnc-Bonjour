@@ -42,8 +42,6 @@ private:
 	static StringStorage service_name;
 	static uint16_t port;
 	static StringStorage service_type;
-	static void start_();
-	static void stop_();
 	static HWND WINAPI bogus_hwnd;//used for WTSRegisterSessionNotificationEx to monitor user logon
 	static HANDLE bogusWindowRun_thread;
 	static LRESULT CALLBACK windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

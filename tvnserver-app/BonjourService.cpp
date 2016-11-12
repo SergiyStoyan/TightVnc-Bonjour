@@ -249,7 +249,7 @@ void BonjourService::start()
 		port = port2;
 		service_type = service_type2;
 	}
-	
+
 	int i = 0;
 	while (!bogus_hwnd)//the window is created by another thread
 	{
@@ -268,11 +268,13 @@ void BonjourService::start()
 		//throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification"));
 	}
 
-	start_();
-}
+	if (dns_sd::service != NULL)
+	{
+		log->interror(_T("BonjourService: dns_sd::service != NULL. Refuse starting."));
+		return;
+		//throw Exception(_T("BonjourService: dns_sd::service != NULL. Refuse starting."));
+	}
 
-void BonjourService::start_()
-{
 	DNSServiceFlags flags = 0;// kDNSServiceFlagsDefault;
 	uint32_t interfaceIndex = 0;
 
@@ -315,7 +317,7 @@ void BonjourService::start_()
 	}
 	log->message(_T("BonjourService: Started. Service name: %s. Port: %d. Service type: %s"), service_name.getString(), port, service_type.getString());
 
-	if (dns_sd::handleEvents_thread != NULL)
+	if (dns_sd::handleEvents_thread != NULL && WaitForSingleObject(dns_sd::handleEvents_thread, 0) != WAIT_OBJECT_0) //the thread is still alive
 		log->interror(_T("BonjourService: handleEvents_thread is not NULL. A new handleEvents_thread will not be created."));
 	else
 	{
@@ -324,7 +326,6 @@ void BonjourService::start_()
 		{
 			BonjourService::log->interror(_T("BonjourService: Could not create handleEvents_thread"));
 			return;
-			//throw Exception(_T("BonjourService: Could not CreateThread"));
 		}
 	}
 }
@@ -387,28 +388,27 @@ void BonjourService::stop()
 		//throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification"));
 	}
 
-	stop_();
-}
-
-void BonjourService::stop_()
-{
 	if (dns_sd::service != NULL)
 	{
 		DNSServiceRefDeallocate(dns_sd::service);
 		dns_sd::service = NULL;
 	}
-	
+
 	if (dns_sd::handleEvents_thread != NULL)
 	{
-		DWORD r = WaitForSingleObject(dns_sd::handleEvents_thread, 3000);
-		if (r == WAIT_TIMEOUT)
-			log->interror(_T("BonjourService: Could not shutdown handleEvents_thread."));
-		else
+		switch (WaitForSingleObject(dns_sd::handleEvents_thread, 3000))
 		{
+		case WAIT_TIMEOUT:
+			log->interror(_T("BonjourService: Timeout on shutdown handleEvents_thread."));
+			break;
+		case WAIT_FAILED:
+			log->interror(_T("BonjourService: Could not shutdown handleEvents_thread: %d"), GetLastError());
+			break;
+		default:
 			CloseHandle(dns_sd::handleEvents_thread);
 			dns_sd::handleEvents_thread = NULL;
 		}
 	}
-	
+
 	log->message(_T("BonjourService: Stopped."));
 }
