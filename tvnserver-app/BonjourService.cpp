@@ -28,16 +28,73 @@ struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
 		if (errorCode == kDNSServiceErr_NoError)
 		{
 			if (flags & kDNSServiceFlagsAdd)
-				log->info(_T("BonjourService: Service %s is registered and active\n"), name_);
+				log->info(_T("BonjourService: Service %s is registered and active."), name_);
 			else
-				log->info(_T("BonjourService: Service %s registration removed\n"), name_);
+				log->info(_T("BonjourService: Service %s is unregistered."), name_);
 		}
 		else if (errorCode == kDNSServiceErr_NameConflict)
-			log->error(_T("BonjourService: Service name %s is in use, please choose another\n"), name_);
+			log->error(_T("BonjourService: Service name %s is in use, please choose another."), name_);
 		else
-			log->error(_T("BonjourService: Error: %d\n"), errorCode);
+			log->error(_T("BonjourService: Error: %d"), errorCode);
 	}
+
+	static DWORD WINAPI handleEvents(void* param)
+	{
+		while (true)
+		{
+			while (!BonjourService::is_started())
+				Sleep(100);
+
+			try
+			{
+				int dns_sd_fd = DNSServiceRefSockFD(service);
+				fd_set readfds;
+				struct timeval tv;
+				tv.tv_sec = 1;
+				tv.tv_usec = 0;
+				int result;
+
+				while (BonjourService::is_started())
+				{
+					FD_ZERO(&readfds);
+					FD_SET(dns_sd_fd, &readfds);
+					result = select(dns_sd_fd + 1, &readfds, (fd_set*)NULL, (fd_set*)NULL, &tv);
+					if (result > 0 && FD_ISSET(dns_sd_fd, &readfds))
+					{
+						DNSServiceErrorType err = kDNSServiceErr_NoError;
+						err = DNSServiceProcessResult(service);
+						if (err)
+						{
+							Sleep(100);//give time to stop service if it is being done
+							if (BonjourService::is_started())
+								log->error(_T("BonjourService: DNSServiceProcessResult returned %d"), err);
+							break;
+						}
+					}
+					else if (result < 0)
+					{
+						LPCSTR error = strerror(errno);
+						TCHAR error_[512];
+						mbstowcs(error_, error, sizeof(error_));
+						log->error(_T("BonjourService: select() returned %d errno %d %s"), result, errno, error_);
+						if (errno != EINTR)
+							break;
+					}
+				}
+			}
+			catch(Exception e)
+			{//ignore an exception if service was stopped and set to NULL
+				if (BonjourService::is_started())
+					log->interror(_T("BonjourService: Excpetion in handleEvents: %s"), e.getMessage());
+			}
+		}
+		return 0;
+	}
+	
+	static HANDLE handleEvents_thread;
 };
+
+HANDLE BonjourService::dns_sd::handleEvents_thread = NULL;
 
 bool BonjourService::is_started()
 {
@@ -65,9 +122,9 @@ uint16_t BonjourService::port = 5353;
 StringStorage BonjourService::service_type = StringStorage(_T("_rfb._tcp"));
 LogWriter *BonjourService::log;
 HWND WINAPI BonjourService::bogus_hwnd = NULL;//used for WTSRegisterSessionNotificationEx to monitor user logon
-HANDLE BonjourService::bogus_window_thread = NULL;
+HANDLE BonjourService::bogusWindowRun_thread = NULL;
 
-LRESULT CALLBACK BonjourService::WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK BonjourService::windowProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (uMsg == WM_WTSSESSION_CHANGE)
 	{
@@ -92,13 +149,13 @@ LRESULT CALLBACK BonjourService::WindowProcedure(HWND hWnd, UINT uMsg, WPARAM wP
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-DWORD WINAPI BonjourService::BogusWindowRun(void* Param)
+DWORD WINAPI BonjourService::bogusWindowRun(void* Param)
 {
 	LPCWSTR class_name = _T("MESSAGE_ONLY_CLASS");
 	HINSTANCE hInstance = NULL;
 	WNDCLASSEX wx = {};
 	wx.cbSize = sizeof(WNDCLASSEX);
-	wx.lpfnWndProc = WindowProcedure;        // function which will handle messages
+	wx.lpfnWndProc = windowProcedure;        // function which will handle messages
 	wx.hInstance = hInstance;
 	wx.lpszClassName = class_name;
 	if (!RegisterClassEx(&wx))
@@ -142,10 +199,18 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 		//throw Exception(_T("BonjourService: Is already initialized"));
 	}
 		
-	bogus_window_thread = CreateThread(0, 0, BogusWindowRun, 0, 0, 0);
-	if (!bogus_window_thread)
+	bogusWindowRun_thread = CreateThread(0, 0, bogusWindowRun, 0, 0, 0);
+	if (!bogusWindowRun_thread)
 	{
-		BonjourService::log->interror(_T("BonjourService: Could not CreateThread"));
+		BonjourService::log->interror(_T("BonjourService: Could not create bogusWindowRun_thread"));
+		return;
+		//throw Exception(_T("BonjourService: Could not CreateThread"));
+	}
+
+	dns_sd::handleEvents_thread = CreateThread(0, 0, dns_sd::handleEvents, NULL, 0, 0);
+	if (!dns_sd::handleEvents_thread)
+	{
+		BonjourService::log->interror(_T("BonjourService: Could not create handleEvents_thread"));
 		return;
 		//throw Exception(_T("BonjourService: Could not CreateThread"));
 	}
@@ -248,7 +313,6 @@ void BonjourService::start_()
 		log->error(_T("BonjourService: Could not DNSServiceRegister. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
 		return;
 	}
-
 	log->message(_T("BonjourService: Started. Service name: %s"), service_name.getString());
 }
 
