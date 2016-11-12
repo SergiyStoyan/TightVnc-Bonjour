@@ -282,8 +282,8 @@ void BonjourService::start()
 	char service_type_[255];
 #ifdef UNICODE
 	//It means TCHAR == WCHAR.
-	wcstombs(service_name_, service_name.getString(), strlen(service_name_));
-	wcstombs(service_type_, service_type.getString(), strlen(service_type_));
+	wcstombs(service_name_, service_name.getString(), sizeof(service_name_));
+	wcstombs(service_type_, service_type.getString(), sizeof(service_type_));
 #else
 	//It means TCHAR == char.	
 	strcpy(service_name_, (char *)service_name.getString());
