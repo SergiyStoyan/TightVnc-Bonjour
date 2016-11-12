@@ -50,7 +50,7 @@ struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
 				int dns_sd_fd = DNSServiceRefSockFD(service);
 				fd_set readfds;
 				struct timeval tv;
-				tv.tv_sec = 1;
+				tv.tv_sec = 100;
 				tv.tv_usec = 0;
 				int result;
 
@@ -65,7 +65,7 @@ struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
 						err = DNSServiceProcessResult(service);
 						if (err)
 						{
-							Sleep(100);//give time to stop service if it is being done
+							Sleep(100);//give time to stop service if it is being stopped
 							if (BonjourService::is_started())
 								log->error(_T("BonjourService: DNSServiceProcessResult returned %d"), err);
 							break;
@@ -162,14 +162,12 @@ DWORD WINAPI BonjourService::bogusWindowRun(void* Param)
 	{
 		log->interror(_T("BonjourService: Could not RegisterClassEx"));
 		return 1;
-		//throw Exception(_T("BonjourService: Could not RegisterClassEx"));
 	}
 	bogus_hwnd = CreateWindowEx(0, class_name, _T("Bogus Window For Listening Messages"), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, hInstance, NULL);
 	if (!bogus_hwnd)
 	{
 		log->interror(_T("BonjourService: Could not CreateWindowEx"));
 		return 1;
-		//throw Exception(_T("BonjourService: Could not CreateWindowEx"));
 	}
 
 	MSG msg; 
@@ -180,7 +178,6 @@ DWORD WINAPI BonjourService::bogusWindowRun(void* Param)
 		{
 			log->interror(_T("BonjourService: GetMessage returned -1"));
 			return 1;
-			//throw Exception(_T("BonjourService: GetMessage returned -1"));
 		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -196,7 +193,6 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 	{
 		BonjourService::log->interror(_T("BonjourService: Is already initialized"));
 		return;
-		//throw Exception(_T("BonjourService: Is already initialized"));
 	}
 		
 	bogusWindowRun_thread = CreateThread(0, 0, bogusWindowRun, 0, 0, 0);
@@ -204,7 +200,6 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 	{
 		BonjourService::log->interror(_T("BonjourService: Could not create bogusWindowRun_thread"));
 		return;
-		//throw Exception(_T("BonjourService: Could not CreateThread"));
 	}
 
 	/*dns_sd::handleEvents_thread = CreateThread(0, 0, dns_sd::handleEvents, NULL, 0, 0);
@@ -212,7 +207,6 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 	{
 		BonjourService::log->interror(_T("BonjourService: Could not create handleEvents_thread"));
 		return;
-		//throw Exception(_T("BonjourService: Could not CreateThread"));
 	}*/
 
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
@@ -227,7 +221,6 @@ void BonjourService::start()
 	{
 		log->interror(_T("BonjourService: Is not initialized"));
 		return;
-		//throw Exception(_T("BonjourService: Is not initialized"));
 	}
 
 	StringStorage service_name2;
@@ -257,7 +250,6 @@ void BonjourService::start()
 		{
 			log->interror(_T("BonjourService: bogus_hwnd is not created for too long time."));
 			return;
-			//throw Exception(_T("BonjourService: bogus_hwnd is not created for too long time."));
 		}
 		Sleep(100);
 	}
@@ -265,14 +257,12 @@ void BonjourService::start()
 	{
 		log->interror(_T("BonjourService: Could not WTSRegisterSessionNotification"));
 		return;
-		//throw Exception(_T("BonjourService: Could not WTSRegisterSessionNotification"));
 	}
 
 	if (dns_sd::service != NULL)
 	{
 		log->interror(_T("BonjourService: dns_sd::service != NULL. Refuse starting."));
 		return;
-		//throw Exception(_T("BonjourService: dns_sd::service != NULL. Refuse starting."));
 	}
 
 	DNSServiceFlags flags = 0;// kDNSServiceFlagsDefault;
@@ -352,7 +342,6 @@ void BonjourService::GetWindowsUserName(StringStorage *serviceName)
 		{
 			log->interror(_T("BonjourService: Could not WTSQuerySessionInformation"));
 			return;
-			//throw Exception(_T("BonjourService: Could not WTSQuerySessionInformation"));
 		}
 		if (user_name_size < 1)
 			serviceName->setString(_T("-UNKNOWN-"));
@@ -375,7 +364,6 @@ void BonjourService::stop()
 	{
 		log->interror(_T("BonjourService: Is not initialized!"));
 		return;
-		//throw Exception(_T("BonjourService: Is not initialized!"));
 	}
 
 	if (!is_started())
@@ -385,7 +373,6 @@ void BonjourService::stop()
 	{
 		log->interror(_T("BonjourService: Could not WTSUnRegisterSessionNotification"));
 		return;
-		//throw Exception(_T("BonjourService: Could not WTSUnRegisterSessionNotification"));
 	}
 
 	if (dns_sd::service != NULL)
