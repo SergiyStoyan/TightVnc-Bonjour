@@ -40,10 +40,10 @@ struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
 
 	static DWORD WINAPI handleEvents(void* param)
 	{
-		while (true)
-		{
-			while (!BonjourService::is_started())
-				Sleep(100);
+		//while (true)
+		//{
+		//	while (!BonjourService::is_started())
+		//		Sleep(100);
 
 			try
 			{
@@ -87,7 +87,7 @@ struct BonjourService::dns_sd//everything that requires Bonjour SDK (dns_sd.h)
 				if (BonjourService::is_started())
 					log->interror(_T("BonjourService: Excpetion in handleEvents: %s"), e.getMessage());
 			}
-		}
+		//}
 		return 0;
 	}
 	
@@ -207,13 +207,13 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 		//throw Exception(_T("BonjourService: Could not CreateThread"));
 	}
 
-	dns_sd::handleEvents_thread = CreateThread(0, 0, dns_sd::handleEvents, NULL, 0, 0);
+	/*dns_sd::handleEvents_thread = CreateThread(0, 0, dns_sd::handleEvents, NULL, 0, 0);
 	if (!dns_sd::handleEvents_thread)
 	{
 		BonjourService::log->interror(_T("BonjourService: Could not create handleEvents_thread"));
 		return;
 		//throw Exception(_T("BonjourService: Could not CreateThread"));
-	}
+	}*/
 
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
 	configurator->addListener(&bonjourServiceConfigReloadListener);
@@ -313,7 +313,20 @@ void BonjourService::start_()
 		log->error(_T("BonjourService: Could not DNSServiceRegister. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
 		return;
 	}
-	log->message(_T("BonjourService: Started. Service name: %s"), service_name.getString());
+	log->message(_T("BonjourService: Started. Service name: %s. Port: %d. Service type: %s"), service_name.getString(), port, service_type.getString());
+
+	if (dns_sd::handleEvents_thread != NULL)
+		log->interror(_T("BonjourService: handleEvents_thread is not NULL. A new handleEvents_thread will not be created."));
+	else
+	{
+		dns_sd::handleEvents_thread = CreateThread(0, 0, dns_sd::handleEvents, NULL, 0, 0);
+		if (!dns_sd::handleEvents_thread)
+		{
+			BonjourService::log->interror(_T("BonjourService: Could not create handleEvents_thread"));
+			return;
+			//throw Exception(_T("BonjourService: Could not CreateThread"));
+		}
+	}
 }
 
 void BonjourService::get_service_name(StringStorage *serviceName)
@@ -380,8 +393,22 @@ void BonjourService::stop()
 void BonjourService::stop_()
 {
 	if (dns_sd::service != NULL)
+	{
 		DNSServiceRefDeallocate(dns_sd::service);
-	dns_sd::service = NULL;
+		dns_sd::service = NULL;
+	}
+	
+	if (dns_sd::handleEvents_thread != NULL)
+	{
+		DWORD r = WaitForSingleObject(dns_sd::handleEvents_thread, 3000);
+		if (r == WAIT_TIMEOUT)
+			log->interror(_T("BonjourService: Could not shutdown handleEvents_thread."));
+		else
+		{
+			CloseHandle(dns_sd::handleEvents_thread);
+			dns_sd::handleEvents_thread = NULL;
+		}
+	}
 	
 	log->message(_T("BonjourService: Stopped."));
 }
