@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
  *  UINT32 messageId 32 bit message id.
  *  UINT8[] messageBody message body depends on messageId.
  * @remark rfb dispatcher in common case read first byte (UINT8) as message id,
- * but if first byte is equal to 0xFC then it's TightVNC extension message and
+ * but if first byte is equal to 0xFC then it's CisteraVNC extension message and
  * must read next 3 bytes and create UINT32 message id for processing.
  *
  * Server to client message have following format:

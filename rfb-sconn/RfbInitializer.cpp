@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -236,7 +236,7 @@ void RfbInitializer::initAuthenticate()
     // Here the protocol varies between versions 3.3 and 3.7+.
     if (m_minorVerNum >= 7) {
       // Send a list with two security types -- VNC-compatible security type
-      // and a special code allowing to enable TightVNC protocol extensions.
+      // and a special code allowing to enable CisteraVNC protocol extensions.
       m_output->writeUInt8(2);
       m_output->writeUInt8(primSecType);
       m_output->writeUInt8(SecurityDefs::TIGHT);

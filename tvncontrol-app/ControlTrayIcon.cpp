@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -177,7 +177,7 @@ void ControlTrayIcon::onRightButtonUp()
   case IDM_ATTACH_TO_DISPATCHER:
     onAttachToDispatcher();
     break;
-  case ID_ABOUT_TIGHTVNC_MENUITEM:
+  case ID_ABOUT_CISTERAVNC_MENUITEM:
     onAboutMenuItemClick();
     break;
   case ID_CLOSE_CONTROL_INTERFACE:
@@ -267,7 +267,7 @@ void ControlTrayIcon::onShutdownServerMenuItemClick()
     }
   }
 
-  // Shutdown TightVNC server.
+  // Shutdown CisteraVNC server.
 
   ShutdownCommand unsafeCommand(m_serverControl);
 
@@ -324,7 +324,7 @@ void ControlTrayIcon::onCloseControlInterfaceMenuItemClick()
 void ControlTrayIcon::syncStatusWithServer()
 {
   try {
-     // Get TightVNC server info.
+     // Get CisteraVNC server info.
     TvnServerInfo info = m_serverControl->getServerInfo();
     std::list<RfbClientInfo *> clients;
     m_serverControl->getClientsList(&clients);

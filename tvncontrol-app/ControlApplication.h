@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ protected:
   /**
    * Inherited from Thread class.
    *
-   * Checks TightVNC server status.
+   * Checks CisteraVNC server status.
    */
   void execute();
 

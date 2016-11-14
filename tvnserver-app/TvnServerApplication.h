@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@
 #include "LogInitListener.h"
 
 /**
- * Windows TightVNC server application.
- * Used for running TightVNC server as single windows application.
+ * Windows CisteraVNC server application.
+ * Used for running CisteraVNC server as single windows application.
  */
 class TvnServerApplication : public WindowsApplication,
                              public TvnServerListener,
@@ -46,7 +46,7 @@ class TvnServerApplication : public WindowsApplication,
 {
 public:
   /**
-   * Creates TightVNC server application instance.
+   * Creates CisteraVNC server application instance.
    * @param hInstance HINSTANCE of application.
    * @param commaneLine command line string.
    */
@@ -55,12 +55,12 @@ public:
                        const TCHAR *commandLine,
                        NewConnectionEvents *newConnectionEvents);
   /**
-   * Deletes TightVNC server application instance.
+   * Deletes CisteraVNC server application instance.
    */
   virtual ~TvnServerApplication();
 
   /**
-   * Runs TightVNC server windows application.
+   * Runs CisteraVNC server windows application.
    *
    * Makes several things:
    *   1) Starts TigthVNC server.
@@ -93,7 +93,7 @@ private:
    */
   StringStorage m_commandLine;
   /**
-   * TightVNC server.
+   * CisteraVNC server.
    */
   TvnServer *m_tvnServer;
   /**

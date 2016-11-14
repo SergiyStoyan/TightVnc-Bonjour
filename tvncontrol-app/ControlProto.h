@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ public:
   static const UINT32 DISCONNECT_ALL_CLIENTS_MSG_ID = 0x6;
 
   /**
-   * Shutdown TightVNC server.
+   * Shutdown CisteraVNC server.
    * Request body: [empty].
    * Reply body: [empty].
    */
@@ -120,7 +120,7 @@ public:
   static const UINT32 CONNECT_TO_TCPDISP_MSG_ID = 0x9;
 
   /**
-   * Send new configuration to TightVNC server.
+   * Send new configuration to CisteraVNC server.
    * Request body:
    *   serialized ServerConfig.
    * Reply body: [empty].
@@ -140,7 +140,7 @@ public:
   static const UINT32 GET_SERVER_INFO_MSG_ID = 0x11;
 
   /**
-   * Get current configuration of TightVNC server.
+   * Get current configuration of CisteraVNC server.
    * Request body: [empty].
    * Reply body:
    *   serialized ServerConfig.
@@ -161,7 +161,7 @@ public:
    * Gets flag for autowork mode of TvnControl.
    *
    * @remark
-   * If this flag is true when TvnControl must be run with TightVNC app or service,
+   * If this flag is true when TvnControl must be run with CisteraVNC app or service,
    * if false, then TvnControl app must be shutdowned forced and silent after it knows
    * that "Run TvnControl flag" is false.
    *

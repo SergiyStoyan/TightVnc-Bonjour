@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -232,7 +232,7 @@ bool FileTransferMainDialog::tryClose()
   }
   if (MessageBox(m_ctrlThis.getWindow(),
                  _T("Do you want to close file transfers and terminate current operation?"),
-                 _T("TightVNC File Transfers"),
+                 _T("CisteraVNC File Transfers"),
                  MB_YESNO | MB_ICONQUESTION) == IDYES) {
     // Set flag
     m_isClosing = true;

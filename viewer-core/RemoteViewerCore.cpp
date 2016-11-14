@@ -1,10 +1,10 @@
-// Copyright (C) 2011,2012 GlavSoft LLC.
+// Copyright (C) 2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -957,7 +957,7 @@ void RemoteViewerCore::execute()
 UINT32 RemoteViewerCore::receiveServerMessageType()
 {
   // Viewer in common case read first byte (UINT8) as message id,
-  // but if first byte is equal to 0xFC then it's TightVNC extension message and
+  // but if first byte is equal to 0xFC then it's CisteraVNC extension message and
   // must read next 3 bytes and create UINT32 message id for processing.
 
   static const UINT16 SERVER_MSG_SPECIAL_TIGHT_CODE = 0xFC;

@@ -1,10 +1,10 @@
-// Copyright (C) 2008,2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2008,2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public:
 
   //
   // Enum defines server action when last client disconnects
-  // from the TightVNC server.
+  // from the CisteraVNC server.
   //
 
   enum DisconnectAction {
@@ -403,7 +403,7 @@ protected:
 
   // Flag that determiates where log file directory will be.
   bool m_saveLogToAllUsersPath;
-  // Run control interface with TightVNC server or not.
+  // Run control interface with CisteraVNC server or not.
   bool m_showTrayIcon;
 
   StringStorage m_logFilePath;

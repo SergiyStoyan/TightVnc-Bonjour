@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@
 #include "LogInitListener.h"
 
 /**
- * TightVNC server singleton that includes serveral components:
+ * CisteraVNC server singleton that includes serveral components:
  *   1) Zombie killer singleton.
  *   2) Configurator singleton.
  *   3) Log singleton.
@@ -67,7 +67,7 @@ class TvnServer : public Singleton<TvnServer>,
 {
 public:
   /**
-   * Creates and starts TightVNC server execution (in separate thread).
+   * Creates and starts CisteraVNC server execution (in separate thread).
    *
    * Makes sereval steps:
    *  1) Instanizes zombie killer.
@@ -77,24 +77,24 @@ public:
    *
    * @param runsInServiceContext must be set to true if TvnServer is running in service context,
    * false, if in context of single application. Parameter determinates control client behavour and
-   * initial place for loading TightVNC configuration.
+   * initial place for loading CisteraVNC configuration.
    *
    * @remark doesn't block calling thread execution cause all servers runs in it's own threads.
-   * To know when need to shutdown TightVNC server you need to use addListener method.
+   * To know when need to shutdown CisteraVNC server you need to use addListener method.
    */
   TvnServer(bool runsInServiceContext,
             NewConnectionEvents *newConnectionEvents,
             LogInitListener *logInitListener,
             Logger *logger);
   /**
-   * Stops and destroys TightVNC server.
+   * Stops and destroys CisteraVNC server.
    * @remark don't generate shutdown signal(like shutdown() method does) for listeners.
    */
   virtual ~TvnServer();
 
   /**
    * Fills structure with information of current state of TvnServer.
-   * @param info [out] output parameter that will contain TightVNC server information
+   * @param info [out] output parameter that will contain CisteraVNC server information
    * after call of this method.
    * @fixme place extended information to server info.
    */
@@ -113,14 +113,14 @@ public:
   /**
    * Only generates shutdown signal (event) for TvnServer listeners.
    *
-   * @remark used by ControlClient, when it recieves command to shutdown TightVNC.
-   * @remark doesn't stop TightVNC server.
+   * @remark used by ControlClient, when it recieves command to shutdown CisteraVNC.
+   * @remark doesn't stop CisteraVNC server.
    * @fixme rename this method.
    */
   void generateExternalShutdownSignal();
 
   /**
-   * Checks if TightVNC server runs in service context.
+   * Checks if CisteraVNC server runs in service context.
    * @returns true if runs in service context.
    * @deprecated use getServerInfo() instead or move to private.
    */

@@ -271,11 +271,11 @@ void BonjourService::start()
 	char service_name_[255];
 	char service_type_[255];
 #ifdef UNICODE
-	//It means TCHAR == WCHAR.
+	//TCHAR == WCHAR
 	wcstombs(service_name_, service_name.getString(), sizeof(service_name_));
 	wcstombs(service_type_, service_type.getString(), sizeof(service_type_));
 #else
-	//It means TCHAR == char.	
+	//TCHAR == char	
 	strcpy(service_name_, (char *)service_name.getString());
 	strcpy(service_type_, (char *)service_type.getString());
 #endif

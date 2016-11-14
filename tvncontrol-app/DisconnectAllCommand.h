@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #include "ControlProxy.h"
 
 /**
- * Command that invokes remote disconnectAll() method of TightVNC server
+ * Command that invokes remote disconnectAll() method of CisteraVNC server
  * using control transport.
  */
 class DisconnectAllCommand : public Command
@@ -56,7 +56,7 @@ public:
   virtual void execute() throw(IOException, RemoteException);
 private:
   /**
-   * Proxy to some of TightVNC server control methods.
+   * Proxy to some of CisteraVNC server control methods.
    */
   ControlProxy *m_proxy;
 };

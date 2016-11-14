@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public:
   /**
    * Creates and starts control server execution.
    * @param serverTransport ready transport for control server.
-   * @param rfbClientManager active TightVNC rfb client manager.
+   * @param rfbClientManager active CisteraVNC rfb client manager.
    * @throws Exception when fail to create server.
    * @remark control server takes ownership over server transport.
    * @remark rfbClientManager and rfbServers parameters are needed for
@@ -78,7 +78,7 @@ private:
 
   PipeServer *m_pipeServer;
   /**
-   * Active rfb client manager that used in TightVNC server.
+   * Active rfb client manager that used in CisteraVNC server.
    */
   RfbClientManager *m_rfbClientManager;
 

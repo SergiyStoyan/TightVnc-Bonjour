@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@
 using namespace std;
 
 /**
- * Proxy to some of TightVNC server methods, supported by control protocol.
- * Used to execute remote commands on on TightVNC server.
+ * Proxy to some of CisteraVNC server methods, supported by control protocol.
+ * Used to execute remote commands on on CisteraVNC server.
  * remote errors.
  */
 class ControlProxy
@@ -96,11 +96,11 @@ public:
   void disconnectAllClients() throw(IOException, RemoteException);
 
   /**
-   * Shutdowns TightVNC server.
+   * Shutdowns CisteraVNC server.
    * @throws RemoteException on error on server.
    * @throws IOException on io error.
    */
-  void shutdownTightVnc() throw(IOException, RemoteException);
+  void shutdownCisteraVnc() throw(IOException, RemoteException);
 
   /**
    * Initialized outgoing rfb connection.

@@ -2,9 +2,9 @@
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #include "ControlProxy.h"
 
 /**
- * Command that connects TightVNC server to a dispatcher.
+ * Command that connects CisteraVNC server to a dispatcher.
  */
 class DispatchCommand : public Command
 {
@@ -55,7 +55,7 @@ public:
   virtual void execute() throw(IOException, RemoteException);
 private:
   /**
-   * Proxy to some of TightVNC server control methods.
+   * Proxy to some of CisteraVNC server control methods.
    */
   ControlProxy *m_proxy;
   StringStorage m_dispatchSpec;

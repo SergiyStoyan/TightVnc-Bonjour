@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include "util/CommonHeader.h"
 
 /**
- * Public TightVNC server information.
+ * Public CisteraVNC server information.
  *
  * Used by tvncontrol only.
  */
@@ -41,11 +41,11 @@ struct TvnServerInfo
    */
   bool m_acceptFlag;
   /**
-   * Determinates if TightVNC server runs in context of service or application.
+   * Determinates if CisteraVNC server runs in context of service or application.
    */
   bool m_serviceFlag;
   /**
-   * TightVNC server status text.
+   * CisteraVNC server status text.
    */
   StringStorage m_statusText;
 };

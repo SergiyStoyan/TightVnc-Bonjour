@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
  *
  * @note that created process will have same access rights as caller (parent process).
  *
- * @remark this class is needed for executing TightVNC Server system applications
+ * @remark this class is needed for executing CisteraVNC Server system applications
  * like Desktop Server, Query Application, so it can do "XP Trick"
  * (force changing current session to session0 and lock workstation after) on WinXP to
  * avoid 233 'Pipe not connected error' error in CreateProcessAsUser WinAPI function

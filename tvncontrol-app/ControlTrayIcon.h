@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ class ControlTrayIcon : public NotifyIcon, /** Inherit tray icon code. */
 public:
   /**
    * Creates control tray icon and places it to system tray.
-   * @param serverControl proxy to execute methods in TightVNC server process.
+   * @param serverControl proxy to execute methods in CisteraVNC server process.
    * @param notificator interface to report about errors during execution of remote methods.
    * @param appControl parent control application.
    * @param showAfterCreation determinates if needs to show icon in tray.
@@ -66,9 +66,9 @@ public:
   virtual ~ControlTrayIcon();
 
   /**
-   * Synchronizes tray icon and status text with TightVNC server.
+   * Synchronizes tray icon and status text with CisteraVNC server.
    * @remark method shutdowns control application if connection to
-   * TightVNC server is lost.
+   * CisteraVNC server is lost.
    */
   void syncStatusWithServer();
 
@@ -127,7 +127,7 @@ protected:
   Icon *m_iconIdle;
   Icon *m_iconDisabled;
 
-  // Interface to execute some commands on remote TightVNC server.
+  // Interface to execute some commands on remote CisteraVNC server.
   ControlProxy *m_serverControl;
 
   // Configuration dialog.
@@ -135,7 +135,7 @@ protected:
   // About dialog.
   AboutDialog m_aboutDialog;
 
-  // Last known TightVNC server information.
+  // Last known CisteraVNC server information.
   TvnServerInfo m_lastKnownServerInfo;
   // Thread-safety of m_lastKnownServerInfo member.
   LocalMutex m_serverInfoMutex;

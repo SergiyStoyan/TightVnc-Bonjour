@@ -1,10 +1,10 @@
-// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2016 Cistera.com.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -60,21 +60,21 @@ UpdateSender::UpdateSender(RfbCodeRegistrator *codeRegtor,
                         EncodingDefs::SIG_COPYRECT);
   codeRegtor->addEncCap(EncodingDefs::HEXTILE,           VendorDefs::STANDARD,
                         EncodingDefs::SIG_HEXTILE);
-  codeRegtor->addEncCap(EncodingDefs::TIGHT,             VendorDefs::TIGHTVNC,
+  codeRegtor->addEncCap(EncodingDefs::TIGHT,             VendorDefs::CISTERAVNC,
                         EncodingDefs::SIG_TIGHT);
-  codeRegtor->addEncCap(PseudoEncDefs::COMPR_LEVEL_0,    VendorDefs::TIGHTVNC,
+  codeRegtor->addEncCap(PseudoEncDefs::COMPR_LEVEL_0,    VendorDefs::CISTERAVNC,
                         PseudoEncDefs::SIG_COMPR_LEVEL);
-  codeRegtor->addEncCap(PseudoEncDefs::QUALITY_LEVEL_0,  VendorDefs::TIGHTVNC,
+  codeRegtor->addEncCap(PseudoEncDefs::QUALITY_LEVEL_0,  VendorDefs::CISTERAVNC,
                         PseudoEncDefs::SIG_QUALITY_LEVEL);
-  codeRegtor->addEncCap(PseudoEncDefs::RICH_CURSOR,      VendorDefs::TIGHTVNC,
+  codeRegtor->addEncCap(PseudoEncDefs::RICH_CURSOR,      VendorDefs::CISTERAVNC,
                         PseudoEncDefs::SIG_RICH_CURSOR);
-  codeRegtor->addEncCap(PseudoEncDefs::POINTER_POS,      VendorDefs::TIGHTVNC,
+  codeRegtor->addEncCap(PseudoEncDefs::POINTER_POS,      VendorDefs::CISTERAVNC,
                         PseudoEncDefs::SIG_POINTER_POS);
-  codeRegtor->addEncCap(PseudoEncDefs::DESKTOP_SIZE,     VendorDefs::TIGHTVNC,
+  codeRegtor->addEncCap(PseudoEncDefs::DESKTOP_SIZE,     VendorDefs::CISTERAVNC,
                         PseudoEncDefs::SIG_DESKTOP_SIZE);
 
   codeRegtor->addClToSrvCap(UpdSenderClientMsgDefs::RFB_VIDEO_FREEZE,
-                            VendorDefs::TIGHTVNC,
+                            VendorDefs::CISTERAVNC,
                             UpdSenderClientMsgDefs::RFB_VIDEO_FREEZE_SIG);
 
   // Request codes

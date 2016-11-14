@@ -2,9 +2,9 @@
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
-// This file is part of the TightVNC software.  Please visit our Web site:
+// This file is part of the CisteraVNC software.  Please visit our Web site:
 //
-//                       http://www.tightvnc.com/
+//                       http://www.cistera.com/
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,18 +24,18 @@
 
 #include "NamingDefs.h"
 
-const TCHAR ProductNames::PRODUCT_NAME[] = _T("TightVNC");
-const TCHAR ProductNames::VIEWER_PRODUCT_NAME[] = _T("TightVNC Viewer");
+const TCHAR ProductNames::PRODUCT_NAME[] = _T("CisteraVNC");
+const TCHAR ProductNames::VIEWER_PRODUCT_NAME[] = _T("CisteraVNC Viewer");
 
 const TCHAR LogNames::VIEWER_LOG_FILE_STUB_NAME[] = _T("tvnviewer");
-const TCHAR LogNames::LOG_DIR_NAME[] = _T("TightVNC");
+const TCHAR LogNames::LOG_DIR_NAME[] = _T("CisteraVNC");
 
-const TCHAR RegistryPaths::VIEWER_PATH[] = _T("Software\\TightVNC\\Viewer");
+const TCHAR RegistryPaths::VIEWER_PATH[] = _T("Software\\CisteraVNC\\Viewer");
 
 const TCHAR ApplicationNames::WINDOW_CLASS_NAME[] = 
   _T("TvnApplicationClass");
 
 const TCHAR WindowNames::TVN_WINDOW_CLASS_NAME[] = _T("TvnWindowClass");
-const TCHAR WindowNames::TVN_WINDOW_TITLE_NAME[] = _T("TightVNC Viewer");
+const TCHAR WindowNames::TVN_WINDOW_TITLE_NAME[] = _T("CisteraVNC Viewer");
 const TCHAR WindowNames::TVN_SUB_WINDOW_TITLE_NAME[] = _T("Viewer");
 
