@@ -525,7 +525,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\CISTERA_LOGO_CLEAR_1500.png" />
-    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\CISTERA_LOGO.bmp" />
+    <Image Include="res\CISTERA_LOGO_CLEAR_3.bmp" />
+    <Image Include="res\CISTERA_LOGO_CLEAR_3.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

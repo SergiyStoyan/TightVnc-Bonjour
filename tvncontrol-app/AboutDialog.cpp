@@ -102,9 +102,9 @@ BOOL AboutDialog::onInitDialog()
   versionLabel.setText(versionText.getString());
 
   // Show licensing info and/or special build info.
-  Control licensingLabel;
-  licensingLabel.setWindow(GetDlgItem(m_ctrlThis.getWindow(), IDC_STATIC_LICENSING));
-  licensingLabel.setText(StringTable::getString(IDS_LICENSING_INFO));
+  //Control licensingLabel;
+  //licensingLabel.setWindow(GetDlgItem(m_ctrlThis.getWindow(), IDC_STATIC_LICENSING));
+  //licensingLabel.setText(StringTable::getString(IDS_LICENSING_INFO));
 
   return FALSE;
 }
