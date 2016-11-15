@@ -43,9 +43,6 @@
     <None Include="res\idle.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\tightvnc.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tvnserver.rc">
@@ -56,15 +53,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\CISTERA_LOGO_CLEAR_1500.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\CISTERA_LOGO_CLEAR_3.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\CISTERA_LOGO_CLEAR_3.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\CISTERA_LOGO.bmp">
       <Filter>Resource Files</Filter>
     </Image>

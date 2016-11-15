@@ -1,4 +1,4 @@
-// Copyright (C) 2016 Cistera.com.
+// Copyright (C) 2011,2012 GlavSoft LLC.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------

@@ -406,7 +406,6 @@
     <None Include="res\connected.ico" />
     <None Include="res\disabled.ico" />
     <None Include="res\idle.ico" />
-    <None Include="res\tightvnc.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\win-event-log\MessageProvider.rc" />
@@ -524,10 +523,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\CISTERA_LOGO_CLEAR_1500.png" />
     <Image Include="res\CISTERA_LOGO.bmp" />
-    <Image Include="res\CISTERA_LOGO_CLEAR_3.bmp" />
-    <Image Include="res\CISTERA_LOGO_CLEAR_3.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
