@@ -56,5 +56,14 @@
     <Image Include="res\CISTERA_LOGO.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\bonjour-error.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bonjour-off.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bonjour-on.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

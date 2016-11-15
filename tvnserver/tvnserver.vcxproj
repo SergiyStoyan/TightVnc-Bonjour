@@ -523,6 +523,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\bonjour-error.ico" />
+    <Image Include="res\bonjour-off.ico" />
+    <Image Include="res\bonjour-on.ico" />
     <Image Include="res\CISTERA_LOGO.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

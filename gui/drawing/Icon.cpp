@@ -77,3 +77,40 @@ void Icon::fromBitmap(Bitmap *bitmap, Bitmap *mask)
 
   m_icon = CreateIconIndirect(&ii);
 }
+
+void Icon::Blend(float factorA, float factorR, float factorG, float factorB)
+{//BUGGY!!! NEEDS FIXING
+	ICONINFO iconinfo;
+	GetIconInfo(m_icon, &iconinfo);
+	HBITMAP hBitmap = iconinfo.hbmColor;
+	
+	HDC hdc, hdcMem;
+	hdc = GetDC(NULL);
+	hdcMem = CreateCompatibleDC(hdc);
+	BITMAPINFO MyBMInfo = { 0 };
+	MyBMInfo.bmiHeader.biSize = sizeof(MyBMInfo.bmiHeader);
+	// Get the BITMAPINFO structure from the bitmap
+	if (0 == GetDIBits(hdcMem, hBitmap, 0, 16, NULL, &MyBMInfo, DIB_RGB_COLORS))
+		throw exception("FAIL");
+	BYTE* bs = new BYTE[MyBMInfo.bmiHeader.biSizeImage];
+	//MyBMInfo.bmiHeader.biBitCount = 32;
+	//MyBMInfo.bmiHeader.biCompression = BI_RGB;
+	//MyBMInfo.bmiHeader.biHeight = (MyBMInfo.bmiHeader.biHeight < 0) ? (-MyBMInfo.bmiHeader.biHeight) : (MyBMInfo.bmiHeader.biHeight);
+	//if (0 == GetDIBits(hdcMem, hBitmap, 0, MyBMInfo.bmiHeader.biHeight, (LPVOID)bs, &MyBMInfo, DIB_RGB_COLORS))
+	//	throw exception("FAIL");
+	
+	for (int i = 0; i < 16 * 4; i += 4) 
+	{
+		bs[i] = (BYTE)(factorB * (float)bs[i]);//blue
+		bs[i + 1] = (BYTE)(factorG * (float)bs[i+1]);//green
+		bs[i + 2] = (BYTE)(factorR * (float)bs[i+2]);//red
+		bs[i + 3] = (BYTE)(factorA * (float)bs[i+3]);//alpha
+	}
+
+	if (0 == SetDIBits(hdcMem, hBitmap, 0, MyBMInfo.bmiHeader.biHeight, (LPVOID)bs, &MyBMInfo, DIB_RGB_COLORS))
+		throw exception("FAIL");
+	
+	Bitmap* bitmap = new Bitmap(hBitmap);
+	Bitmap mask(bitmap->getWidth(), bitmap->getHeight());
+	fromBitmap(bitmap, &mask);
+}

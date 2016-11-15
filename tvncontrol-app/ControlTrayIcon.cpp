@@ -59,7 +59,11 @@ ControlTrayIcon::ControlTrayIcon(ControlProxy *serverControl,
 
   m_iconWorking = new Icon(resLoader->loadIcon(MAKEINTRESOURCE(IDI_CONNECTED)));
   m_iconIdle = new Icon(resLoader->loadIcon(MAKEINTRESOURCE(IDI_IDLE)));
+  //m_iconIdle->Blend(1, 0, 0, 1);
   m_iconDisabled = new Icon(resLoader->loadIcon(MAKEINTRESOURCE(IDI_DISABLED)));
+  m_iconBonjourError = new Icon(resLoader->loadIcon(MAKEINTRESOURCE(IDI_BONJOUR_ERROR)));
+  m_iconBonjourOff = new Icon(resLoader->loadIcon(MAKEINTRESOURCE(IDI_BONJOUR_OFF)));
+  m_iconBonjourOn = new Icon(resLoader->loadIcon(MAKEINTRESOURCE(IDI_BONJOUR_ON)));
 
   setWindowProcHolder(this);
 
@@ -96,6 +100,9 @@ ControlTrayIcon::~ControlTrayIcon()
   delete m_iconDisabled;
   delete m_iconIdle;
   delete m_iconWorking;
+  delete m_iconBonjourError;
+  delete m_iconBonjourOff;
+  delete m_iconBonjourOn;
 }
 
 LRESULT ControlTrayIcon::windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,

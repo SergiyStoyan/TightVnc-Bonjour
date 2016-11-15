@@ -126,6 +126,9 @@ protected:
   Icon *m_iconWorking;
   Icon *m_iconIdle;
   Icon *m_iconDisabled;
+  Icon *m_iconBonjourOn;
+  Icon *m_iconBonjourOff;
+  Icon *m_iconBonjourError;
 
   // Interface to execute some commands on remote CisteraVNC server.
   ControlProxy *m_serverControl;

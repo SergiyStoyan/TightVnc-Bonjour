@@ -40,6 +40,7 @@ public:
   virtual ~Icon();
 
   HICON getHICON();
+  void Blend(float factorA, float factorR, float factorG, float factorB);
 
 protected:
   void fromBitmap(Bitmap *bitmap, Bitmap *mask);
