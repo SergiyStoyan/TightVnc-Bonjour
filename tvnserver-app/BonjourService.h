@@ -32,6 +32,8 @@ class BonjourService
 public:
 	static void Initialize(LogWriter* log, TvnServer* tvnServer, Configurator* configurator);
 	static void GetWindowsUserName(StringStorage* serviceName);
+	static bool IsAvailable();
+
 private:
 	static void get_service_name(StringStorage* serviceName);
 	static void start();

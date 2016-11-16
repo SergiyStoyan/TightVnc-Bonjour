@@ -35,7 +35,7 @@
       </Component>
 
       <Component Id='UrlComponent' Guid='{9282ED3F-A2F7-4727-909B-02614DEA23EA}'>
-        <File Id='UrlFile' Name='TightVNC Web Site.url' Source='TightVNC Web Site.url'
+        <File Id='UrlFile' Name='CisteraVNC Web Site.url' Source='CisteraVNC Web Site.url'
               KeyPath='yes'>
         </File>
       </Component>
@@ -46,6 +46,11 @@
         </File>
       </Component>
       <?endif?>
+      
+      <Component Id='Bonjour' Guid='{????????????}'>
+        <File Id='viewerEXE' Name='tvnviewer.exe' DiskId='1' Source='$(var.BinFolder)\tvnviewer.exe' KeyPath='yes'>
+        </File>
+      </Component>
 
       <Component Id='LicenseFileComponent' Guid='{66D70E32-FE2B-49ca-A64C-3CCDC7A7BF95}'>
         <File Id='LicenseFile' Name='LICENSE.txt' Source='LICENSE.txt'
@@ -96,12 +101,12 @@
         <Shortcut Id="UrlShortcut"
           Target ="[#UrlFile]"
           Directory="ProgramMenuDir"
-          Name="Visit TightVNC Web Site"
+          Name="Visit CisteraVNC Web Site"
           WorkingDirectory='INSTALLDIR'/>
         <Shortcut Id="startmenuViewer"
           Target ="[#viewerEXE]"
           Directory="ProgramMenuDir"
-          Name="TightVNC Viewer"
+          Name="CisteraVNC Viewer"
           WorkingDirectory='INSTALLDIR'
           Icon='viewer.ico'
           IconIndex="0"/>
@@ -114,7 +119,7 @@
         <Shortcut Id="menuTvnServerApp"
                   Target ="[#tvnserverEXE]"
                   Directory="ServerMenuDir"
-                  Name="Run TightVNC Server"
+                  Name="Run CisteraVNC Server"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
@@ -122,7 +127,7 @@
                   Target ="[#tvnserverEXE]"
                   Arguments="-controlapp"
                   Directory="ServerMenuDir"
-                  Name="TightVNC Server - Control Interface"
+                  Name="CisteraVNC Server - Control Interface"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
@@ -130,7 +135,7 @@
                   Target ="[#tvnserverEXE]"
                   Arguments="-configapp"
                   Directory="ServerMenuDir"
-                  Name="TightVNC Server - Offline Configuration"
+                  Name="CisteraVNC Server - Offline Configuration"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
@@ -143,42 +148,42 @@
         <Shortcut Id="menuRegisterTvnService"
                   Target ="[#tvnserverEXE]"
                   Arguments="-install"
-                  Name="Register TightVNC Service"
+                  Name="Register CisteraVNC Service"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
         <Shortcut Id="menuStartTvnService"
                   Target ="[#tvnserverEXE]"
                   Arguments="-start"
-                  Name="Start TightVNC Service"
+                  Name="Start CisteraVNC Service"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
         <Shortcut Id="menuStopTvnService"
                   Target ="[#tvnserverEXE]"
                   Arguments="-stop"
-                  Name="Stop TightVNC Service"
+                  Name="Stop CisteraVNC Service"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
         <Shortcut Id="menuTvnControlService"
                   Target ="[#tvnserverEXE]"
                   Arguments="-controlservice"
-                  Name="TightVNC Service - Control Interface"
+                  Name="CisteraVNC Service - Control Interface"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
         <Shortcut Id="menuTvnOfflineControlService"
                   Target ="[#tvnserverEXE]"
                   Arguments="-configservice"
-                  Name="TightVNC Service - Offline Configuration"
+                  Name="CisteraVNC Service - Offline Configuration"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>
         <Shortcut Id="menuUnregisterTvnService"
                   Target ="[#tvnserverEXE]"
                   Arguments="-remove"
-                  Name="Unregister TightVNC Service"
+                  Name="Unregister CisteraVNC Service"
                   WorkingDirectory='INSTALLDIR'
                   Icon='tvnserver.ico'
                   IconIndex="0"/>

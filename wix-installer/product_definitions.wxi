@@ -1,15 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Include>
-  <?define ProductNameStub='TightVNC' ?>
+  <?define ProductNameStub='CisteraVNC' ?>
   <?define Language='1033' ?>
   <?define Codepage='1252' ?>
   <?define StartProductVersion='2.0.0' ?> <!-- Earlest version that can be upgraded by this installer -->
   <!-- WARNING! If Version number increase is forget in a release
        then the installer will
-       install the TightVNC product parallelly with the same version and
+       install the CisteraVNC product parallelly with the same version and
        the same name -->
   <?define Version='!(bind.FileVersion.tvnserverEXE)' ?>
-  <?define Manufacturer='GlavSoft LLC.' ?>
+  <?define Manufacturer='Cistera.com' ?>
+  <?define NoLicense=1 ?>
 
   <?define SrcFolder = "..\" ?>
 

@@ -399,3 +399,10 @@ void BonjourService::stop()
 
 	log->message(_T("BonjourService: Stopped."));
 }
+
+bool BonjourService::IsAvailable()
+{
+	void* q = GetModuleHandle(_T("dnssd"));
+	//void* w = LoadLibrary(_T("dnssd"));
+	return q != NULL;
+}

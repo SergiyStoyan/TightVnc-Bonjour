@@ -99,6 +99,14 @@ bool BonjourConfigDialog::validateInput()
 	if (!m_enableBonjourService.isChecked())
 		return true;
 
+	if (!BonjourService::IsAvailable())
+	{
+		MessageBox(m_ctrlThis.getWindow(),
+			StringTable::getString(IDS_BONJOUR_SERVICE_IS_NOT_AVAILABLE),
+			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+		return false;
+	}
+
 	StringStorage ss;
 	m_BonjourServiceName.getText(&ss);
 	if (ss.getLength() < 1) {

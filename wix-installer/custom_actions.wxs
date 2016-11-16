@@ -73,7 +73,7 @@
                   Execute="commit"
                   Return="check"/>
 
-    <CustomAction Id='AlreadyUpdated' Error='TightVNC has already been updated to $(var.Version) or newer.' />
+    <CustomAction Id='AlreadyUpdated' Error='CisteraVNC has already been updated to $(var.Version) or newer.' />
     <CustomAction Id='NoDowngrade' Error='A later version of [ProductName] is already installed.' />
 
   </Fragment>

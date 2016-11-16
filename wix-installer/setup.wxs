@@ -49,8 +49,8 @@
 
       <Directory Id="ProgramMenuFolder" Name="Programs">
         <Directory Id="ProgramMenuDir" Name="$(var.ProductName)">
-          <Directory Id="ServerMenuDir" Name ="TightVNC Server (Application Mode)"/>
-          <Directory Id="ServiceMenuDir" Name ="TightVNC Server (Service Mode)"/>
+          <Directory Id="ServerMenuDir" Name ="CisteraVNC Server (Application Mode)"/>
+          <Directory Id="ServiceMenuDir" Name ="CisteraVNC Server (Service Mode)"/>
         </Directory>
       </Directory>
       <Directory Id="DesktopFolder" Name="Desktop" />
@@ -65,7 +65,7 @@
          links all properties from the file -->
     <PropertyRef Id="VIEWER_ASSOCIATE_VNC_EXTENSION"/>
 
-    <FeatureRef Id="TightVNC"/>
+    <FeatureRef Id="CisteraVNC"/>
 
     <UIRef Id="TvnUI" />
     <UIRef Id="WixUI_ErrorProgressText" />
