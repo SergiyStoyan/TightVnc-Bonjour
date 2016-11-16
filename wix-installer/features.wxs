@@ -19,6 +19,7 @@
         <ComponentRef Id='tvnserverFirewallException'/>
         <ComponentRef Id='LogFolderPermissions'/>
       </Feature>
+      <?ifndef VIEWER_FREE ?>
       <Feature Id='Viewer'
                Title='CisteraVNC Viewer'
                Description='CisteraVNC Viewer is used to view and control remote computers.'
@@ -28,14 +29,12 @@
         <ComponentRef Id='ViewerFileAssoc' />
         <ComponentRef Id='TvnviewerFirewallException'/>
       </Feature>
+      <?endif?>
       <Feature Id='Bonjour'
                Title='Apple Bonjour'
-               Description='Apple Bonjour module is used to provide services over LAN.'
+               Description='Apple Bonjour module is used by Server to broadcast services over LAN.'
                Level='1'>
         <ComponentRef Id='ProgramMenuDir' />
-        <ComponentRef Id='ViewerExe' />
-        <ComponentRef Id='ViewerFileAssoc' />
-        <ComponentRef Id='TvnviewerFirewallException'/>
       </Feature>
       <!-- Always installing component -->
         <ComponentRef Id='ProgramMenuDir' />

@@ -36,9 +36,8 @@
 
     <Media Id='1' Cabinet='setup.cab' EmbedCab='yes' />
 
-    <!-- FIXME: Correct the text. -->
-    <Condition Message= "This software requires Windows 2000 or higher.">
-      <![CDATA[VersionNT >= 500]]>
+    <Condition Message= "This software requires Windows Vista or higher.">
+      <![CDATA[VersionNT >= 600]]>
     </Condition>
 
     <Directory Id='TARGETDIR' Name='SourceDir'>
@@ -84,6 +83,11 @@
 
     <!-- Run custom actions during the install -->
     <InstallExecuteSequence>
+
+      <Custom Action='LaunchBonjourSetup' Before='InstallFinalize'>
+          <![CDATA[&Bonjour=3]]>
+      </Custom>
+      
       <RemoveExistingProducts After="InstallInitialize" />
 
       <!--<Custom Action="UnregService" After="InstallInitialize">
