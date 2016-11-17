@@ -89,7 +89,7 @@
       <!--Custom Action='LaunchBonjourSetup' Before='InstallFinalize'>
         <![CDATA[&Bonjour=3]]>
       </Custom-->
-      <Custom Action='LaunchBonjourSetup' After='InstallInitialize'>
+      <Custom Action='LaunchBonjourSetup' Before='InstallFinalize'>
         SETUP_BONJOUR = 1
       </Custom>      
 

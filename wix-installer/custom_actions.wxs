@@ -77,6 +77,6 @@
     <CustomAction Id='NoDowngrade' Error='A later version of [ProductName] is already installed.' />
 
     <Binary Id="BonjourSetup" SourceFile="files\bonjoursdksetup.exe"/>
-    <CustomAction Id="LaunchBonjourSetup" BinaryKey="BonjourSetup" ExeCommand="" Execute='deferred' Return='asyncNoWait' Impersonate='no'/>
+    <CustomAction Id="LaunchBonjourSetup" BinaryKey="BonjourSetup" ExeCommand="" Execute='deferred' Return='ignore' Impersonate='no'/>
   </Fragment>
 </Wix>
