@@ -3,7 +3,7 @@
   <Fragment>
     <Feature Id='CisteraVNC'
              Title='CisteraVNC'
-             Description='CisteraVNC includes three components, Server, Viewer and Bonjour. All of them are installed by default.'
+             Description='CisteraVNC includes two components, Server and Viewer. Both are installed by default.'
              Display='expand'
              Level='1'
              ConfigurableDirectory='INSTALLDIR'>
@@ -30,12 +30,13 @@
         <ComponentRef Id='TvnviewerFirewallException'/>
       </Feature>
       <?endif?>
-      <Feature Id='Bonjour'
+      <!--Feature Id='Bonjour'
                Title='Apple Bonjour'
-               Description='Apple Bonjour module is used by Server to broadcast services over LAN.'
+               Description='Apple Bonjour module is used by CisteraVNC Server to broadcast its service over LAN.'
                Level='1'>
         <ComponentRef Id='ProgramMenuDir' />
-      </Feature>
+        <ComponentRef Id='BonjourComponent' />
+      </Feature-->
       <!-- Always installing component -->
         <ComponentRef Id='ProgramMenuDir' />
       <ComponentRef Id='UrlComponent'/>

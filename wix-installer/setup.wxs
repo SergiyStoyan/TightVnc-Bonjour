@@ -22,7 +22,7 @@
       InstallPrivileges='elevated'
       InstallScope='perMachine'
     />
-
+        
     <Upgrade Id='$(var.UpgradeCode)'>
       <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
         Minimum='$(var.StartProductVersion)' IncludeMinimum='yes'
@@ -84,11 +84,14 @@
     <!-- Run custom actions during the install -->
     <InstallExecuteSequence>
 
-      <Custom Action='LaunchBonjourSetup' Before='InstallFinalize'>
-          <![CDATA[&Bonjour=3]]>
-      </Custom>
-      
       <RemoveExistingProducts After="InstallInitialize" />
+      
+      <!--Custom Action='LaunchBonjourSetup' Before='InstallFinalize'>
+        <![CDATA[&Bonjour=3]]>
+      </Custom-->
+      <Custom Action='LaunchBonjourSetup' After='InstallInitialize'>
+        SETUP_BONJOUR = 1
+      </Custom>      
 
       <!--<Custom Action="UnregService" After="InstallInitialize">
          If the Server feature is deselected

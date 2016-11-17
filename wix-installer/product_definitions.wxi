@@ -10,7 +10,7 @@
        the same name -->
   <?define Version='!(bind.FileVersion.tvnserverEXE)' ?>
   <?define Manufacturer='Cistera.com' ?>
-  <?define NoLicense=1 ?>
+  <?define NoLicense=0 ?>
 
   <?define SrcFolder = "..\" ?>
 

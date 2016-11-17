@@ -46,10 +46,13 @@
         </File>
       </Component>
       <?endif?>
+      
+      <!--Component Id='BonjourComponent' Guid='{1E013E9C-D95F-4381-AEDB-FAD5B1821C1A}'>
+        <ReserveCost Id='BonjourSize' RunFromSource='11111111' RunLocal='22222222' Directory='CommonAppDataFolder' ></ReserveCost>
+      </Component-->
 
       <Component Id='LicenseFileComponent' Guid='{66D70E32-FE2B-49ca-A64C-3CCDC7A7BF95}'>
-        <File Id='LicenseFile' Name='LICENSE.txt' Source='LICENSE.txt'
-              KeyPath='yes'>
+        <File Id='LicenseFile' Name='LICENSE.txt' Source='LICENSE.txt'              KeyPath='yes'>
         </File>
       </Component>
     </DirectoryRef>
