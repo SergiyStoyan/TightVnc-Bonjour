@@ -97,7 +97,7 @@
          If the Server feature is deselected
         <![CDATA[(&Server=2) AND (!Server=3)]]>
       </Custom> -->
-      <Custom Action='SetDataForPasswordsActionSilently'  After="InstallFiles"/>
+      <Custom Action='SetDataForPasswordsActionSilently' After="InstallFiles"/>
       <Custom Action='SetDataForViewOnlyPasswordsActionSilently'  After="InstallFiles"/>
       <Custom Action='SetDataForControlPasswordsActionSilently'  After="InstallFiles"/>
 
@@ -135,11 +135,11 @@
         AND <![CDATA[&Server=3 AND NOT (!Server=3)]]>
         AND NOT REMOVE
       </Custom>
-      <Custom Action="SetPasswordsAction" After="StartService">
+      <!--<Custom Action="SetPasswordsAction" After="StartService">
         REGISTER_AS_SERVICE = 1 AND <![CDATA[IS_SILENT <> 1]]>
         AND <![CDATA[&Server=3 AND NOT (!Server=3)]]>
         AND NOT REMOVE
-      </Custom>
+      </Custom>-->
 
       <Custom Action='AlreadyUpdated' After='FindRelatedProducts'>SELFFOUND</Custom>
       <Custom Action='NoDowngrade' After='FindRelatedProducts'>NEWERFOUND</Custom>

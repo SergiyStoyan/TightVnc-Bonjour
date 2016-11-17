@@ -45,7 +45,7 @@
         <Control Id="BonjourConfLabel" Type="Text" X="15" Y="167" Width="370" Height="15" TabSkip="no" Text="Apple Bonjour Service:">
           <Condition Action="hide"> <![CDATA[&Server<>3]]> </Condition>
         </Control>
-        <Control Id="BonjourSetupCheckBox" Type="CheckBox" X="25" Y="180" Width="370" Height="15" Property="SETUP_BONJOUR" CheckBoxValue="1" Text="Setup Bonjour SDK which is used by CisteraVNC Server to broadcast its service over LAN" >
+        <Control Id="BonjourSetupCheckBox" Type="CheckBox" X="25" Y="180" Width="370" Height="15" Property="SETUP_BONJOUR" CheckBoxValue="1" Text="Install Bonjour SDK which is used by CisteraVNC Server to broadcast its service over LAN" >
           <Condition Action="hide"> <![CDATA[&Server<>3]]> </Condition>
         </Control>
 
