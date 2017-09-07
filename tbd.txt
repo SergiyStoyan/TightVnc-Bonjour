@@ -1,0 +1,38 @@
+- (a) unencrypted RFB, (b) encrypted RFB or (c)* encrypted UDP
+stream*
+
+- the server can once 
+connected via VNC, look to a specific port with UDP on 10.10.1.1 (for
+example).
+
+Once the VNCclient disconnects then all the ports disconnect as well.
+
+
+
+1) As per the diagram I would like the RFB option to remain as is but add encrypted VNC session using the openSSH libraries. 
+2) advertise that service on bonjour as suggested
+
+3) Would like the option of enabling ffmpeg streaming independently of RFB using ffmpeg (or libav) libraries. 
+This is an option that is off by default but can be enabled in the options. This completely bypasses RFB functions.
+This stream becomes available ONLY if the CisteraVNC accepts a valid incoming request. 
+
+Desktop: ffmpeg -f gdigrab -framerate 10 -i desktop -f mpegts udp://10.10.1.1:5920
+Backend: udp://10.10.1.1:5920
+
+
+>ffmpeg -f gdigrab -framerate 10 -i desktop -f mpegts udp://128.0.0.1:5920
+>ffplay udp://128.0.0.1:5920
+
+
+
+
+4) Option to Encrypt this session back the BACKEND 
+5) Advertise this capability onto Boujour with port to use but ONLY if authenticated user. 
+
+
+
+QUESTIONS:
+
+- >This stream becomes available ONLY if the CisteraVNC accepts a valid incoming request. 
+
+What kind of request must be? will the client send a certain command to VNC server with the receiving ip:port to demand screen streaming? To which ip:port to such a request is to be sent? Should the server advertize the screen streaming option by Bonjour?
