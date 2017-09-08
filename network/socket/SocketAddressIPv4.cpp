@@ -150,24 +150,43 @@ void SocketAddressIPv4::toString2(StringStorage* address) const
 
 SocketAddressIPv4 SocketAddressIPv4::resolve(const TCHAR *host, unsigned short m_port)
 {
-  SocketAddressIPv4 resolvedAddress;
+	SocketAddressIPv4 resolvedAddress;
 
-  StringStorage hostStorage(host);
+	StringStorage hostStorage(host);
 
-  {
-    AutoLock l(&s_resolveMutex);
+	{
+		AutoLock l(&s_resolveMutex);
 
-    AnsiStringStorage hostAnsi(&hostStorage);
+		AnsiStringStorage hostAnsi(&hostStorage);
 
-    hostent *hent = gethostbyname(hostAnsi.getString());
-    if (hent == 0) {
-      throw SocketException();
-    }
+		hostent *hent = gethostbyname(hostAnsi.getString());
+		if (hent == 0) {
+			throw SocketException();
+		}
 
-    resolvedAddress.m_addr.S_un.S_addr = ntohl(*(u_long *)hent->h_addr_list[0]);
-  }
+		resolvedAddress.m_addr.S_un.S_addr = ntohl(*(u_long *)hent->h_addr_list[0]);
+	}
 
-  resolvedAddress.m_port = m_port;
+	resolvedAddress.m_port = m_port;
 
-  return resolvedAddress;
+	return resolvedAddress;
+}
+
+SocketAddressIPv4 SocketAddressIPv4::resolve(u_long ip, unsigned short m_port)
+{
+	SocketAddressIPv4 resolvedAddress;
+
+	{
+		AutoLock l(&s_resolveMutex);
+
+		if (ip == 0) {
+			throw SocketException();
+		}
+
+		resolvedAddress.m_addr.S_un.S_addr = ntohl(ip);
+	}
+
+	resolvedAddress.m_port = m_port;
+
+	return resolvedAddress;
 }

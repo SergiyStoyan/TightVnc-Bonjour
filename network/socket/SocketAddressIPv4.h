@@ -54,6 +54,7 @@ public:
   void toString2(StringStorage *address) const;
 
   static SocketAddressIPv4 resolve(const TCHAR *host, unsigned short port) throw(SocketException);
+  static SocketAddressIPv4 resolve(u_long ip, unsigned short port) throw(SocketException);
 
 protected:
   WsaStartup m_wsaStartup;
