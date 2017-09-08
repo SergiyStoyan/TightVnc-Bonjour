@@ -77,8 +77,10 @@ void RfbClient::disconnect()
   try { m_socket->shutdown(SD_BOTH); } catch (...) { }
   try { m_socket->close(); } catch (...) { }
   m_log->message(_T("Connection has been closed"));
-
-  ScreenStreamingService::Stop(ScreenStreamingService::GetIpString(m_socket));
+  
+  StringStorage ss;
+  ScreenStreamingService::GetIpString(m_socket, &ss);
+  ScreenStreamingService::Stop(ss.getString());
 }
 
 unsigned int RfbClient::getId() const
@@ -267,7 +269,9 @@ void RfbClient::execute()
     m_log->info(_T("Entering normal phase of the RFB protocol"));
     dispatcher.resume();
 
-	ScreenStreamingService::Start(ScreenStreamingService::GetIpString(m_socket));
+	StringStorage ss;
+	ScreenStreamingService::GetIpString(m_socket, &ss);
+	ScreenStreamingService::Start(ss.getString());
 
     connClosingEvent.waitForEvent();
   } catch (Exception &e) {

@@ -51,7 +51,7 @@ public:
   void toString(StringStorage *address) const;
 
   // Converts socket address including port to it's string value (ip address and port as string).
-  const TCHAR* toString2();
+  void toString2(StringStorage *address) const;
 
   static SocketAddressIPv4 resolve(const TCHAR *host, unsigned short port) throw(SocketException);
 

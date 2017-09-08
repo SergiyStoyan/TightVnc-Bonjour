@@ -43,7 +43,7 @@ public:
 	bool IsRunning();
 	static void StopAll();
 
-	static const TCHAR* GetIpString(SocketIPv4* s);
+	static void GetIpString(SocketIPv4* s, StringStorage* ip);
 
 private:
 	ScreenStreamingService(const TCHAR* host, USHORT port);

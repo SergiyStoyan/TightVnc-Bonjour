@@ -138,17 +138,14 @@ void SocketAddressIPv4::toString(StringStorage *address) const
 	address->format(_T("%d.%d.%d.%d"), b1, b2, b3, b4);
 }
 
-const TCHAR* SocketAddressIPv4::toString2()
+void SocketAddressIPv4::toString2(StringStorage* address) const
 {
-	StringStorage address;
 	u_char b1 = m_addr.S_un.S_un_b.s_b4;
 	u_char b2 = m_addr.S_un.S_un_b.s_b3;
 	u_char b3 = m_addr.S_un.S_un_b.s_b2;
 	u_char b4 = m_addr.S_un.S_un_b.s_b1;
 
-	address.format(_T("%d.%d.%d.%d:%d"), b1, b2, b3, b4, m_port);
-
-	return address.getString();
+	address->format(_T("%d.%d.%d.%d:%d"), b1, b2, b3, b4, m_port);
 }
 
 SocketAddressIPv4 SocketAddressIPv4::resolve(const TCHAR *host, unsigned short m_port)

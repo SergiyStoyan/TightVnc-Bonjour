@@ -43,8 +43,9 @@ void ScreenStreamingService::Initialize(LogWriter *log, TvnServer *tvnServer, Co
 
 	tvnServer->addListener(&screenStreamingServiceConfigReloadListener);
 	configurator->addListener(&screenStreamingServiceConfigReloadListener);
-	initialized = true;
 	screenStreamingServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());
+
+	initialized = true;
 }
 
 ScreenStreamingService* ScreenStreamingService::Get(const TCHAR* host)
@@ -79,11 +80,14 @@ ScreenStreamingService* ScreenStreamingService::Start(const TCHAR* host)
 		return NULL;
 	}
 
-	AutoLock l(&lock);
-
 	//ServerConfig *sc = Configurator::getInstance()->getServerConfig();
 	if (!ScreenStreamingService::serverConfig->isScreenStreamingEnabled())
 		return NULL;
+
+	if(ScreenStreamingService::serverConfig->getScreenStreamingDelayMss() > 0)
+		Sleep(ScreenStreamingService::serverConfig->getScreenStreamingDelayMss());
+
+	AutoLock l(&lock);
 
 	ScreenStreamingService* sss = ScreenStreamingService::Get(host);
 	if (sss)
@@ -111,7 +115,8 @@ ScreenStreamingService* ScreenStreamingService::Start(const TCHAR* host)
 			//	log->error(_T("BonjourService: Could not DNSServiceRegister. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
 			//	return;
 			//}
-	log->message(_T("ScreenStreamingService: Started for: %s"), sss->address.toString2());
+	sss->address.toString2(&ss);
+	log->message(_T("ScreenStreamingService: Started for: %s"), ss.getString());
 	screenStreamingServiceList.push_back(sss);
 	return sss;
 }
@@ -121,7 +126,7 @@ void ScreenStreamingService::Stop(const TCHAR* host)
 	ScreenStreamingService* sss = ScreenStreamingService::Get(host);
 	if (!sss)
 	{
-		log->interror(_T("ScreenStreamingService: No service exists for address: %s"), sss->address.toString2());
+		log->interror(_T("ScreenStreamingService: No service exists for address: %s"), host);
 		return;
 	}
 	sss->Stop();
@@ -140,7 +145,9 @@ void ScreenStreamingService::Stop()
 
 	screenStreamingServiceList.remove(this);
 
-	log->message(_T("ScreenStreamingService: Stopped for address: %s", address.toString2()));
+	StringStorage ss;
+	address.toString2(&ss);
+	log->message(_T("ScreenStreamingService: Stopped for address: %s"), ss.getString());
 }
 
 void ScreenStreamingService::StopAll()
@@ -155,11 +162,10 @@ void ScreenStreamingService::StopAll()
 	log->message(_T("ScreenStreamingService: Stopped all."));
 }
 
-const TCHAR* ScreenStreamingService::GetIpString(SocketIPv4* s)
+void ScreenStreamingService::GetIpString(SocketIPv4* s, StringStorage* ip)
 {
 	SocketAddressIPv4 sa;
 	s->getPeerAddr(&sa);
 	StringStorage ss;
 	sa.toString(&ss);
-	return ss.getString();
 }
