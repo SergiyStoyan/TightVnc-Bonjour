@@ -84,7 +84,7 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 	if (!ScreenStreamingService::serverConfig->isScreenStreamingEnabled())
 		return NULL;
 
-	if(ScreenStreamingService::serverConfig->getScreenStreamingDelayMss() > 0)
+	if (ScreenStreamingService::serverConfig->getScreenStreamingDelayMss() > 0)
 		Sleep(ScreenStreamingService::serverConfig->getScreenStreamingDelayMss());
 
 	AutoLock l(&lock);
@@ -94,27 +94,31 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 		sss->Stop();
 
 	sss = new ScreenStreamingService(ip, ScreenStreamingService::serverConfig->getScreenStreamingDestinationPort());
-	STARTUPINFO sti;
-	//getStartupInfo(&sti);
-	StringStorage ss;
-	sss->address.toString(&ss);
-	StringStorage cl;
-	cl.format(_T("ffmpeg -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString());
-		/*	if (CreateProcess(
-				NULL, (LPTSTR)commandLine.getString(),
-				NULL, NULL, m_handlesIsInherited, NULL, NULL, NULL,
-				&sti, sss->lpProcessInformation)
-				== 0
-				)
-			{
-				throw SystemException();
-			}*/
+	try 
+	{
+		sss->process = new Process(_T("ffmpeg.exe"), _T("-f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
+		sss->process->start();		
+		//STARTUPINFO sti;
+		//getStartupInfo(&sti);
+		//StringStorage ss;
+		//sss->address.toString2(&ss);
+		//StringStorage command_line(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
 
-			//if (err != kDNSServiceErr_NoError)
-			//{
-			//	log->error(_T("BonjourService: Could not DNSServiceRegister. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
-			//	return;
-			//}
+	//if (!CreateProcess(NULL, (LPTSTR)cl.getString(), NULL, NULL, m_handlesIsInherited, NULL, NULL, NULL, &sti, sss->lpProcessInformation))
+	//{
+	//	//GetLastError()
+	//	//log->error(_T("ScreenStreamingService: Could not CreateProcess. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
+	//	//return;
+	//	throw SystemException();
+	//}
+	}
+	catch (SystemException &e) 
+	{
+		//log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), command_line.getString(), e.getMessage());
+		log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
+		return NULL;
+	}
+	StringStorage ss;
 	sss->address.toString2(&ss);
 	log->message(_T("ScreenStreamingService: Started for: %s"), ss.getString());
 	screenStreamingServiceList.push_back(sss);
@@ -139,13 +143,15 @@ void ScreenStreamingService::Stop()
 {
 	AutoLock l(&lock);
 
-
-
-
-
-
-
-
+	try
+	{
+		process->kill();
+	}
+	catch (SystemException &e)
+	{
+		log->error(_T("ScreenStreamingService: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
+		//return;//it is expected to be removed from the list. Otherwise it will be duplicated.
+	}
 	screenStreamingServiceList.remove(this);
 
 	StringStorage ss;
@@ -161,7 +167,6 @@ void ScreenStreamingService::StopAll()
 		ScreenStreamingService* sss = (*i);
 		sss->Stop();
 	}
-
 	log->message(_T("ScreenStreamingService: Stopped all."));
 }
 

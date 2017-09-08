@@ -54,11 +54,15 @@ public:
    */
   void setFilename(const TCHAR *path);
 
+  const TCHAR* Process::getFilename();
+
   /**
    * Sets arguments for process.
    * @param args.
    */
   void setArguments(const TCHAR *args);
+
+  const TCHAR* getArguments();
 
   // Sets standard in/out/error handles for the child process.
   void setStandardIoHandles(HANDLE stdIn, HANDLE stdOut, HANDLE stdErr);

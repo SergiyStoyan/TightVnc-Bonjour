@@ -10,6 +10,7 @@
 
 #include "server-config-lib/Configurator.h"
 #include "TvnServer.h"
+#include "win-system/Process.h"
 
 /*
 WISHES:
@@ -48,7 +49,8 @@ public:
 private:
 	ScreenStreamingService(ULONG ip, USHORT port);
 
-	LPPROCESS_INFORMATION lpProcessInformation;
+	//LPPROCESS_INFORMATION lpProcessInformation;
+	Process* process;
 	SocketAddressIPv4 address; 
 
 	static LocalMutex lock;
@@ -58,6 +60,5 @@ private:
 	static LogWriter* log;
 	static ServerConfig* serverConfig;
 };
-
 
 #endif

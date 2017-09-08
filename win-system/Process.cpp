@@ -54,9 +54,19 @@ void Process::setFilename(const TCHAR *path)
   m_path.setString(path);
 }
 
+const TCHAR* Process::getFilename()
+{
+	return m_path.getString();
+}
+
 void Process::setArguments(const TCHAR *args)
 {
   m_args.setString(args);
+}
+
+const TCHAR* Process::getArguments()
+{
+	return m_args.getString();
 }
 
 void Process::setStandardIoHandles(HANDLE stdIn, HANDLE stdOut, HANDLE stdErr)
