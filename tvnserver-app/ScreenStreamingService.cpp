@@ -91,7 +91,10 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 
 	ScreenStreamingService* sss = ScreenStreamingService::Get(ip);
 	if (sss)
+	{
 		sss->Stop();
+		screenStreamingServiceList.remove(sss);
+	}
 
 	sss = new ScreenStreamingService(ip, ScreenStreamingService::serverConfig->getScreenStreamingDestinationPort());
 	try 
