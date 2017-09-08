@@ -453,7 +453,7 @@ public:
 	bool m_enableScreenStreaming;
 	uint16_t m_ScreenStreamingDestinationPort;
 	uint16_t m_ScreenStreamingFramerate;
-	uint16_t m_ScreenStreamingMssDelay;
+	uint16_t m_ScreenStreamingDelayMss;
 public:
 
 	bool isScreenStreamingEnabled();
@@ -465,8 +465,8 @@ public:
 	uint16_t getScreenStreamingFramerate();
 	void setScreenStreamingFramerate(uint16_t framerate);
 
-	uint16_t getScreenStreamingMssDelay();
-	void setScreenStreamingMssDelay(uint16_t mss_delay);
+	uint16_t getScreenStreamingDelayMss();
+	void setScreenStreamingDelayMss(uint16_t mss_delay);
 };
 
 #endif

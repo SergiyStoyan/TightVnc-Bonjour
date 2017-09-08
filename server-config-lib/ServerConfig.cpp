@@ -56,6 +56,11 @@ ServerConfig::ServerConfig()
   m_BonjourServiceName = StringStorage(_T("-UNKNOWN-"));
   m_BonjourServicePort = 5353;
   m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
+
+  m_enableScreenStreaming = true;
+  m_ScreenStreamingDestinationPort = 5920;
+  m_ScreenStreamingFramerate = 10;
+  m_ScreenStreamingDelayMss = 500;
 }
 
 ServerConfig::~ServerConfig()
@@ -851,14 +856,14 @@ void ServerConfig::setScreenStreamingFramerate(uint16_t screenStreamingFramerate
 	m_ScreenStreamingFramerate = screenStreamingFramerate;
 }
 
-uint16_t ServerConfig::getScreenStreamingMssDelay()
+uint16_t ServerConfig::getScreenStreamingDelayMss()
 {
 	AutoLock lock(&m_objectCS);
-	return m_ScreenStreamingMssDelay;
+	return m_ScreenStreamingDelayMss;
 }
 
-void ServerConfig::setScreenStreamingMssDelay(uint16_t screenStreamingMssDelay)
+void ServerConfig::setScreenStreamingDelayMss(uint16_t screenStreamingMssDelay)
 {
 	AutoLock lock(&m_objectCS);
-	m_ScreenStreamingMssDelay = screenStreamingMssDelay;
+	m_ScreenStreamingDelayMss = screenStreamingMssDelay;
 }
