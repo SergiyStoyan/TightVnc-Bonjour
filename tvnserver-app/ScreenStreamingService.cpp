@@ -90,41 +90,41 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 	AutoLock l(&lock);
 
 	ScreenStreamingService* sss = ScreenStreamingService::Get(ip);
-	if (sss)
+	while (sss)
 	{
 		sss->Stop();
 		screenStreamingServiceList.remove(sss);
+		sss = ScreenStreamingService::Get(ip);
 	}
 
 	sss = new ScreenStreamingService(ip, ScreenStreamingService::serverConfig->getScreenStreamingDestinationPort());
+	StringStorage command_line;
 	try 
 	{
-		sss->process = new Process(_T("ffmpeg.exe"), _T("-f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
-		sss->process->start();		
-		//STARTUPINFO sti;
-		//getStartupInfo(&sti);
-		//StringStorage ss;
-		//sss->address.toString2(&ss);
-		//StringStorage command_line(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
+		//sss->process = new Process(_T("ffmpeg.exe"), _T("-f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
+		//sss->process->start();	
 
-	//if (!CreateProcess(NULL, (LPTSTR)cl.getString(), NULL, NULL, m_handlesIsInherited, NULL, NULL, NULL, &sti, sss->lpProcessInformation))
-	//{
-	//	//GetLastError()
-	//	//log->error(_T("ScreenStreamingService: Could not CreateProcess. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
-	//	//return;
-	//	throw SystemException();
-	//}
+		STARTUPINFO sti;
+		StringStorage ss;
+		sss->address.toString2(&ss);
+		command_line.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
+		if (!CreateProcess(NULL, (LPTSTR)command_line.getString(), NULL, NULL, NULL, NULL, NULL, NULL, &sti, sss->lpProcessInformation))
+			throw SystemException();
 	}
 	catch (SystemException &e) 
 	{
-		//log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), command_line.getString(), e.getMessage());
-		log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
+		log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), command_line.getString(), e.getMessage());
+		//log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
 		return NULL;
 	}
+
+	if (ScreenStreamingService::Get(sss->address.getSockAddr().sin_addr.S_un.S_addr))
+		throw Exception(_T("ScreenStreamingService: while adding a stream: a stream to this destination aready exists: %s", sss->address.toString()));
+	screenStreamingServiceList.push_back(sss);
+
 	StringStorage ss;
 	sss->address.toString2(&ss);
 	log->message(_T("ScreenStreamingService: Started for: %s"), ss.getString());
-	screenStreamingServiceList.push_back(sss);
 	return sss;
 }
 
@@ -148,11 +148,16 @@ void ScreenStreamingService::Stop()
 
 	try
 	{
-		process->kill();
+		//process->kill();
+		if (!TerminateProcess(lpProcessInformation->hProcess, 0))
+			throw SystemException();
 	}
 	catch (SystemException &e)
 	{
-		log->error(_T("ScreenStreamingService: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
+		//log->error(_T("ScreenStreamingService: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
+		StringStorage ss;
+		address.toString2(&ss);
+		log->error(_T("ScreenStreamingService: Could not terminate process for %s\r\nError: %s"), ss.getString(), e.getMessage());
 		//return;//it is expected to be removed from the list. Otherwise it will be duplicated.
 	}
 	screenStreamingServiceList.remove(this);
