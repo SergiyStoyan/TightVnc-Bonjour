@@ -78,9 +78,7 @@ void RfbClient::disconnect()
   try { m_socket->close(); } catch (...) { }
   m_log->message(_T("Connection has been closed"));
 
-  SocketAddressIPv4 sa;
-  m_socket->getPeerAddr(&sa);
-  ScreenStreamingService::Start(*(sa.getSockAddr().sin_addr.S_un.S_un_b));
+  ScreenStreamingService::Stop(ScreenStreamingService::GetIpString(m_socket));
 }
 
 unsigned int RfbClient::getId() const
@@ -269,9 +267,7 @@ void RfbClient::execute()
     m_log->info(_T("Entering normal phase of the RFB protocol"));
     dispatcher.resume();
 
-	SocketAddressIPv4 sa;
-	m_socket->getPeerAddr(&sa);
-	ScreenStreamingService::Start(sa);
+	ScreenStreamingService::Start(ScreenStreamingService::GetIpString(m_socket));
 
     connClosingEvent.waitForEvent();
   } catch (Exception &e) {

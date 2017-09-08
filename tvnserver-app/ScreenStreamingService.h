@@ -36,17 +36,17 @@ class ScreenStreamingService
 public:
 	static void Initialize(LogWriter* log, TvnServer* tvnServer, Configurator* configurator);
 
-	static ScreenStreamingService* Start(TCHAR* host);
-	static ScreenStreamingService* Get(TCHAR* host);
-	static void Stop(TCHAR* host);
+	static ScreenStreamingService* Start(const TCHAR* host);
+	static ScreenStreamingService* Get(const TCHAR* host);
+	static void Stop(const TCHAR* host);
 	void Stop();
 	bool IsRunning();
 	static void StopAll();
 
-	static SocketAddressIPv4 getAddress(SocketIPv4* s);
+	static const TCHAR* GetIpString(SocketIPv4* s);
 
 private:
-	ScreenStreamingService(TCHAR* host, USHORT port);
+	ScreenStreamingService(const TCHAR* host, USHORT port);
 
 	LPPROCESS_INFORMATION lpProcessInformation;
 	SocketAddressIPv4 address; 

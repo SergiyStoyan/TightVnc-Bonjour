@@ -47,7 +47,7 @@ void ScreenStreamingService::Initialize(LogWriter *log, TvnServer *tvnServer, Co
 	screenStreamingServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());
 }
 
-ScreenStreamingService* ScreenStreamingService::Get(TCHAR* host)
+ScreenStreamingService* ScreenStreamingService::Get(const TCHAR* host)
 {
 	ULONG ip = SocketAddressIPv4::resolve(host, 0).getSockAddr().sin_addr.S_un.S_addr;
 	//ULONG ip = address.getSockAddr().sin_addr.S_un.S_addr;
@@ -66,12 +66,12 @@ ScreenStreamingService* ScreenStreamingService::Get(TCHAR* host)
 	return NULL;
 }
 
-ScreenStreamingService::ScreenStreamingService(TCHAR* host, USHORT port)
+ScreenStreamingService::ScreenStreamingService(const TCHAR* host, USHORT port)
 { 
 	this->address = SocketAddressIPv4(host, port);
 }
 
-ScreenStreamingService* ScreenStreamingService::Start(TCHAR* host)
+ScreenStreamingService* ScreenStreamingService::Start(const TCHAR* host)
 {
 	if (!initialized)
 	{
@@ -111,21 +111,17 @@ ScreenStreamingService* ScreenStreamingService::Start(TCHAR* host)
 			//	log->error(_T("BonjourService: Could not DNSServiceRegister. Error code: %d. Service name: %s. Port: %d. Service type: %s"), err, service_name.getString(), port, service_type.getString());
 			//	return;
 			//}
-		StringStorage ss;
-	sss->address.toString(&ss);
-	log->message(_T("ScreenStreamingService: Started for: %s"), ss.getString());
+	log->message(_T("ScreenStreamingService: Started for: %s"), sss->address.toString2());
 	screenStreamingServiceList.push_back(sss);
 	return sss;
 }
 
-void ScreenStreamingService::Stop(TCHAR* host)
+void ScreenStreamingService::Stop(const TCHAR* host)
 {
 	ScreenStreamingService* sss = ScreenStreamingService::Get(host);
 	if (!sss)
 	{
-		StringStorage ss;
-		sss->address.toString(&ss);
-		log->interror(_T("ScreenStreamingService: No service exists for address: %s"), ss.getString());
+		log->interror(_T("ScreenStreamingService: No service exists for address: %s"), sss->address.toString2());
 		return;
 	}
 	sss->Stop();
@@ -144,9 +140,7 @@ void ScreenStreamingService::Stop()
 
 	screenStreamingServiceList.remove(this);
 
-	StringStorage ss;
-	address.toString(&ss);
-	log->message(_T("ScreenStreamingService: Stopped for address: %s", ss.getString()));
+	log->message(_T("ScreenStreamingService: Stopped for address: %s", address.toString2()));
 }
 
 void ScreenStreamingService::StopAll()
@@ -161,9 +155,11 @@ void ScreenStreamingService::StopAll()
 	log->message(_T("ScreenStreamingService: Stopped all."));
 }
 
-SocketAddressIPv4 getAddress(SocketIPv4* s)
+const TCHAR* ScreenStreamingService::GetIpString(SocketIPv4* s)
 {
 	SocketAddressIPv4 sa;
 	s->getPeerAddr(&sa);
-	sa.getSockAddr().sin_addr.S_un.S_addr;
+	StringStorage ss;
+	sa.toString(&ss);
+	return ss.getString();
 }
