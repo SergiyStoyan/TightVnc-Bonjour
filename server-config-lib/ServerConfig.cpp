@@ -814,3 +814,51 @@ bool ServerConfig::isWindowsUserAsBonjourServiceNameUsed()
 	AutoLock lock(&m_objectCS);
 	return m_useWindowsUserAsBonjourServiceName;
 }
+
+bool ServerConfig::isScreenStreamingEnabled()
+{
+	AutoLock lock(&m_objectCS);
+	return m_enableScreenStreaming;
+}
+
+void ServerConfig::enableScreenStreaming(bool enabled)
+{
+	AutoLock lock(&m_objectCS);
+	m_enableScreenStreaming = enabled;
+}
+
+uint16_t ServerConfig::getScreenStreamingDestinationPort()
+{
+	AutoLock lock(&m_objectCS);
+	return m_ScreenStreamingDestinationPort;
+}
+
+void ServerConfig::setScreenStreamingDestinationPort(uint16_t screenStreamingDestinationPort)
+{
+	AutoLock lock(&m_objectCS);
+	m_ScreenStreamingDestinationPort = screenStreamingDestinationPort;
+}
+
+uint16_t ServerConfig::getScreenStreamingFramerate()
+{
+	AutoLock lock(&m_objectCS);
+	return m_ScreenStreamingFramerate;
+}
+
+void ServerConfig::setScreenStreamingFramerate(uint16_t screenStreamingFramerate)
+{
+	AutoLock lock(&m_objectCS);
+	m_ScreenStreamingFramerate = screenStreamingFramerate;
+}
+
+uint16_t ServerConfig::getScreenStreamingMssDelay()
+{
+	AutoLock lock(&m_objectCS);
+	return m_ScreenStreamingMssDelay;
+}
+
+void ServerConfig::setScreenStreamingMssDelay(uint16_t screenStreamingMssDelay)
+{
+	AutoLock lock(&m_objectCS);
+	m_ScreenStreamingMssDelay = screenStreamingMssDelay;
+}

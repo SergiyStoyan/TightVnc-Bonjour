@@ -16,9 +16,16 @@ WISHES:
 
 */
 
+/*
+This service creates a video stream to the client INDEPENDENTLY on RFB connection.
+*/
+
+using namespace std;
 
 class ScreenStreamingService
 {
+	typedef list<ScreenStreamingService *> ScreenStreamingServiceList;
+
 	class ScreenStreamingServiceConfigReloadListener : public ConfigReloadListener, public TvnServerListener
 	{
 	public:
@@ -28,18 +35,29 @@ class ScreenStreamingService
 
 public:
 	static void Initialize(LogWriter* log, TvnServer* tvnServer, Configurator* configurator);
-	static bool IsAvailable();
+
+	static ScreenStreamingService* Start(TCHAR* host);
+	static ScreenStreamingService* Get(TCHAR* host);
+	static void Stop(TCHAR* host);
+	void Stop();
+	bool IsRunning();
+	static void StopAll();
+
+	static SocketAddressIPv4 getAddress(SocketIPv4* s);
 
 private:
-	static void start();
-	static void stop();
+	ScreenStreamingService(TCHAR* host, USHORT port);
+
+	LPPROCESS_INFORMATION lpProcessInformation;
+	SocketAddressIPv4 address; 
+
+	static LocalMutex lock;
+	static ScreenStreamingServiceList screenStreamingServiceList;
 	static ScreenStreamingServiceConfigReloadListener screenStreamingServiceConfigReloadListener;
 	static bool initialized;
-	static bool is_started();
-	static StringStorage service_name;
-	static uint16_t port;
-	static StringStorage service_type;
 	static LogWriter* log;
+	static ServerConfig* serverConfig;
 };
+
 
 #endif

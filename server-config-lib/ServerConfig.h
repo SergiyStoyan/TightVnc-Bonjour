@@ -432,20 +432,41 @@ private:
   StringStorage m_BonjourServiceType;
   bool m_useWindowsUserAsBonjourServiceName;
 public:
-  bool isBonjourServiceEnabled();
-  void enableBonjourService(bool enabled);
+	bool isBonjourServiceEnabled();
+	void enableBonjourService(bool enabled);
 
-  void getBonjourServiceName(StringStorage *bonjourServiceName);
-  void setBonjourServiceName(const TCHAR *bonjourServiceName);
+	void getBonjourServiceName(StringStorage *bonjourServiceName);
+	void setBonjourServiceName(const TCHAR *bonjourServiceName);
 
-  uint16_t getBonjourServicePort();
-  void setBonjourServicePort(uint16_t bonjourServicePort);
+	uint16_t getBonjourServicePort();
+	void setBonjourServicePort(uint16_t bonjourServicePort);
 
-  void getBonjourServiceType(StringStorage *bonjourServiceType);
-  void setBonjourServiceType(const TCHAR *bonjourServiceType);
+	void getBonjourServiceType(StringStorage *bonjourServiceType);
+	void setBonjourServiceType(const TCHAR *bonjourServiceType);
 
-  bool isWindowsUserAsBonjourServiceNameUsed();
-  void useWindowsUserAsBonjourServiceName(bool enabled);
+	bool isWindowsUserAsBonjourServiceNameUsed();
+	void useWindowsUserAsBonjourServiceName(bool enabled);
+
+	//
+	// Configurator from Screen Streaming tab
+	//
+	bool m_enableScreenStreaming;
+	uint16_t m_ScreenStreamingDestinationPort;
+	uint16_t m_ScreenStreamingFramerate;
+	uint16_t m_ScreenStreamingMssDelay;
+public:
+
+	bool isScreenStreamingEnabled();
+	void enableScreenStreaming(bool enabled);
+
+	uint16_t getScreenStreamingDestinationPort();
+	void setScreenStreamingDestinationPort(uint16_t bonjourServicePort);
+
+	uint16_t getScreenStreamingFramerate();
+	void setScreenStreamingFramerate(uint16_t framerate);
+
+	uint16_t getScreenStreamingMssDelay();
+	void setScreenStreamingMssDelay(uint16_t mss_delay);
 };
 
 #endif
