@@ -141,19 +141,23 @@ void ScreenStreamingService::Stop()
 {
 	AutoLock l(&lock);
 
-	try
+	DWORD ec;
+	if (GetExitCodeProcess(processInformation.hProcess, &ec) && (ec == STILL_ACTIVE))
 	{
-		//process->kill();
-		if (!TerminateProcess(processInformation.hProcess, 0))
-			throw SystemException();
+		try
+		{
+			//process->kill();
+			if (!TerminateProcess(processInformation.hProcess, 0))
+				throw SystemException();
+		}
+		catch (SystemException &e)
+		{
+			//log->error(_T("ScreenStreamingService: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
+			log->error(_T("ScreenStreamingService: Could not terminate process for %s\r\nError: %s"), commandLine.getString(), e.getMessage());
+			//!!!return;//!!! it is expected to be removed from the list. Otherwise it may duplicate in the list.
+		}
 	}
-	catch (SystemException &e)
-	{
-		//log->error(_T("ScreenStreamingService: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
-		log->error(_T("ScreenStreamingService: CHECK PROCESSES FOR ZOMBIE! Could not terminate process for %s\r\nError: %s"), commandLine.getString(), e.getMessage());
-		//return;//it is expected to be removed from the list. Otherwise it may duplicate in the list.
-	}
-	DWORD state = WaitForSingleObject(processInformation.hProcess, 100);
+	DWORD state = WaitForSingleObject(processInformation.hProcess, 1000);
 	if (state != WAIT_OBJECT_0)
 		log->error(_T("ScreenStreamingService: ZOMBIE PROCESSES RUNNING: %s"), commandLine.getString());
 	/*DWORD ec;
@@ -170,7 +174,7 @@ void ScreenStreamingService::Stop()
 	address.toString2(&ss);
 	log->message(_T("ScreenStreamingService: Stopped for address: %s"), ss.getString());
 
-	delete(this);
+	delete(this);//!!!ATTENTION: potential corruption of memory if this object is accessed after this line!!!
 }
 
 void ScreenStreamingService::StopAll()
