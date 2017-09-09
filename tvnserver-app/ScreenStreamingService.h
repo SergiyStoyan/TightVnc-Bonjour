@@ -37,23 +37,22 @@ class ScreenStreamingService
 public:
 	static void Initialize(LogWriter* log, TvnServer* tvnServer, Configurator* configurator);
 
-	static ScreenStreamingService* Start(ULONG ip);
-	static ScreenStreamingService* Get(ULONG ip);
+	static void Start(ULONG ip);
 	static void Stop(ULONG ip);
-	void Stop();
-	bool IsRunning();
 	static void StopAll();
 
 	static ULONG GetIp(SocketIPv4* s);
 
 private:
 	ScreenStreamingService(ULONG ip, USHORT port);
+	void destroy();
 
 	StringStorage commandLine;
 	PROCESS_INFORMATION processInformation;
 	//Process* process;
 	SocketAddressIPv4 address; 
 
+	static ScreenStreamingService* get(ULONG ip);
 	static LocalMutex lock;
 	static ScreenStreamingServiceList screenStreamingServiceList;
 	static ScreenStreamingServiceConfigReloadListener screenStreamingServiceConfigReloadListener;

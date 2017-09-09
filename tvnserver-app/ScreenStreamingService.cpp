@@ -8,11 +8,6 @@
 #include "ScreenStreamingService.h"
 #include <tchar.h>
 
-bool ScreenStreamingService::IsRunning()
-{
-	return true;
-}
-
 void ScreenStreamingService::ScreenStreamingServiceConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
 {
 	ScreenStreamingService::serverConfig = serverConfig;
@@ -48,7 +43,7 @@ void ScreenStreamingService::Initialize(LogWriter *log, TvnServer *tvnServer, Co
 	initialized = true;
 }
 
-ScreenStreamingService* ScreenStreamingService::Get(ULONG ip)
+ScreenStreamingService* ScreenStreamingService::get(ULONG ip)
 {
 	//ULONG ip = SocketAddressIPv4::resolve(host, 0).getSockAddr().sin_addr.S_un.S_addr;
 	//ULONG ip = address.getSockAddr().sin_addr.S_un.S_addr;
@@ -72,17 +67,17 @@ ScreenStreamingService::ScreenStreamingService(ULONG ip, USHORT port)
 	this->address = SocketAddressIPv4::resolve(ip, port);
 }
 
-ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
+void ScreenStreamingService::Start(ULONG ip)
 {
 	if (!initialized)
 	{
 		log->interror(_T("ScreenStreamingService: Is not initialized"));
-		return NULL;
+		return;
 	}
 
 	//ServerConfig *sc = Configurator::getInstance()->getServerConfig();
 	if (!ScreenStreamingService::serverConfig->isScreenStreamingEnabled())
-		return NULL;
+		return;
 
 	if (ScreenStreamingService::serverConfig->getScreenStreamingDelayMss() > 0)
 		Sleep(ScreenStreamingService::serverConfig->getScreenStreamingDelayMss());
@@ -90,8 +85,8 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 	AutoLock l(&lock);
 
 	ScreenStreamingService* sss;
-	for (sss = ScreenStreamingService::Get(ip); sss; sss = ScreenStreamingService::Get(ip))
-		sss->Stop();
+	for (sss = ScreenStreamingService::get(ip); sss; sss = ScreenStreamingService::get(ip))
+		sss->destroy();
 
 	sss = new ScreenStreamingService(ip, ScreenStreamingService::serverConfig->getScreenStreamingDestinationPort());
 	try 
@@ -102,7 +97,7 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 		STARTUPINFO sti = { sizeof(STARTUPINFO) };
 		StringStorage ss;
 		sss->address.toString2(&ss);
-		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
+		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s 2>&1>_1.txt", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
 		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, TRUE, 0, NULL, NULL, &sti, &sss->processInformation))
 			throw SystemException();
 	}
@@ -110,22 +105,21 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 	{
 		log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), sss->commandLine.getString(), e.getMessage());
 		//log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
-		return NULL;
+		return;
 	}
 
-	if (ScreenStreamingService::Get(sss->address.getSockAddr().sin_addr.S_un.S_addr))
+	if (ScreenStreamingService::get(sss->address.getSockAddr().sin_addr.S_un.S_addr))
 		throw Exception(_T("ScreenStreamingService: while adding a stream: a stream to this destination aready exists: %s", sss->address.toString()));
 	screenStreamingServiceList.push_back(sss);
 
 	StringStorage ss;
 	sss->address.toString2(&ss);
 	log->message(_T("ScreenStreamingService: Started for: %s"), ss.getString());
-	return sss;
 }
 
 void ScreenStreamingService::Stop(ULONG ip)
 {
-	ScreenStreamingService* sss = ScreenStreamingService::Get(ip);
+	ScreenStreamingService* sss = ScreenStreamingService::get(ip);
 	if (!sss)
 	{
 		SocketAddressIPv4 s = SocketAddressIPv4::resolve(ip, 0);
@@ -134,10 +128,10 @@ void ScreenStreamingService::Stop(ULONG ip)
 		log->interror(_T("ScreenStreamingService: No service exists for address: %s"), ss.getString());
 		return;
 	}
-	sss->Stop();
+	sss->destroy();
 }
 
-void ScreenStreamingService::Stop()
+void ScreenStreamingService::destroy()
 {
 	AutoLock l(&lock);
 
@@ -174,7 +168,8 @@ void ScreenStreamingService::Stop()
 	address.toString2(&ss);
 	log->message(_T("ScreenStreamingService: Stopped for address: %s"), ss.getString());
 
-	delete(this);//!!!ATTENTION: potential corruption of memory if this object is accessed after this line!!!
+	delete(this);//!!!ATTENTION: can be applied only to objects created by 'new'!!!
+	//!!!this object must be forgotten after this line!!!
 }
 
 void ScreenStreamingService::StopAll()
@@ -183,7 +178,7 @@ void ScreenStreamingService::StopAll()
 	for (ScreenStreamingServiceList::iterator i = screenStreamingServiceList.begin(); i != screenStreamingServiceList.end(); i++)
 	{
 		ScreenStreamingService* sss = (*i);
-		sss->Stop();
+		sss->destroy();
 	}
 	log->message(_T("ScreenStreamingService: Stopped all."));
 }
