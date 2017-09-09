@@ -33,6 +33,8 @@ Backend: udp://10.10.1.1:5920
 
 QUESTIONS:
 
+!!!prevent zombie process!!!
+
 - the problem is that session starts, passes authentication and closes on RFB connection. So, to monitor all those events for ffmpeg streaming, we have to keep RFB connection together with ffmpeg stream. Does it meet your needs or transferring RFB video must be suppressed?
 
 
@@ -40,7 +42,7 @@ QUESTIONS:
 
 once the session has disconnected, then the streaming should stop. 
 
-parameters of streaming are: framerate, port, screen coordinates, start delay. Those are pre-configured on VNC server.
+parameters of streaming are: framerate, port, screen coordinates, start delay, suppress RFB video. Those are pre-configured on VNC server.
 
 
 - should be Screen Streamer be configured in separated tab? Or, just inlcude it in Server tab? 

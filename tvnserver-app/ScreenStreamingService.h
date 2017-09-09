@@ -52,6 +52,7 @@ private:
 	//Process* process;
 	SocketAddressIPv4 address; 
 
+	static HANDLE anti_zombie_job;
 	static ScreenStreamingService* get(ULONG ip);
 	static LocalMutex lock;
 	static ScreenStreamingServiceList screenStreamingServiceList;

@@ -24,6 +24,7 @@ LogWriter* ScreenStreamingService::log;
 ScreenStreamingService::ScreenStreamingServiceList ScreenStreamingService::screenStreamingServiceList = ScreenStreamingServiceList();
 LocalMutex ScreenStreamingService::lock;
 ServerConfig* ScreenStreamingService::serverConfig;
+HANDLE ScreenStreamingService::anti_zombie_job;
 
 void ScreenStreamingService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator *configurator)
 {
@@ -39,6 +40,21 @@ void ScreenStreamingService::Initialize(LogWriter *log, TvnServer *tvnServer, Co
 	tvnServer->addListener(&screenStreamingServiceConfigReloadListener);
 	configurator->addListener(&screenStreamingServiceConfigReloadListener);
 	screenStreamingServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());
+
+	//this is an unti-zombie mechanism that must kill the child processes even if the app crashed
+	anti_zombie_job = CreateJobObject(NULL, NULL); // GLOBAL
+	if (!anti_zombie_job)
+	{
+		ScreenStreamingService::log->interror(_T("ScreenStreamingService: CreateJobObject failed"));
+		return;
+	}
+	JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
+	jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+	if (!SetInformationJobObject(anti_zombie_job, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli)))
+	{
+		ScreenStreamingService::log->interror(_T("ScreenStreamingService: SetInformationJobObject failed"));
+		return;
+	}
 
 	initialized = true;
 }
@@ -111,6 +127,11 @@ void ScreenStreamingService::Start(ULONG ip)
 		//log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
 		return;
 	}
+	if (!AssignProcessToJobObject(anti_zombie_job, sss->processInformation.hProcess))
+	{
+		log->error(_T("ScreenStreamingService: AssignProcessToJobObject failed. Error: %d"), GetLastError());
+		return;
+	}
 
 	if (ScreenStreamingService::get(sss->address.getSockAddr().sin_addr.S_un.S_addr))
 	{
@@ -157,12 +178,12 @@ void ScreenStreamingService::destroy()
 		{
 			//log->error(_T("ScreenStreamingService: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
 			log->error(_T("ScreenStreamingService: Could not terminate process for %s\r\nError: %s"), commandLine.getString(), e.getMessage());
-			//!!!return;//!!! it is expected to be removed from the list. Otherwise it may duplicate in the list.
+			//!!!return;//!!! it must be removed from the list. Otherwise it may duplicate in the list.
 		}
 	}
 	DWORD state = WaitForSingleObject(processInformation.hProcess, 1000);
 	if (state != WAIT_OBJECT_0)
-		log->error(_T("ScreenStreamingService: ZOMBIE PROCESSES RUNNING: %s"), commandLine.getString());
+		log->error(_T("ScreenStreamingService: !!!ZOMBIE PROCESSE RUNNING!!!: %s"), commandLine.getString());
 	/*DWORD ec;
 	if (!GetExitCodeProcess(processInformation.hProcess, &ec))
 		log->error(_T("ScreenStreamingService: GetExitCodeProcess: %d"), GetLastError());
