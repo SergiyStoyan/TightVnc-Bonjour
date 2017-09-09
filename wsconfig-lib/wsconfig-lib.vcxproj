@@ -280,6 +280,7 @@
     <ClCompile Include="EditIpAccessRuleDialog.cpp" />
     <ClCompile Include="EditPortMappingDialog.cpp" />
     <ClCompile Include="IpAccessControlDialog.cpp" />
+    <ClCompile Include="MpegStreamerConfigDialog.cpp" />
     <ClCompile Include="PasswordControl.cpp" />
     <ClCompile Include="PortMappingDialog.cpp" />
     <ClCompile Include="ServerConfigDialog.cpp" />
@@ -296,6 +297,7 @@
     <ClInclude Include="EditIpAccessRuleDialog.h" />
     <ClInclude Include="EditPortMappingDialog.h" />
     <ClInclude Include="IpAccessControlDialog.h" />
+    <ClInclude Include="MpegStreamerConfigDialog.h" />
     <ClInclude Include="PasswordControl.h" />
     <ClInclude Include="PortMappingDialog.h" />
     <ClInclude Include="resource.h" />

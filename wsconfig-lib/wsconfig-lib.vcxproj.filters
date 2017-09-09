@@ -53,6 +53,9 @@
     <ClCompile Include="BonjourConfigDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MpegStreamerConfigDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdministrationConfigDialog.h">
@@ -98,6 +101,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BonjourConfigDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MpegStreamerConfigDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

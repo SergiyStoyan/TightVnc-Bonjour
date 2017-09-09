@@ -41,6 +41,7 @@
 #include "IpAccessControlDialog.h"
 #include "VideoRegionsConfigDialog.h"
 #include "BonjourConfigDialog.h"
+#include "MpegStreamerConfigDialog.h"
 
 #include "tvncontrol-app/ControlCommand.h"
 
@@ -92,6 +93,7 @@ protected:
   IpAccessControlDialog m_ipAccessControlDialog;
   VideoRegionsConfigDialog m_videoRegionsConfigDialog;
   BonjourConfigDialog m_BonjourConfigDialog;
+  MpegStreamerConfigDialog m_MpegStreamerConfigDialog;
   // Other members
   bool m_isConfiguringService;
 
