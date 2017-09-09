@@ -118,7 +118,10 @@ void MpegStreamer::Start(ULONG ip)
 		sss->address.toString2(&ss);
 		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), MpegStreamer::serverConfig->getMpegStreamerFramerate(), ss.getString());
 		//sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s 2>_1.txt"), MpegStreamer::serverConfig->getMpegStreamerFramerate(), ss.getString());
-		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &sss->processInformation))
+		DWORD dwCreationFlags = 0;
+		if(MpegStreamer::serverConfig->isMpegStreamerWindowHidden())
+			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;
+		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, FALSE, dwCreationFlags, NULL, NULL, &si, &sss->processInformation))
 			throw SystemException();
 	}
 	catch (SystemException &e)
