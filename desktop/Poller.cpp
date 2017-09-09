@@ -107,8 +107,7 @@ void Poller::execute()
       doUpdate();
     }
 
-    unsigned int pollInterval = Configurator::getInstance()->
-                                getServerConfig()->getPollingInterval();
+    unsigned int pollInterval = Configurator::getInstance()->getServerConfig()->getPollingInterval();
     m_intervalWaiter.waitForEvent(pollInterval);
   }
 }

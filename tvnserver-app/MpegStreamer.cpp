@@ -10,7 +10,7 @@
 
 void MpegStreamer::MpegStreamerConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
 {
-	MpegStreamer::serverConfig = serverConfig;
+	//MpegStreamer::serverConfig = serverConfig;
 }
 
 void MpegStreamer::MpegStreamerConfigReloadListener::onTvnServerShutdown()
@@ -23,7 +23,7 @@ bool MpegStreamer::initialized = false;
 LogWriter* MpegStreamer::log;
 MpegStreamer::MpegStreamerList MpegStreamer::mpegStreamerList = MpegStreamerList();
 LocalMutex MpegStreamer::lock;
-ServerConfig* MpegStreamer::serverConfig;
+//ServerConfig* MpegStreamer::serverConfig;
 HANDLE MpegStreamer::anti_zombie_job;
 
 void MpegStreamer::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator *configurator)
@@ -90,13 +90,13 @@ void MpegStreamer::Start(ULONG ip)
 		log->interror(_T("MpegStreamer: Is not initialized"));
 		return;
 	}
-
-	//ServerConfig *sc = Configurator::getInstance()->getServerConfig();
-	if (!MpegStreamer::serverConfig->isMpegStreamerEnabled())
+	
+	ServerConfig *config = Configurator::getInstance()->getServerConfig();
+	if (!config->isMpegStreamerEnabled())
 		return;
 
-	if (MpegStreamer::serverConfig->getMpegStreamerDelayMss() > 0)
-		Sleep(MpegStreamer::serverConfig->getMpegStreamerDelayMss());
+	if (config->getMpegStreamerDelayMss() > 0)
+		Sleep(config->getMpegStreamerDelayMss());
 
 	AutoLock l(&lock);
 
@@ -104,7 +104,7 @@ void MpegStreamer::Start(ULONG ip)
 	for (sss = MpegStreamer::get(ip); sss; sss = MpegStreamer::get(ip))
 		sss->destroy();
 
-	sss = new MpegStreamer(ip, MpegStreamer::serverConfig->getMpegStreamerDestinationPort());
+	sss = new MpegStreamer(ip, config->getMpegStreamerDestinationPort());
 	try
 	{
 		STARTUPINFO si;
@@ -113,9 +113,9 @@ void MpegStreamer::Start(ULONG ip)
 		ZeroMemory(&sss->processInformation, sizeof(sss->processInformation));
 		StringStorage ss;
 		sss->address.toString2(&ss);
-		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), MpegStreamer::serverConfig->getMpegStreamerFramerate(), ss.getString());
+		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
 		DWORD dwCreationFlags = 0;
-		if(MpegStreamer::serverConfig->isMpegStreamerWindowHidden())
+		if(config->isMpegStreamerWindowHidden())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;
 		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, FALSE, dwCreationFlags, NULL, NULL, &si, &sss->processInformation))
 			throw SystemException();

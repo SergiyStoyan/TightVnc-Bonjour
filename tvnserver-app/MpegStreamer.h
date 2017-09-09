@@ -59,7 +59,7 @@ private:
 	static MpegStreamerConfigReloadListener mpegStreamerConfigReloadListener;
 	static bool initialized;
 	static LogWriter* log;
-	static ServerConfig* serverConfig;
+	//static ServerConfig* serverConfig;
 };
 
 #endif
