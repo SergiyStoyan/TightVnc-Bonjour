@@ -95,14 +95,14 @@ void ScreenStreamingService::Start(ULONG ip)
 		//sss->process->start();	
 
 		STARTUPINFO si;
-		::ZeroMemory(&si, sizeof(si));
+		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
-		::ZeroMemory(&sss->processInformation, sizeof(sss->processInformation));
+		ZeroMemory(&sss->processInformation, sizeof(sss->processInformation));
 		StringStorage ss;
 		sss->address.toString2(&ss);
 		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString());
 		//sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s 2>_1.txt"), ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString());
-		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, TRUE, 0, NULL, NULL, &si, &sss->processInformation))
+		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &sss->processInformation))
 			throw SystemException();
 	}
 	catch (SystemException &e)
@@ -184,7 +184,13 @@ void ScreenStreamingService::destroy()
 void ScreenStreamingService::StopAll()
 {
 	AutoLock l(&lock);
+	ScreenStreamingServiceList list;
 	for (ScreenStreamingServiceList::iterator i = screenStreamingServiceList.begin(); i != screenStreamingServiceList.end(); i++)
+	{
+		ScreenStreamingService* sss = (*i);
+		list.push_back(sss);//put to another list to iterate while removing from the base one
+	}
+	for (ScreenStreamingServiceList::iterator i = list.begin(); i != list.end(); i++)
 	{
 		ScreenStreamingService* sss = (*i);
 		sss->destroy();
