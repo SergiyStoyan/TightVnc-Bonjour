@@ -5,8 +5,8 @@
 //        stoyan@cliversoft.com
 //********************************************************************************************
 
-#ifndef _SCREEN_STREAMING_SERVICE_H_
-#define _SCREEN_STREAMING_SERVICE_H_
+#ifndef _MPEG_STREAMER_H_
+#define _MPEG_STREAMER_H_
 
 #include "server-config-lib/Configurator.h"
 #include "TvnServer.h"
@@ -23,11 +23,11 @@ This service creates a video stream to the client INDEPENDENTLY on RFB connectio
 
 using namespace std;
 
-class ScreenStreamingService
+class MpegStreamer
 {
-	typedef list<ScreenStreamingService *> ScreenStreamingServiceList;
+	typedef list<MpegStreamer *> MpegStreamerList;
 
-	class ScreenStreamingServiceConfigReloadListener : public ConfigReloadListener, public TvnServerListener
+	class MpegStreamerConfigReloadListener : public ConfigReloadListener, public TvnServerListener
 	{
 	public:
 		void onConfigReload(ServerConfig* serverConfig);
@@ -44,7 +44,7 @@ public:
 	static ULONG GetIp(SocketIPv4* s);
 
 private:
-	ScreenStreamingService(ULONG ip, USHORT port);
+	MpegStreamer(ULONG ip, USHORT port);
 	void destroy();
 
 	StringStorage commandLine;
@@ -53,10 +53,10 @@ private:
 	SocketAddressIPv4 address; 
 
 	static HANDLE anti_zombie_job;
-	static ScreenStreamingService* get(ULONG ip);
+	static MpegStreamer* get(ULONG ip);
 	static LocalMutex lock;
-	static ScreenStreamingServiceList screenStreamingServiceList;
-	static ScreenStreamingServiceConfigReloadListener screenStreamingServiceConfigReloadListener;
+	static MpegStreamerList mpegStreamerList;
+	static MpegStreamerConfigReloadListener mpegStreamerConfigReloadListener;
 	static bool initialized;
 	static LogWriter* log;
 	static ServerConfig* serverConfig;

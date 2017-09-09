@@ -30,7 +30,7 @@
 #include "RfbInitializer.h"
 #include "ClientAuthListener.h"
 #include "server-config-lib/Configurator.h"
-#include "tvnserver-app/ScreenStreamingService.h"
+#include "tvnserver-app/MpegStreamer.h"
 
 RfbClient::RfbClient(NewConnectionEvents *newConnectionEvents,
                      SocketIPv4 *socket,
@@ -78,7 +78,7 @@ void RfbClient::disconnect()
   try { m_socket->close(); } catch (...) { }
   m_log->message(_T("Connection has been closed"));
     
-  ScreenStreamingService::Stop(ScreenStreamingService::GetIp(m_socket));
+  MpegStreamer::Stop(MpegStreamer::GetIp(m_socket));
 }
 
 unsigned int RfbClient::getId() const
@@ -267,7 +267,7 @@ void RfbClient::execute()
     m_log->info(_T("Entering normal phase of the RFB protocol"));
     dispatcher.resume();
 
-	ScreenStreamingService::Start(ScreenStreamingService::GetIp(m_socket));
+	MpegStreamer::Start(MpegStreamer::GetIp(m_socket));
 
     connClosingEvent.waitForEvent();
   } catch (Exception &e) {

@@ -450,23 +450,23 @@ public:
 	//
 	// Configurator from Screen Streaming tab
 	//
-	bool m_enableScreenStreaming;
-	uint16_t m_ScreenStreamingDestinationPort;
-	uint16_t m_ScreenStreamingFramerate;
-	uint16_t m_ScreenStreamingDelayMss;
+	bool m_enableMpegStreamer;
+	uint16_t m_MpegStreamerDestinationPort;
+	uint16_t m_MpegStreamerFramerate;
+	uint16_t m_MpegStreamerDelayMss;
 public:
 
-	bool isScreenStreamingEnabled();
-	void enableScreenStreaming(bool enabled);
+	bool isMpegStreamerEnabled();
+	void enableMpegStreamer(bool enabled);
 
-	uint16_t getScreenStreamingDestinationPort();
-	void setScreenStreamingDestinationPort(uint16_t bonjourServicePort);
+	uint16_t getMpegStreamerDestinationPort();
+	void setMpegStreamerDestinationPort(uint16_t bonjourServicePort);
 
-	uint16_t getScreenStreamingFramerate();
-	void setScreenStreamingFramerate(uint16_t framerate);
+	uint16_t getMpegStreamerFramerate();
+	void setMpegStreamerFramerate(uint16_t framerate);
 
-	uint16_t getScreenStreamingDelayMss();
-	void setScreenStreamingDelayMss(uint16_t mss_delay);
+	uint16_t getMpegStreamerDelayMss();
+	void setMpegStreamerDelayMss(uint16_t mss_delay);
 };
 
 #endif

@@ -57,10 +57,10 @@ ServerConfig::ServerConfig()
   m_BonjourServicePort = 5353;
   m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
 
-  m_enableScreenStreaming = true;
-  m_ScreenStreamingDestinationPort = 5920;
-  m_ScreenStreamingFramerate = 10;
-  m_ScreenStreamingDelayMss = 500;
+  m_enableMpegStreamer = true;
+  m_MpegStreamerDestinationPort = 5920;
+  m_MpegStreamerFramerate = 10;
+  m_MpegStreamerDelayMss = 500;
 }
 
 ServerConfig::~ServerConfig()
@@ -820,50 +820,50 @@ bool ServerConfig::isWindowsUserAsBonjourServiceNameUsed()
 	return m_useWindowsUserAsBonjourServiceName;
 }
 
-bool ServerConfig::isScreenStreamingEnabled()
+bool ServerConfig::isMpegStreamerEnabled()
 {
 	AutoLock lock(&m_objectCS);
-	return m_enableScreenStreaming;
+	return m_enableMpegStreamer;
 }
 
-void ServerConfig::enableScreenStreaming(bool enabled)
+void ServerConfig::enableMpegStreamer(bool enabled)
 {
 	AutoLock lock(&m_objectCS);
-	m_enableScreenStreaming = enabled;
+	m_enableMpegStreamer = enabled;
 }
 
-uint16_t ServerConfig::getScreenStreamingDestinationPort()
+uint16_t ServerConfig::getMpegStreamerDestinationPort()
 {
 	AutoLock lock(&m_objectCS);
-	return m_ScreenStreamingDestinationPort;
+	return m_MpegStreamerDestinationPort;
 }
 
-void ServerConfig::setScreenStreamingDestinationPort(uint16_t screenStreamingDestinationPort)
+void ServerConfig::setMpegStreamerDestinationPort(uint16_t mpegStreamerDestinationPort)
 {
 	AutoLock lock(&m_objectCS);
-	m_ScreenStreamingDestinationPort = screenStreamingDestinationPort;
+	m_MpegStreamerDestinationPort = mpegStreamerDestinationPort;
 }
 
-uint16_t ServerConfig::getScreenStreamingFramerate()
+uint16_t ServerConfig::getMpegStreamerFramerate()
 {
 	AutoLock lock(&m_objectCS);
-	return m_ScreenStreamingFramerate;
+	return m_MpegStreamerFramerate;
 }
 
-void ServerConfig::setScreenStreamingFramerate(uint16_t screenStreamingFramerate)
+void ServerConfig::setMpegStreamerFramerate(uint16_t mpegStreamerFramerate)
 {
 	AutoLock lock(&m_objectCS);
-	m_ScreenStreamingFramerate = screenStreamingFramerate;
+	m_MpegStreamerFramerate = mpegStreamerFramerate;
 }
 
-uint16_t ServerConfig::getScreenStreamingDelayMss()
+uint16_t ServerConfig::getMpegStreamerDelayMss()
 {
 	AutoLock lock(&m_objectCS);
-	return m_ScreenStreamingDelayMss;
+	return m_MpegStreamerDelayMss;
 }
 
-void ServerConfig::setScreenStreamingDelayMss(uint16_t screenStreamingMssDelay)
+void ServerConfig::setMpegStreamerDelayMss(uint16_t mpegStreamerMssDelay)
 {
 	AutoLock lock(&m_objectCS);
-	m_ScreenStreamingDelayMss = screenStreamingMssDelay;
+	m_MpegStreamerDelayMss = mpegStreamerMssDelay;
 }

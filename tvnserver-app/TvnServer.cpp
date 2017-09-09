@@ -54,7 +54,7 @@
 #include <time.h>
 
 #include "BonjourService.h"
-#include "ScreenStreamingService.h"
+#include "MpegStreamer.h"
 
 TvnServer::TvnServer(bool runsInServiceContext,
                      NewConnectionEvents *newConnectionEvents,
@@ -130,7 +130,7 @@ TvnServer::TvnServer(bool runsInServiceContext,
   try
   {
 	  BonjourService::Initialize(&m_log, this, Configurator::getInstance());
-	  ScreenStreamingService::Initialize(&m_log, this, Configurator::getInstance());
+	  MpegStreamer::Initialize(&m_log, this, Configurator::getInstance());
   }
   catch (Exception &ex)
   {

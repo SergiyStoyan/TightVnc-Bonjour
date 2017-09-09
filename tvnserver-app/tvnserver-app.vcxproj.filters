@@ -101,7 +101,7 @@
     <ClCompile Include="BonjourService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScreenStreamingService.cpp">
+    <ClCompile Include="MpegStreamer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -199,7 +199,7 @@
     <ClInclude Include="BonjourService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScreenStreamingService.h">
+    <ClInclude Include="MpegStreamer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
