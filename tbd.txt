@@ -38,7 +38,5 @@ QUESTIONS:
 
 
 
-once the session has disconnected, then the streaming should stop. 
-
 parameters of streaming are: framerate, port, screen coordinates, start delay, suppress RFB video, hide ffmpeg window. Those are pre-configured on VNC server.
 

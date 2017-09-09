@@ -41,7 +41,7 @@ void MpegStreamer::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator
 	configurator->addListener(&mpegStreamerConfigReloadListener);
 	mpegStreamerConfigReloadListener.onConfigReload(configurator->getServerConfig());
 
-	//this is an unti-zombie mechanism that must kill the child processes even if the app crashed
+	//this is an anti-zombie mechanism that must kill the child processes even if the app crashed
 	anti_zombie_job = CreateJobObject(NULL, NULL); // GLOBAL
 	if (!anti_zombie_job)
 	{
@@ -107,9 +107,6 @@ void MpegStreamer::Start(ULONG ip)
 	sss = new MpegStreamer(ip, MpegStreamer::serverConfig->getMpegStreamerDestinationPort());
 	try
 	{
-		//sss->process = new Process(_T("ffmpeg.exe"), _T("-f gdigrab -framerate %d -i desktop -f mpegts udp://%s", MpegStreamer::serverConfig->getMpegStreamerFramerate(), ss.getString()));
-		//sss->process->start();	
-
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
@@ -117,7 +114,6 @@ void MpegStreamer::Start(ULONG ip)
 		StringStorage ss;
 		sss->address.toString2(&ss);
 		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), MpegStreamer::serverConfig->getMpegStreamerFramerate(), ss.getString());
-		//sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s 2>_1.txt"), MpegStreamer::serverConfig->getMpegStreamerFramerate(), ss.getString());
 		DWORD dwCreationFlags = 0;
 		if(MpegStreamer::serverConfig->isMpegStreamerWindowHidden())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;
@@ -127,7 +123,6 @@ void MpegStreamer::Start(ULONG ip)
 	catch (SystemException &e)
 	{
 		log->error(_T("MpegStreamer: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), sss->commandLine.getString(), e.getMessage());
-		//log->error(_T("MpegStreamer: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
 		return;
 	}
 	if (!AssignProcessToJobObject(anti_zombie_job, sss->processInformation.hProcess))
@@ -169,29 +164,22 @@ void MpegStreamer::destroy()
 	AutoLock l(&lock);
 
 	DWORD ec;
-	if (GetExitCodeProcess(processInformation.hProcess, &ec) && (ec == STILL_ACTIVE))
+	if (GetExitCodeProcess(processInformation.hProcess, &ec) && ec == STILL_ACTIVE)
 	{
 		try
 		{
-			//process->kill();
 			if (!TerminateProcess(processInformation.hProcess, 0))
 				throw SystemException();
 		}
 		catch (SystemException &e)
 		{
-			//log->error(_T("MpegStreamer: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
 			log->error(_T("MpegStreamer: Could not terminate process for %s\r\nError: %s"), commandLine.getString(), e.getMessage());
 			//!!!return;//!!! it must be removed from the list. Otherwise it may duplicate in the list.
 		}
 	}
 	DWORD state = WaitForSingleObject(processInformation.hProcess, 1000);
 	if (state != WAIT_OBJECT_0)
-		log->error(_T("MpegStreamer: !!!ZOMBIE PROCESSE RUNNING!!!: %s"), commandLine.getString());
-	/*DWORD ec;
-	if (!GetExitCodeProcess(processInformation.hProcess, &ec))
-		log->error(_T("MpegStreamer: GetExitCodeProcess: %d"), GetLastError());
-	else if (ec == STILL_ACTIVE) 
-			log->error(_T("MpegStreamer: ZOMBIE PROCESSES RUNNING: %s"), commandLine.getString());*/
+		log->error(_T("MpegStreamer: !!!ZOMBIE PROCESS RUNNING!!!: %s"), commandLine.getString());
 
 	CloseHandle(processInformation.hProcess);
 	CloseHandle(processInformation.hThread);
@@ -208,12 +196,7 @@ void MpegStreamer::destroy()
 void MpegStreamer::StopAll()
 {
 	AutoLock l(&lock);
-	MpegStreamerList list;
-	for (MpegStreamerList::iterator i = mpegStreamerList.begin(); i != mpegStreamerList.end(); i++)
-	{
-		MpegStreamer* sss = (*i);
-		list.push_back(sss);//put to another list to iterate while removing from the base one
-	}
+	MpegStreamerList list = mpegStreamerList;//copy to another list to iterate while removing objects from the base one
 	for (MpegStreamerList::iterator i = list.begin(); i != list.end(); i++)
 	{
 		MpegStreamer* sss = (*i);
