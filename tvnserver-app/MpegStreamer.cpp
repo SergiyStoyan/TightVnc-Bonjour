@@ -122,12 +122,12 @@ void MpegStreamer::Start(ULONG ip)
 	}
 	catch (SystemException &e)
 	{
-		log->error(_T("MpegStreamer: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), sss->commandLine.getString(), e.getMessage());
+		log->interror(_T("MpegStreamer: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), sss->commandLine.getString(), e.getMessage());
 		return;
 	}
 	if (!AssignProcessToJobObject(anti_zombie_job, sss->processInformation.hProcess))
 	{
-		log->error(_T("MpegStreamer: AssignProcessToJobObject failed. Error: %d"), GetLastError());
+		log->interror(_T("MpegStreamer: AssignProcessToJobObject failed. Error: %d"), GetLastError());
 		return;
 	}
 
@@ -135,7 +135,7 @@ void MpegStreamer::Start(ULONG ip)
 	{
 		StringStorage ss;
 		sss->address.toString(&ss);
-		ss.format(_T("MpegStreamer: while adding a stream: a stream to this destination aready exists: %s"), ss.getString());
+		log->interror(_T("MpegStreamer: while adding a stream: a stream to this destination aready exists: %s"), ss.getString());
 		throw Exception(ss.getString());
 	}
 	mpegStreamerList.push_back(sss);
@@ -179,7 +179,7 @@ void MpegStreamer::destroy()
 	}
 	DWORD state = WaitForSingleObject(processInformation.hProcess, 1000);
 	if (state != WAIT_OBJECT_0)
-		log->error(_T("MpegStreamer: !!!ZOMBIE PROCESS RUNNING!!!: %s"), commandLine.getString());
+		log->interror(_T("MpegStreamer: !!!ZOMBIE PROCESS RUNNING!!!: %s"), commandLine.getString());
 
 	CloseHandle(processInformation.hProcess);
 	CloseHandle(processInformation.hThread);
