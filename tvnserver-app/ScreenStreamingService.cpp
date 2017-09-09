@@ -89,19 +89,23 @@ void ScreenStreamingService::Start(ULONG ip)
 		sss->destroy();
 
 	sss = new ScreenStreamingService(ip, ScreenStreamingService::serverConfig->getScreenStreamingDestinationPort());
-	try 
+	try
 	{
 		//sss->process = new Process(_T("ffmpeg.exe"), _T("-f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
 		//sss->process->start();	
 
-		STARTUPINFO sti = { sizeof(STARTUPINFO) };
+		STARTUPINFO si;
+		::ZeroMemory(&si, sizeof(si));
+		si.cb = sizeof(si);
+		::ZeroMemory(&sss->processInformation, sizeof(sss->processInformation));
 		StringStorage ss;
 		sss->address.toString2(&ss);
-		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s 2>&1>_1.txt", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
-		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, TRUE, 0, NULL, NULL, &sti, &sss->processInformation))
+		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString());
+		//sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s 2>_1.txt"), ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString());
+		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, TRUE, 0, NULL, NULL, &si, &sss->processInformation))
 			throw SystemException();
 	}
-	catch (SystemException &e) 
+	catch (SystemException &e)
 	{
 		log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), sss->commandLine.getString(), e.getMessage());
 		//log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
@@ -109,7 +113,12 @@ void ScreenStreamingService::Start(ULONG ip)
 	}
 
 	if (ScreenStreamingService::get(sss->address.getSockAddr().sin_addr.S_un.S_addr))
-		throw Exception(_T("ScreenStreamingService: while adding a stream: a stream to this destination aready exists: %s", sss->address.toString()));
+	{
+		StringStorage ss;
+		sss->address.toString(&ss);
+		ss.format(_T("ScreenStreamingService: while adding a stream: a stream to this destination aready exists: %s"), ss.getString());
+		throw Exception(ss.getString());
+	}
 	screenStreamingServiceList.push_back(sss);
 
 	StringStorage ss;

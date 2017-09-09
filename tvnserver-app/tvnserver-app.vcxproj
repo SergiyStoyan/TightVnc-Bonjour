@@ -153,6 +153,12 @@
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>$(BONJOUR_SDK_HOME)/Lib/$(Platform)/dnssd.lib;ws2_32.lib;</AdditionalDependencies>
     </Lib>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)dependencies" "$(TargetDir)" /e /y /i /r</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy ffmpeg.exe to binaries</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
