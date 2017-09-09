@@ -171,12 +171,18 @@ BOOL ConfigDialog::onInitDialog()
   m_BonjourConfigDialog.create();
   moveDialogToTabControl(&m_BonjourConfigDialog);
 
+  m_MpegStreamerConfigDialog.setParent(&m_ctrlThis);
+  m_MpegStreamerConfigDialog.setParentDialog(this);
+  m_MpegStreamerConfigDialog.create();
+  moveDialogToTabControl(&m_MpegStreamerConfigDialog);
+
   m_tabControl.addTab(&m_serverConfigDialog, StringTable::getString(IDS_SERVER_TAB_CAPTION));
   m_tabControl.addTab(&m_portMappingDialog, StringTable::getString(IDS_EXTRA_PORTS_TAB_CAPTION));
   m_tabControl.addTab(&m_ipAccessControlDialog, StringTable::getString(IDS_ACCESS_CONTROL_TAB_CAPTION));
   m_tabControl.addTab(&m_videoRegionsConfigDialog, StringTable::getString(IDS_VIDEO_WINDOWS_TAB_CAPTION));
   m_tabControl.addTab(&m_administrationConfigDialog, StringTable::getString(IDS_ADMINISTRATION_TAB_CAPTION));
   m_tabControl.addTab(&m_BonjourConfigDialog, StringTable::getString(IDS_BONJOUR_TAB_CAPTION));
+  m_tabControl.addTab(&m_MpegStreamerConfigDialog, StringTable::getString(IDS_BONJOUR_TAB_CAPTION));
 
   m_tabControl.removeTab(0);
 
@@ -221,6 +227,7 @@ void ConfigDialog::onApplyButtonClick()
     m_ipAccessControlDialog.apply();
     m_videoRegionsConfigDialog.apply();
 	m_BonjourConfigDialog.apply();
+	m_MpegStreamerConfigDialog.apply();
   } else {
     return ;
   }
@@ -300,6 +307,10 @@ bool ConfigDialog::validateInput()
   }
   if (!m_BonjourConfigDialog.validateInput()) {
 	  m_tabControl.showTab(&m_BonjourConfigDialog);
+	  return false;
+  }
+  if (!m_MpegStreamerConfigDialog.validateInput()) {
+	  m_tabControl.showTab(&m_MpegStreamerConfigDialog);
 	  return false;
   }
 #ifdef USE_EXTRA_TABS
