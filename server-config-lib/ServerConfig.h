@@ -454,6 +454,8 @@ public:
 	uint16_t m_MpegStreamerDestinationPort;
 	uint16_t m_MpegStreamerFramerate;
 	uint16_t m_MpegStreamerDelayMss;
+	bool m_turnOffMpegStreamerRfbVideo;
+	bool m_hideMpegStreamerWindow;
 public:
 
 	bool isMpegStreamerEnabled();
@@ -467,6 +469,12 @@ public:
 
 	uint16_t getMpegStreamerDelayMss();
 	void setMpegStreamerDelayMss(uint16_t mss_delay);
+
+	bool isMpegStreamerRfbVideoTunedOff();
+	void turnOffMpegStreamerRfbVideo(bool turn_off);
+
+	bool isMpegStreamerWindowHidden();
+	void hideMpegStreamerWindow(bool hide);
 };
 
 #endif

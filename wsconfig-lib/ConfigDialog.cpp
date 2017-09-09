@@ -182,7 +182,7 @@ BOOL ConfigDialog::onInitDialog()
   m_tabControl.addTab(&m_videoRegionsConfigDialog, StringTable::getString(IDS_VIDEO_WINDOWS_TAB_CAPTION));
   m_tabControl.addTab(&m_administrationConfigDialog, StringTable::getString(IDS_ADMINISTRATION_TAB_CAPTION));
   m_tabControl.addTab(&m_BonjourConfigDialog, StringTable::getString(IDS_BONJOUR_TAB_CAPTION));
-  m_tabControl.addTab(&m_MpegStreamerConfigDialog, StringTable::getString(IDS_BONJOUR_TAB_CAPTION));
+  m_tabControl.addTab(&m_MpegStreamerConfigDialog, StringTable::getString(IDS_MPEG_STREAMER_TAB_CAPTION));
 
   m_tabControl.removeTab(0);
 

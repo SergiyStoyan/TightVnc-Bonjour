@@ -117,7 +117,8 @@ bool BonjourConfigDialog::validateInput()
 	}
 
 	m_BonjourServicePort.getText(&ss);
-	if (ss.getLength() < 1 || _ttoi(ss.getString()) < 1) {
+	long i;
+	if (CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
 		MessageBox(m_ctrlThis.getWindow(),
 			StringTable::getString(IDS_SET_BONJOUR_SERVICE_PORT_NOTIFICATION),
 			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);

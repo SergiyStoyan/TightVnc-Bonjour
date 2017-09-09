@@ -85,3 +85,12 @@ void CommonInputValidation::notifyValidationError(TextBox *textBox, const TCHAR 
   textBox->showBalloonTip(&invalidInputTip);
   textBox->setFocus();
 }
+
+bool CommonInputValidation::parseNumber(StringStorage* s, long* i)
+{
+	if (!s->getLength())
+		return false;
+	TCHAR* p;
+	*i = _tcstol(s->getString(), &p, 10);
+	return !(*p);
+}

@@ -137,6 +137,13 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt16(m_BonjourServicePort);
   output->writeUTF8(m_BonjourServiceType.getString());
 
+  output->writeInt8(m_enableMpegStreamer ? 1 : 0);
+  output->writeInt16(m_MpegStreamerDestinationPort);
+  output->writeInt16(m_MpegStreamerFramerate);
+  output->writeInt16(m_MpegStreamerDelayMss);
+  output->writeInt8(m_turnOffMpegStreamerRfbVideo ? 1 : 0);
+  output->writeInt8(m_hideMpegStreamerWindow ? 1 : 0);
+
   output->writeUTF8(m_logFilePath.getString());
 }
 
@@ -210,6 +217,13 @@ void ServerConfig::deserialize(DataInputStream *input)
   input->readUTF8(&m_BonjourServiceName);
   m_BonjourServicePort = input->readInt16();
   input->readUTF8(&m_BonjourServiceType);
+
+  m_enableMpegStreamer = input->readInt8() == 1;
+  m_MpegStreamerDestinationPort = input->readInt16();
+  m_MpegStreamerFramerate = input->readInt16();
+  m_MpegStreamerDelayMss = input->readInt16();
+  m_turnOffMpegStreamerRfbVideo = input->readInt8() == 1;
+  m_hideMpegStreamerWindow = input->readInt8() == 1;
 
   input->readUTF8(&m_logFilePath);
 }
@@ -866,4 +880,28 @@ void ServerConfig::setMpegStreamerDelayMss(uint16_t mpegStreamerMssDelay)
 {
 	AutoLock lock(&m_objectCS);
 	m_MpegStreamerDelayMss = mpegStreamerMssDelay;
+}
+
+bool ServerConfig::isMpegStreamerRfbVideoTunedOff()
+{
+	AutoLock lock(&m_objectCS);
+	return m_turnOffMpegStreamerRfbVideo;
+}
+
+void ServerConfig::turnOffMpegStreamerRfbVideo(bool turn_off)
+{
+	AutoLock lock(&m_objectCS);
+	m_turnOffMpegStreamerRfbVideo = turn_off;
+}
+
+bool ServerConfig::isMpegStreamerWindowHidden()
+{
+	AutoLock lock(&m_objectCS);
+	return m_hideMpegStreamerWindow;
+}
+
+void ServerConfig::hideMpegStreamerWindow(bool hide)
+{
+	AutoLock lock(&m_objectCS);
+	m_hideMpegStreamerWindow = hide;
 }

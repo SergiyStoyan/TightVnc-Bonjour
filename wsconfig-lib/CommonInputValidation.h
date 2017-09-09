@@ -61,6 +61,9 @@ public:
    * @fixme don't use BaloonTip in this case, use direct message box.
    */
   static void notifyValidationError(TextBox *textBox, const TCHAR *messageText);
+
+  static bool parseNumber(StringStorage* s, long* i);
+
 private:
   /**
    * Don't allow creating instances of this class.

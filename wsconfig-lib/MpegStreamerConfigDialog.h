@@ -41,9 +41,8 @@ protected:
 	// Controls event handlers.
 	//
 
-	void onBonjourEnabledClick();
-	void onUseWindowsUserAsBonjourServiceNameClick();
-	void onBonjourTextChange();
+	void onMpegStreamerEnabledClick();
+	void onMpegStreamerTextChange();
 
 private:
 	void initControls();
@@ -52,11 +51,12 @@ protected:
 	// Configuration
 	ServerConfig *m_config;
 	// Controls
-	CheckBox m_enableBonjourService;
-	CheckBox m_useWindowsUserAsBonjourServiceName;
-	TextBox m_BonjourServiceName;
-	TextBox m_BonjourServicePort;
-	TextBox m_BonjourServiceType;
+	CheckBox m_enableMpegStreamer;
+	TextBox m_MpegStreamerDestinationPort;
+	TextBox m_MpegStreamerFramerate;
+	TextBox m_MpegStreamerDelayMss;
+	CheckBox m_turnOffRfbVideo;
+	CheckBox m_hideStreamerWindow;
 
 	BaseDialog *m_parent;
 };

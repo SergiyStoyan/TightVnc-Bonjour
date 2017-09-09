@@ -8,11 +8,10 @@
 #include "MpegStreamerConfigDialog.h"
 #include "ConfigDialog.h"
 #include "tvnserver/resource.h"
-#include "tvnserver-app/BonjourService.h"
 #include "CommonInputValidation.h"
 
 MpegStreamerConfigDialog::MpegStreamerConfigDialog()
-: BaseDialog(IDD_CONFIG_BONJOUR_PAGE), m_parent(NULL)
+: BaseDialog(IDD_CONFIG_MPEG_STREAMER_PAGE), m_parent(NULL)
 {
 }
 
@@ -29,30 +28,27 @@ void MpegStreamerConfigDialog::initControls()
 {
 	HWND dialogHwnd = m_ctrlThis.getWindow();
 
-	m_enableBonjourService.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_ENABLED));
-	m_useWindowsUserAsBonjourServiceName.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_USE_WINDOWS_USER_AS_SERVICE_NAME));
-	m_BonjourServiceName.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_SERVICE_NAME));
-	m_BonjourServicePort.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_SERVICE_PORT));
-	m_BonjourServiceType.setWindow(GetDlgItem(dialogHwnd, IDC_BONJOUR_SERVICE_TYPE));
+	m_enableMpegStreamer.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_ENABLED));
+	m_MpegStreamerDestinationPort.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_DESTINATION_PORT));
+	m_MpegStreamerFramerate.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_FRAMERATE));
+	m_MpegStreamerDelayMss.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_START_DELAY));
+	m_turnOffRfbVideo.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO));
+	m_hideStreamerWindow.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_HIDE_WINDOW));
 }
 
 BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 {
 	switch (controlID)
 	{
-	case IDC_BONJOUR_ENABLED:
+	case IDC_MPEG_STREAMER_ENABLED:
 		if (notificationID == BN_CLICKED)
-			onBonjourEnabledClick();
+			onMpegStreamerEnabledClick();
 		break;
-	case IDC_BONJOUR_USE_WINDOWS_USER_AS_SERVICE_NAME:
-		if (notificationID == BN_CLICKED)
-			onUseWindowsUserAsBonjourServiceNameClick();
-		break;
-	case IDC_BONJOUR_SERVICE_NAME:
-	case IDC_BONJOUR_SERVICE_PORT:
-	case IDC_BONJOUR_SERVICE_TYPE:
+	case IDC_MPEG_STREAMER_DESTINATION_PORT:
+	case IDC_MPEG_STREAMER_FRAMERATE:
+	case IDC_MPEG_STREAMER_START_DELAY:
 		if (notificationID == EN_UPDATE)
-			onBonjourTextChange();
+			onMpegStreamerTextChange();
 		break;
 	}
 	return TRUE;
@@ -68,68 +64,59 @@ BOOL MpegStreamerConfigDialog::onInitDialog()
   return TRUE;
 }
 
-void MpegStreamerConfigDialog::onBonjourEnabledClick()
+void MpegStreamerConfigDialog::onMpegStreamerEnabledClick()
 {
-	m_useWindowsUserAsBonjourServiceName.setEnabled(m_enableBonjourService.isChecked());
-	m_BonjourServiceName.setEnabled(m_enableBonjourService.isChecked() && !m_useWindowsUserAsBonjourServiceName.isChecked());
-	m_BonjourServicePort.setEnabled(m_enableBonjourService.isChecked());
-	m_BonjourServiceType.setEnabled(m_enableBonjourService.isChecked());
+	m_MpegStreamerDestinationPort.setEnabled(m_enableMpegStreamer.isChecked());
+	m_MpegStreamerFramerate.setEnabled(m_enableMpegStreamer.isChecked());
+	m_MpegStreamerDelayMss.setEnabled(m_enableMpegStreamer.isChecked());
+	m_turnOffRfbVideo.setEnabled(m_enableMpegStreamer.isChecked());
+	m_hideStreamerWindow.setEnabled(m_enableMpegStreamer.isChecked());
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
 
-void MpegStreamerConfigDialog::onUseWindowsUserAsBonjourServiceNameClick()
-{
-	m_BonjourServiceName.setEnabled(!m_useWindowsUserAsBonjourServiceName.isChecked());
-	if (m_useWindowsUserAsBonjourServiceName.isChecked())
-	{
-		StringStorage service_name;
-		BonjourService::GetWindowsUserName(&service_name);
-		m_BonjourServiceName.setText(service_name.getString());
-	}
-	((ConfigDialog *)m_parent)->updateApplyButtonState();	
-}
-
-void MpegStreamerConfigDialog::onBonjourTextChange()
+void MpegStreamerConfigDialog::onMpegStreamerTextChange()
 {
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
 
 bool MpegStreamerConfigDialog::validateInput()
 {
-	if (!m_enableBonjourService.isChecked())
+	if (!m_enableMpegStreamer.isChecked())
 		return true;
 
-	if (!BonjourService::IsAvailable())
+	/*if (!BonjourService::IsAvailable())
 	{
 		MessageBox(m_ctrlThis.getWindow(),
 			StringTable::getString(IDS_BONJOUR_SERVICE_IS_NOT_AVAILABLE),
 			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 		return false;
-	}
+	}*/
 
 	StringStorage ss;
-	m_BonjourServiceName.getText(&ss);
-	if (ss.getLength() < 1) {
+	long i;
+	m_MpegStreamerDestinationPort.getText(&ss);
+	if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
 		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_BONJOUR_SERVICE_NAME_NOTIFICATION),
+			StringTable::getString(IDS_SET_MPEG_STREAMER_PORT_ERROR),
+			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+		return false;
+	}
+	if (!CommonInputValidation::validatePort(&m_MpegStreamerDestinationPort))
+		return false;
+
+	m_MpegStreamerFramerate.getText(&ss);
+	if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+		MessageBox(m_ctrlThis.getWindow(),
+			StringTable::getString(IDS_SET_MPEG_STREAMER_FRAMERATE_ERROR),
 			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 		return false;
 	}
 
-	m_BonjourServicePort.getText(&ss);
-	if (ss.getLength() < 1 || _ttoi(ss.getString()) < 1) {
+	m_MpegStreamerDelayMss.getText(&ss);
+	if (!CommonInputValidation::parseNumber(&ss, &i))
+	{
 		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_BONJOUR_SERVICE_PORT_NOTIFICATION),
-			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-		return false;
-	}
-	if(!CommonInputValidation::validatePort(&m_BonjourServicePort))
-		return false;
-
-	m_BonjourServiceType.getText(&ss);
-	if (ss.getLength() < 1) {
-		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_BONJOUR_SERVICE_TYPE_NOTIFICATION),
+			StringTable::getString(IDS_SET_MPEG_STREAMER_START_DELAY_ERROR),
 			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 		return false;
 	}
@@ -139,45 +126,38 @@ bool MpegStreamerConfigDialog::validateInput()
 
 void MpegStreamerConfigDialog::updateUI()
 {
-	m_enableBonjourService.check(m_config->isBonjourServiceEnabled());
+	m_enableMpegStreamer.check(m_config->isMpegStreamerEnabled()); 
+	MpegStreamerConfigDialog::onMpegStreamerEnabledClick();
 
-	m_useWindowsUserAsBonjourServiceName.setEnabled(m_enableBonjourService.isChecked());
-	
-	StringStorage ss;
-	m_useWindowsUserAsBonjourServiceName.check(m_config->isWindowsUserAsBonjourServiceNameUsed());
-	if (m_useWindowsUserAsBonjourServiceName.isChecked())
-	{
-		m_BonjourServiceName.setEnabled(false);
-		StringStorage service_name;
-		BonjourService::GetWindowsUserName(&service_name);
-		m_BonjourServiceName.setText(service_name.getString());
-	}
-	else
-	{
-		m_BonjourServiceName.setEnabled(m_config->isBonjourServiceEnabled());
-		m_config->getBonjourServiceName(&ss);
-		m_BonjourServiceName.setText(ss.getString());
-	}
-
-	m_BonjourServicePort.setEnabled(m_enableBonjourService.isChecked());
 	TCHAR ts[255];
-	m_BonjourServicePort.setText(_itot(m_config->getBonjourServicePort(), ts, 10));
+	m_MpegStreamerDestinationPort.setText(_itot(m_config->getMpegStreamerDestinationPort(), ts, 10));
 
-	m_BonjourServiceType.setEnabled(m_enableBonjourService.isChecked());
-	m_config->getBonjourServiceType(&ss);
-	m_BonjourServiceType.setText(ss.getString());
+	m_MpegStreamerFramerate.setText(_itot(m_config->getMpegStreamerFramerate(), ts, 10));
+
+	m_MpegStreamerDelayMss.setText(_itot(m_config->getMpegStreamerDelayMss(), ts, 10));
+
+	m_turnOffRfbVideo.check(m_config->isMpegStreamerRfbVideoTunedOff());
+
+	m_hideStreamerWindow.check(m_config->isMpegStreamerWindowHidden());
 }
 
 void MpegStreamerConfigDialog::apply()
 {
 	AutoLock al(m_config);
-	m_config->enableBonjourService(m_enableBonjourService.isChecked());
-	m_config->useWindowsUserAsBonjourServiceName(m_useWindowsUserAsBonjourServiceName.isChecked());
+
+	m_config->enableMpegStreamer(m_enableMpegStreamer.isChecked());
+
 	StringStorage ss;
-	m_BonjourServiceName.getText(&ss);
-	m_config->setBonjourServiceName(ss.getString());
-	m_BonjourServicePort.getText(&ss);
-	m_config->setBonjourServicePort(_ttoi(ss.getString()));
-	m_BonjourServiceType.getText(&ss);
-	m_config->setBonjourServiceType(ss.getString());
+	m_MpegStreamerDestinationPort.getText(&ss);
+	m_config->setMpegStreamerDestinationPort(_ttoi(ss.getString()));
+
+	m_MpegStreamerFramerate.getText(&ss);
+	m_config->setMpegStreamerFramerate(_ttoi(ss.getString()));
+
+	m_MpegStreamerDelayMss.getText(&ss);
+	m_config->setMpegStreamerDelayMss(_ttoi(ss.getString()));
+
+	m_config->turnOffMpegStreamerRfbVideo(m_turnOffRfbVideo.isChecked());
+
+	m_config->hideMpegStreamerWindow(m_hideStreamerWindow.isChecked());
 }
