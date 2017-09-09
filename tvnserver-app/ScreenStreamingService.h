@@ -49,7 +49,8 @@ public:
 private:
 	ScreenStreamingService(ULONG ip, USHORT port);
 
-	LPPROCESS_INFORMATION lpProcessInformation;
+	StringStorage commandLine;
+	PROCESS_INFORMATION processInformation;
 	//Process* process;
 	SocketAddressIPv4 address; 
 

@@ -89,31 +89,26 @@ ScreenStreamingService* ScreenStreamingService::Start(ULONG ip)
 
 	AutoLock l(&lock);
 
-	ScreenStreamingService* sss = ScreenStreamingService::Get(ip);
-	while (sss)
-	{
+	ScreenStreamingService* sss;
+	for (sss = ScreenStreamingService::Get(ip); sss; sss = ScreenStreamingService::Get(ip))
 		sss->Stop();
-		screenStreamingServiceList.remove(sss);
-		sss = ScreenStreamingService::Get(ip);
-	}
 
 	sss = new ScreenStreamingService(ip, ScreenStreamingService::serverConfig->getScreenStreamingDestinationPort());
-	StringStorage command_line;
 	try 
 	{
 		//sss->process = new Process(_T("ffmpeg.exe"), _T("-f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
 		//sss->process->start();	
 
-		STARTUPINFO sti;
+		STARTUPINFO sti = { sizeof(STARTUPINFO) };
 		StringStorage ss;
 		sss->address.toString2(&ss);
-		command_line.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
-		if (!CreateProcess(NULL, (LPTSTR)command_line.getString(), NULL, NULL, NULL, NULL, NULL, NULL, &sti, sss->lpProcessInformation))
+		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s", ScreenStreamingService::serverConfig->getScreenStreamingFramerate(), ss.getString()));
+		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, TRUE, 0, NULL, NULL, &sti, &sss->processInformation))
 			throw SystemException();
 	}
 	catch (SystemException &e) 
 	{
-		log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), command_line.getString(), e.getMessage());
+		log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), sss->commandLine.getString(), e.getMessage());
 		//log->error(_T("ScreenStreamingService: Could not CreateProcess. Command line:\r\n%s %s\r\nError: %s"), sss->process->getFilename(), sss->process->getArguments(), e.getMessage());
 		return NULL;
 	}
@@ -149,22 +144,33 @@ void ScreenStreamingService::Stop()
 	try
 	{
 		//process->kill();
-		if (!TerminateProcess(lpProcessInformation->hProcess, 0))
+		if (!TerminateProcess(processInformation.hProcess, 0))
 			throw SystemException();
 	}
 	catch (SystemException &e)
 	{
 		//log->error(_T("ScreenStreamingService: Could not terminate process:\r\n%s %s\r\nError: %s"), process->getFilename(), process->getArguments(), e.getMessage());
-		StringStorage ss;
-		address.toString2(&ss);
-		log->error(_T("ScreenStreamingService: Could not terminate process for %s\r\nError: %s"), ss.getString(), e.getMessage());
-		//return;//it is expected to be removed from the list. Otherwise it will be duplicated.
+		log->error(_T("ScreenStreamingService: CHECK PROCESSES FOR ZOMBIE! Could not terminate process for %s\r\nError: %s"), commandLine.getString(), e.getMessage());
+		//return;//it is expected to be removed from the list. Otherwise it may duplicate in the list.
 	}
+	DWORD state = WaitForSingleObject(processInformation.hProcess, 100);
+	if (state != WAIT_OBJECT_0)
+		log->error(_T("ScreenStreamingService: ZOMBIE PROCESSES RUNNING: %s"), commandLine.getString());
+	/*DWORD ec;
+	if (!GetExitCodeProcess(processInformation.hProcess, &ec))
+		log->error(_T("ScreenStreamingService: GetExitCodeProcess: %d"), GetLastError());
+	else if (ec == STILL_ACTIVE) 
+			log->error(_T("ScreenStreamingService: ZOMBIE PROCESSES RUNNING: %s"), commandLine.getString());*/
+
+	CloseHandle(processInformation.hProcess);
+	CloseHandle(processInformation.hThread);
 	screenStreamingServiceList.remove(this);
 
 	StringStorage ss;
 	address.toString2(&ss);
 	log->message(_T("ScreenStreamingService: Stopped for address: %s"), ss.getString());
+
+	delete(this);
 }
 
 void ScreenStreamingService::StopAll()
