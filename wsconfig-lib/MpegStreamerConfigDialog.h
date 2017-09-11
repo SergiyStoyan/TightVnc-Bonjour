@@ -42,7 +42,7 @@ protected:
 	//
 
 	void onMpegStreamerEnabledClick();
-	void onMpegStreamerTextChange();
+	void onMpegStreamerChange();
 
 private:
 	void initControls();

@@ -93,16 +93,22 @@ void DesktopWinImpl::onTerminate()
 
 void DesktopWinImpl::execute()
 {
-  m_log->info(_T("DesktopWinImpl thread started"));
+	if (Configurator::getInstance()->getServerConfig()->isMpegStreamerRfbVideoTunedOff())
+	{
+		m_log->warning(_T("DesktopWinImpl thread NOT started because of MpegStreamerRfbVideoTunedOff mode."));
+		return;
+	}
 
-  while (!isTerminating()) {
-    m_newUpdateEvent.waitForEvent();
-    if (!isTerminating()) {
-      sendUpdate();
-    }
-  }
+	m_log->info(_T("DesktopWinImpl thread started"));
 
-  m_log->info(_T("DesktopWinImpl thread stopped"));
+	while (!isTerminating()) {
+		m_newUpdateEvent.waitForEvent();
+		if (!isTerminating()) {
+			sendUpdate();
+		}
+	}
+
+	m_log->info(_T("DesktopWinImpl thread stopped"));
 }
 
 bool DesktopWinImpl::isRemoteInputTempBlocked()

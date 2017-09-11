@@ -107,6 +107,8 @@ void Poller::execute()
       doUpdate();
     }
 
+	//ServerConfig* config = Configurator::getInstance()->getServerConfig();
+	//unsigned int pollInterval = config->isMpegStreamerRfbVideoTunedOff() ? INFINITE : config->getPollingInterval();
     unsigned int pollInterval = Configurator::getInstance()->getServerConfig()->getPollingInterval();
     m_intervalWaiter.waitForEvent(pollInterval);
   }

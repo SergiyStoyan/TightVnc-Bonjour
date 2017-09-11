@@ -48,7 +48,12 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 	case IDC_MPEG_STREAMER_FRAMERATE:
 	case IDC_MPEG_STREAMER_START_DELAY:
 		if (notificationID == EN_UPDATE)
-			onMpegStreamerTextChange();
+			onMpegStreamerChange();
+		break;
+	case IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO:
+	case IDC_MPEG_STREAMER_HIDE_WINDOW:
+		if (notificationID == BN_CLICKED)
+			onMpegStreamerEnabledClick();
 		break;
 	}
 	return TRUE;
@@ -74,7 +79,7 @@ void MpegStreamerConfigDialog::onMpegStreamerEnabledClick()
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
 
-void MpegStreamerConfigDialog::onMpegStreamerTextChange()
+void MpegStreamerConfigDialog::onMpegStreamerChange()
 {
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
