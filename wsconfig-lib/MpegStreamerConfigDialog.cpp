@@ -215,9 +215,6 @@ void MpegStreamerConfigDialog::set_monitors()
 	//select
 	StringStorage dn;
 	m_config->getMpegStreamerCapturedDesktopDeviceName(&dn);
-	MessageBox(NULL,
-		dn.getString(),
-		_T("222"), MB_ICONSTOP | MB_OK);
 	for (int i = m_desktops.getItemsCount() - 1; i >= 0; i--)
 	{
 		WCHAR* ws = (WCHAR*)m_desktops.getItemData(i);
@@ -229,18 +226,11 @@ void MpegStreamerConfigDialog::set_monitors()
 		//TCHAR == char	
 		TO BE IMPLEMENTED!
 #endif
-			MessageBox(NULL,
-				ss.getString(),
-				_T("333"), MB_ICONSTOP | MB_OK);
-
-			if (ss.isEqualTo(&dn))
-			{
-				MessageBox(NULL,
-					ss.getString(),
-					_T("000"), MB_ICONSTOP | MB_OK);
-				m_desktops.setSelectedItem(i);
-				break;
-			}
+		if (ss.isEqualTo(&dn))
+		{
+			m_desktops.setSelectedItem(i);
+			break;
+		}
 	}
 }
 
