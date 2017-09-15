@@ -456,7 +456,11 @@ public:
 	uint16_t m_MpegStreamerDelayMss;
 	bool m_turnOffMpegStreamerRfbVideo;
 	bool m_hideMpegStreamerWindow;
-	StringStorage m_capturedDesktop;
+	StringStorage m_capturedDesktopDeviceName;
+	LONG m_capturedAreaX;
+	LONG m_capturedAreaY;
+	LONG m_capturedAreaWidth;
+	LONG m_capturedAreaHeight;
 	StringStorage m_capturedWindow;
 public:
 
@@ -478,11 +482,14 @@ public:
 	bool isMpegStreamerWindowHidden();
 	void hideMpegStreamerWindow(bool hide);
 
-	void getMpegStreamerCapturedDesktop(StringStorage* capturedDesktop);
-	void setMpegStreamerCapturedDesktop(StringStorage capturedDesktop);
+	void getMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName);
+	void setMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName);
+
+	void getMpegStreamerCapturedArea(LONG* x, LONG* y, LONG* width, LONG* height);
+	void setMpegStreamerCapturedArea(LONG x, LONG y, LONG width, LONG height);
 
 	void getMpegStreamerCapturedWindow(StringStorage* capturedWindow);
-	void setMpegStreamerCapturedWindow(StringStorage capturedWindow);
+	void setMpegStreamerCapturedWindow(StringStorage* capturedWindow);
 };
 
 #endif

@@ -26,9 +26,10 @@ public:
 		LONG y;
 		LONG width;
 		LONG height;
-		//StringStorage name;
+		WCHAR DeviceName[CCHDEVICENAME];
+		WCHAR DeviceString[128];
 	};
-	typedef list<Screen *> ScreenList; 
+	typedef list<Screen *> ScreenList;
 	static MpegStreamerConfigDialog::ScreenList Screens;
 	
 	MpegStreamerConfigDialog();

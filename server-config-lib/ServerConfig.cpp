@@ -906,16 +906,34 @@ void ServerConfig::hideMpegStreamerWindow(bool hide)
 	m_hideMpegStreamerWindow = hide;
 }
 
-void ServerConfig::getMpegStreamerCapturedDesktop(StringStorage* capturedDesktop)
+void ServerConfig::getMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName)
 {
 	AutoLock lock(&m_objectCS);
-	capturedDesktop = &m_capturedDesktop;
+	capturedDesktopDeviceName = &m_capturedDesktopDeviceName;
 }
 
-void ServerConfig::setMpegStreamerCapturedDesktop(StringStorage capturedDesktop)
+void ServerConfig::setMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName)
 {
 	AutoLock lock(&m_objectCS);
-	m_capturedDesktop = capturedDesktop;
+	m_capturedDesktopDeviceName = *capturedDesktopDeviceName;
+}
+
+void ServerConfig::getMpegStreamerCapturedArea(LONG* x, LONG* y, LONG* width, LONG* height)
+{
+	AutoLock lock(&m_objectCS);
+	*x = m_capturedAreaX;
+	*y = m_capturedAreaY;
+	*width = m_capturedAreaWidth;
+	*height = m_capturedAreaHeight;
+}
+
+void ServerConfig::setMpegStreamerCapturedArea(LONG x, LONG y, LONG width, LONG height)
+{
+	AutoLock lock(&m_objectCS);
+	m_capturedAreaX = x;
+	m_capturedAreaY = y;
+	m_capturedAreaWidth = width;
+	m_capturedAreaHeight = height;
 }
 
 void ServerConfig::getMpegStreamerCapturedWindow(StringStorage* capturedWindow)
@@ -924,8 +942,8 @@ void ServerConfig::getMpegStreamerCapturedWindow(StringStorage* capturedWindow)
 	capturedWindow = &m_capturedWindow;
 }
 
-void ServerConfig::setMpegStreamerCapturedWindow(StringStorage capturedWindow)
+void ServerConfig::setMpegStreamerCapturedWindow(StringStorage* capturedWindow)
 {
 	AutoLock lock(&m_objectCS);
-	m_capturedWindow = capturedWindow;
+	m_capturedWindow = *capturedWindow;
 }
