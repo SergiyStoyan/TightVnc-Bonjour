@@ -21,7 +21,7 @@ WISHES:
 This service creates a video stream to the client INDEPENDENTLY on RFB connection.
 */
 
-using namespace std;
+#include <list>
 
 class MpegStreamer
 {

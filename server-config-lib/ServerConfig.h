@@ -456,6 +456,8 @@ public:
 	uint16_t m_MpegStreamerDelayMss;
 	bool m_turnOffMpegStreamerRfbVideo;
 	bool m_hideMpegStreamerWindow;
+	StringStorage m_capturedDesktop;
+	StringStorage m_capturedWindow;
 public:
 
 	bool isMpegStreamerEnabled();
@@ -475,6 +477,12 @@ public:
 
 	bool isMpegStreamerWindowHidden();
 	void hideMpegStreamerWindow(bool hide);
+
+	void getMpegStreamerCapturedDesktop(StringStorage* capturedDesktop);
+	void setMpegStreamerCapturedDesktop(StringStorage capturedDesktop);
+
+	void getMpegStreamerCapturedWindow(StringStorage* capturedWindow);
+	void setMpegStreamerCapturedWindow(StringStorage capturedWindow);
 };
 
 #endif

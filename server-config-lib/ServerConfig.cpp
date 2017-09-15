@@ -905,3 +905,27 @@ void ServerConfig::hideMpegStreamerWindow(bool hide)
 	AutoLock lock(&m_objectCS);
 	m_hideMpegStreamerWindow = hide;
 }
+
+void ServerConfig::getMpegStreamerCapturedDesktop(StringStorage* capturedDesktop)
+{
+	AutoLock lock(&m_objectCS);
+	capturedDesktop = &m_capturedDesktop;
+}
+
+void ServerConfig::setMpegStreamerCapturedDesktop(StringStorage capturedDesktop)
+{
+	AutoLock lock(&m_objectCS);
+	m_capturedDesktop = capturedDesktop;
+}
+
+void ServerConfig::getMpegStreamerCapturedWindow(StringStorage* capturedWindow)
+{
+	AutoLock lock(&m_objectCS);
+	capturedWindow = &m_capturedWindow;
+}
+
+void ServerConfig::setMpegStreamerCapturedWindow(StringStorage capturedWindow)
+{
+	AutoLock lock(&m_objectCS);
+	m_capturedWindow = capturedWindow;
+}

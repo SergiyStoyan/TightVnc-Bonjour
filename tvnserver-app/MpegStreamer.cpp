@@ -68,12 +68,12 @@ MpegStreamer* MpegStreamer::get(ULONG ip)
 	AutoLock l(&lock);
 	for (MpegStreamerList::iterator i = mpegStreamerList.begin(); i != mpegStreamerList.end(); i++)
 	{
-		MpegStreamer* sss = (*i);
-		if (sss->address.getSockAddr().sin_addr.S_un.S_addr != ip)
+		MpegStreamer* ms = (*i);
+		if (ms->address.getSockAddr().sin_addr.S_un.S_addr != ip)
 			continue;
 		//if (sss->address.getSockAddr().sin_port != port)
 		//	continue;
-		return sss;
+		return ms;
 	}
 	return NULL;
 }
@@ -100,48 +100,53 @@ void MpegStreamer::Start(ULONG ip)
 
 	AutoLock l(&lock);
 
-	MpegStreamer* sss;
-	for (sss = MpegStreamer::get(ip); sss; sss = MpegStreamer::get(ip))
-		sss->destroy();
+	MpegStreamer* ms;
+	for (ms = MpegStreamer::get(ip); ms; ms = MpegStreamer::get(ip))
+		ms->destroy();
 
-	sss = new MpegStreamer(ip, config->getMpegStreamerDestinationPort());
+	ms = new MpegStreamer(ip, config->getMpegStreamerDestinationPort());
 	try
 	{
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
-		ZeroMemory(&sss->processInformation, sizeof(sss->processInformation));
+		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		StringStorage ss;
-		sss->address.toString2(&ss);
-		sss->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+		//ms->address.toString2(&ss);
+		//if(1)//window title
+		//	ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i title=\"%s\" -f mpegts udp://%s"), config->getMpegStreamerFramerate(), config->getMpegStreamerCapturedWindowTitle(), ss.getString());
+		//else if(2)//region in the virtual desktop
+		//	ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), offset_x, offset_y, video_size_x, video_size_y, ss.getString());
+		//
+		ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop  -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
 		DWORD dwCreationFlags = 0;
 		if(config->isMpegStreamerWindowHidden())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;
-		if (!CreateProcess(NULL, (LPTSTR)sss->commandLine.getString(), NULL, NULL, FALSE, dwCreationFlags, NULL, NULL, &si, &sss->processInformation))
+		if (!CreateProcess(NULL, (LPTSTR)ms->commandLine.getString(), NULL, NULL, FALSE, dwCreationFlags, NULL, NULL, &si, &ms->processInformation))
 			throw SystemException();
 	}
 	catch (SystemException &e)
 	{
-		log->interror(_T("MpegStreamer: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), sss->commandLine.getString(), e.getMessage());
+		log->interror(_T("MpegStreamer: Could not CreateProcess. Command line:\r\n%s\r\nError: %s"), ms->commandLine.getString(), e.getMessage());
 		return;
 	}
-	if (!AssignProcessToJobObject(anti_zombie_job, sss->processInformation.hProcess))
+	if (!AssignProcessToJobObject(anti_zombie_job, ms->processInformation.hProcess))
 	{
 		log->interror(_T("MpegStreamer: AssignProcessToJobObject failed. Error: %d"), GetLastError());
 		return;
 	}
 
-	if (MpegStreamer::get(sss->address.getSockAddr().sin_addr.S_un.S_addr))
+	if (MpegStreamer::get(ms->address.getSockAddr().sin_addr.S_un.S_addr))
 	{
 		StringStorage ss;
-		sss->address.toString(&ss);
+		ms->address.toString(&ss);
 		log->interror(_T("MpegStreamer: while adding a stream: a stream to this destination aready exists: %s"), ss.getString());
 		throw Exception(ss.getString());
 	}
-	mpegStreamerList.push_back(sss);
+	mpegStreamerList.push_back(ms);
 
 	StringStorage ss;
-	sss->address.toString2(&ss);
+	ms->address.toString2(&ss);
 	log->message(_T("MpegStreamer: Started for: %s"), ss.getString());
 }
 

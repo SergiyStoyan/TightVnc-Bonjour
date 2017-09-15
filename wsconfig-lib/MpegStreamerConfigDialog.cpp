@@ -34,6 +34,8 @@ void MpegStreamerConfigDialog::initControls()
 	m_MpegStreamerDelayMss.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_START_DELAY));
 	m_turnOffRfbVideo.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO));
 	m_hideStreamerWindow.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_HIDE_WINDOW));
+	m_desktops.setWindow(GetDlgItem(dialogHwnd, IDC_COMBO_MPEG_STREAMER_MONOTORS));
+	m_windows.setWindow(GetDlgItem(dialogHwnd, IDC_COMBO_MPEG_STREAMER_WINDOWS));
 }
 
 BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
@@ -131,7 +133,7 @@ bool MpegStreamerConfigDialog::validateInput()
 
 void MpegStreamerConfigDialog::updateUI()
 {
-	m_enableMpegStreamer.check(m_config->isMpegStreamerEnabled()); 
+	m_enableMpegStreamer.check(m_config->isMpegStreamerEnabled());
 	MpegStreamerConfigDialog::onMpegStreamerEnabledClick();
 
 	TCHAR ts[255];
@@ -144,6 +146,63 @@ void MpegStreamerConfigDialog::updateUI()
 	m_turnOffRfbVideo.check(m_config->isMpegStreamerRfbVideoTunedOff());
 
 	m_hideStreamerWindow.check(m_config->isMpegStreamerWindowHidden());
+
+	set_monitors();
+	HMONITOR hMonitor;
+	
+	StringStorage cd;
+	m_config->getMpegStreamerCapturedDesktop(&cd);
+	StringStorage ss;
+	for (int i = m_desktops.getItemsCount() - 1; i >= 0; i--)
+	{
+		m_desktops.getItemText(i, &ss);
+		if (ss.isEqualTo(&cd))
+		{
+			m_desktops.setSelectedItem(i);
+			break;
+		}
+	}
+}
+BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+	//MONITORINFO info;
+	//info.cbSize = sizeof(info);
+	//if (GetMonitorInfo(hMonitor, &info)) 
+	{
+		MpegStreamerConfigDialog::Screen* s = new MpegStreamerConfigDialog::Screen();
+		/*s->x = info.rcMonitor.left;
+		s->y = info.rcMonitor.top;
+		s->width = info.rcMonitor.left - info.rcMonitor.right;
+		s->height = info.rcMonitor.top - info.rcMonitor.bottom;*/
+		s->x = lprcMonitor->left;
+		s->y = lprcMonitor->top;
+		s->width = lprcMonitor->right - lprcMonitor->left;
+		s->height = lprcMonitor->bottom - lprcMonitor->top;
+		MpegStreamerConfigDialog::Screens.push_back(s); 
+	}
+	return TRUE;  // continue enumerating
+}
+MpegStreamerConfigDialog::ScreenList MpegStreamerConfigDialog::Screens = MpegStreamerConfigDialog::ScreenList();
+
+void MpegStreamerConfigDialog::set_monitors() 
+{
+	int numberOfScreens = GetSystemMetrics(SM_CMONITORS);
+	int width = GetSystemMetrics(SM_CXSCREEN);
+	int height = GetSystemMetrics(SM_CYSCREEN);
+
+	Screens.clear();
+	EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, 0);
+
+	StringStorage ss;
+	for (ScreenList::iterator i = Screens.begin(); i != Screens.end(); i++)
+	{
+		Screen* s = (*i);
+		ss.format(_T("%d,%d,%d,%d"), s->x, s->y, s->width, s->height);
+		/*MessageBox(m_ctrlThis.getWindow(),
+			ss.getString(),
+			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);*/ 		
+		m_desktops.addItem(ss.getString());
+	}
 }
 
 void MpegStreamerConfigDialog::apply()

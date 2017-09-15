@@ -11,12 +11,26 @@
 #include "gui/BaseDialog.h"
 #include "gui/TextBox.h"
 #include "gui/CheckBox.h"
+#include "gui/ComboBox.h"
 
 #include "server-config-lib/Configurator.h"
+
+#include <list>
 
 class MpegStreamerConfigDialog : public BaseDialog
 {
 public:
+	struct Screen
+	{
+		LONG x;
+		LONG y;
+		LONG width;
+		LONG height;
+		//StringStorage name;
+	};
+	typedef list<Screen *> ScreenList; 
+	static MpegStreamerConfigDialog::ScreenList Screens;
+	
 	MpegStreamerConfigDialog();
 	virtual ~MpegStreamerConfigDialog();
 
@@ -46,8 +60,9 @@ protected:
 
 private:
 	void initControls();
+	void set_monitors();
+	//BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 
-protected:
 	// Configuration
 	ServerConfig *m_config;
 	// Controls
@@ -57,6 +72,8 @@ protected:
 	TextBox m_MpegStreamerDelayMss;
 	CheckBox m_turnOffRfbVideo;
 	CheckBox m_hideStreamerWindow;
+	ComboBox m_desktops;
+	ComboBox m_windows;
 
 	BaseDialog *m_parent;
 };
