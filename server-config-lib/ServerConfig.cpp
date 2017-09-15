@@ -143,6 +143,11 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt16(m_MpegStreamerDelayMss);
   output->writeInt8(m_turnOffMpegStreamerRfbVideo ? 1 : 0);
   output->writeInt8(m_hideMpegStreamerWindow ? 1 : 0);
+  output->writeUTF8(m_MpegStreamerCapturedDesktopDeviceName.getString());
+  output->writeInt32(m_MpegStreamerCapturedAreaX);
+  output->writeInt32(m_MpegStreamerCapturedAreaY);
+  output->writeInt32(m_MpegStreamerCapturedAreaWidth);
+  output->writeInt32(m_MpegStreamerCapturedAreaHeight);  
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -224,6 +229,11 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_MpegStreamerDelayMss = input->readInt16();
   m_turnOffMpegStreamerRfbVideo = input->readInt8() == 1;
   m_hideMpegStreamerWindow = input->readInt8() == 1;
+  input->readUTF8(&m_MpegStreamerCapturedDesktopDeviceName);
+  m_MpegStreamerCapturedAreaX = input->readInt32();
+  m_MpegStreamerCapturedAreaY = input->readInt32();
+  m_MpegStreamerCapturedAreaWidth = input->readInt32();
+  m_MpegStreamerCapturedAreaHeight = input->readInt32();
 
   input->readUTF8(&m_logFilePath);
 }
@@ -909,41 +919,41 @@ void ServerConfig::hideMpegStreamerWindow(bool hide)
 void ServerConfig::getMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName)
 {
 	AutoLock lock(&m_objectCS);
-	capturedDesktopDeviceName = &m_capturedDesktopDeviceName;
+	*capturedDesktopDeviceName = m_MpegStreamerCapturedDesktopDeviceName;
 }
 
-void ServerConfig::setMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName)
+void ServerConfig::setMpegStreamerCapturedDesktopDeviceName(const TCHAR* capturedDesktopDeviceName)
 {
 	AutoLock lock(&m_objectCS);
-	m_capturedDesktopDeviceName = *capturedDesktopDeviceName;
+	m_MpegStreamerCapturedDesktopDeviceName.setString(capturedDesktopDeviceName);
 }
 
 void ServerConfig::getMpegStreamerCapturedArea(LONG* x, LONG* y, LONG* width, LONG* height)
 {
 	AutoLock lock(&m_objectCS);
-	*x = m_capturedAreaX;
-	*y = m_capturedAreaY;
-	*width = m_capturedAreaWidth;
-	*height = m_capturedAreaHeight;
+	*x = m_MpegStreamerCapturedAreaX;
+	*y = m_MpegStreamerCapturedAreaY;
+	*width = m_MpegStreamerCapturedAreaWidth;
+	*height = m_MpegStreamerCapturedAreaHeight;
 }
 
 void ServerConfig::setMpegStreamerCapturedArea(LONG x, LONG y, LONG width, LONG height)
 {
 	AutoLock lock(&m_objectCS);
-	m_capturedAreaX = x;
-	m_capturedAreaY = y;
-	m_capturedAreaWidth = width;
-	m_capturedAreaHeight = height;
+	m_MpegStreamerCapturedAreaX = x;
+	m_MpegStreamerCapturedAreaY = y;
+	m_MpegStreamerCapturedAreaWidth = width;
+	m_MpegStreamerCapturedAreaHeight = height;
 }
 
 void ServerConfig::getMpegStreamerCapturedWindow(StringStorage* capturedWindow)
 {
 	AutoLock lock(&m_objectCS);
-	capturedWindow = &m_capturedWindow;
+	*capturedWindow = m_MpegStreamerCapturedWindow;
 }
 
-void ServerConfig::setMpegStreamerCapturedWindow(StringStorage* capturedWindow)
+void ServerConfig::setMpegStreamerCapturedWindow(const TCHAR* capturedWindow)
 {
 	AutoLock lock(&m_objectCS);
-	m_capturedWindow = *capturedWindow;
+	m_MpegStreamerCapturedWindow.setString(capturedWindow);
 }

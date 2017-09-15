@@ -456,12 +456,12 @@ public:
 	uint16_t m_MpegStreamerDelayMss;
 	bool m_turnOffMpegStreamerRfbVideo;
 	bool m_hideMpegStreamerWindow;
-	StringStorage m_capturedDesktopDeviceName;
-	LONG m_capturedAreaX;
-	LONG m_capturedAreaY;
-	LONG m_capturedAreaWidth;
-	LONG m_capturedAreaHeight;
-	StringStorage m_capturedWindow;
+	StringStorage m_MpegStreamerCapturedDesktopDeviceName;
+	LONG m_MpegStreamerCapturedAreaX;
+	LONG m_MpegStreamerCapturedAreaY;
+	LONG m_MpegStreamerCapturedAreaWidth;
+	LONG m_MpegStreamerCapturedAreaHeight;
+	StringStorage m_MpegStreamerCapturedWindow;
 public:
 
 	bool isMpegStreamerEnabled();
@@ -483,13 +483,13 @@ public:
 	void hideMpegStreamerWindow(bool hide);
 
 	void getMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName);
-	void setMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName);
+	void setMpegStreamerCapturedDesktopDeviceName(const TCHAR* capturedDesktopDeviceName);
 
 	void getMpegStreamerCapturedArea(LONG* x, LONG* y, LONG* width, LONG* height);
 	void setMpegStreamerCapturedArea(LONG x, LONG y, LONG width, LONG height);
 
 	void getMpegStreamerCapturedWindow(StringStorage* capturedWindow);
-	void setMpegStreamerCapturedWindow(StringStorage* capturedWindow);
+	void setMpegStreamerCapturedWindow(const TCHAR* capturedWindow);
 };
 
 #endif

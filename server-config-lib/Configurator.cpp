@@ -908,3 +908,48 @@ bool Configurator::loadBonjourConfig(SettingsManager *sm, ServerConfig *config)
 
 	return loadResult;
 }
+
+//bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *config)
+//{
+//	bool loadResult = true;
+//
+//	bool b;
+//	if (!sm->getBoolean(_T("EnableBonjourService"), &b))
+//		loadResult = false;
+//	else {
+//		m_isConfigLoadedPartly = true;
+//		m_serverConfig.enableBonjourService(b);
+//	}
+//
+//	if (!sm->getBoolean(_T("UseWindowsUserAsBonjourServiceName"), &b))
+//		loadResult = false;
+//	else {
+//		m_isConfigLoadedPartly = true;
+//		m_serverConfig.useWindowsUserAsBonjourServiceName(b);
+//	}
+//
+//	StringStorage ss;
+//	if (!sm->getString(_T("BonjourServiceName"), &ss))
+//		loadResult = false;
+//	else {
+//		m_isConfigLoadedPartly = true;
+//		m_serverConfig.setBonjourServiceName(ss.getString());
+//	}
+//
+//	UINT ui;
+//	if (!sm->getUINT(_T("BonjourServicePort"), &ui))
+//		loadResult = false;
+//	else {
+//		m_isConfigLoadedPartly = true;
+//		m_serverConfig.setBonjourServicePort(ui);
+//	}
+//
+//	if (!sm->getString(_T("BonjourServiceType"), &ss))
+//		loadResult = false;
+//	else {
+//		m_isConfigLoadedPartly = true;
+//		m_serverConfig.setBonjourServiceType(ss.getString());
+//	}
+//
+//	return loadResult;
+//}
