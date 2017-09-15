@@ -946,14 +946,14 @@ void ServerConfig::setMpegStreamerCapturedArea(LONG x, LONG y, LONG width, LONG 
 	m_MpegStreamerCapturedAreaHeight = height;
 }
 
-void ServerConfig::getMpegStreamerCapturedWindow(StringStorage* capturedWindow)
+void ServerConfig::getMpegStreamerCapturedWindowTitle(StringStorage* capturedWindowTitle)
 {
 	AutoLock lock(&m_objectCS);
-	*capturedWindow = m_MpegStreamerCapturedWindow;
+	*capturedWindowTitle = m_MpegStreamerCapturedWindowTitle;
 }
 
-void ServerConfig::setMpegStreamerCapturedWindow(const TCHAR* capturedWindow)
+void ServerConfig::setMpegStreamerCapturedWindowTitle(const TCHAR* capturedWindowTitle)
 {
 	AutoLock lock(&m_objectCS);
-	m_MpegStreamerCapturedWindow.setString(capturedWindow);
+	m_MpegStreamerCapturedWindowTitle.setString(capturedWindowTitle);
 }

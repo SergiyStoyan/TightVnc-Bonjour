@@ -147,6 +147,9 @@ bool Configurator::save(SettingsManager *sm)
   if (!saveBonjourConfig(sm)) {
 	  saveResult = false;
   }
+  if (!saveMpegStreamerConfig(sm)) {
+	  saveResult = false;
+  }
   return saveResult;
 }
 
@@ -184,6 +187,9 @@ bool Configurator::load(SettingsManager *sm)
 	  loadResult = false;
   }
   if (!loadBonjourConfig(sm, &m_serverConfig)) {
+	  loadResult = false;
+  }
+  if (!loadMpegStreamerConfig(sm, &m_serverConfig)) {
 	  loadResult = false;
   }
 
@@ -909,47 +915,116 @@ bool Configurator::loadBonjourConfig(SettingsManager *sm, ServerConfig *config)
 	return loadResult;
 }
 
-//bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *config)
-//{
-//	bool loadResult = true;
-//
-//	bool b;
-//	if (!sm->getBoolean(_T("EnableBonjourService"), &b))
-//		loadResult = false;
-//	else {
-//		m_isConfigLoadedPartly = true;
-//		m_serverConfig.enableBonjourService(b);
-//	}
-//
-//	if (!sm->getBoolean(_T("UseWindowsUserAsBonjourServiceName"), &b))
-//		loadResult = false;
-//	else {
-//		m_isConfigLoadedPartly = true;
-//		m_serverConfig.useWindowsUserAsBonjourServiceName(b);
-//	}
-//
-//	StringStorage ss;
-//	if (!sm->getString(_T("BonjourServiceName"), &ss))
-//		loadResult = false;
-//	else {
-//		m_isConfigLoadedPartly = true;
-//		m_serverConfig.setBonjourServiceName(ss.getString());
-//	}
-//
-//	UINT ui;
-//	if (!sm->getUINT(_T("BonjourServicePort"), &ui))
-//		loadResult = false;
-//	else {
-//		m_isConfigLoadedPartly = true;
-//		m_serverConfig.setBonjourServicePort(ui);
-//	}
-//
-//	if (!sm->getString(_T("BonjourServiceType"), &ss))
-//		loadResult = false;
-//	else {
-//		m_isConfigLoadedPartly = true;
-//		m_serverConfig.setBonjourServiceType(ss.getString());
-//	}
-//
-//	return loadResult;
-//}
+bool Configurator::saveMpegStreamerConfig(SettingsManager *sm)
+{
+	//AutoLock l(&m_serverConfig);
+	bool saveResult = true;
+
+	if (!sm->setBoolean(_T("EnableMpegStreamer"), m_serverConfig.isMpegStreamerEnabled()))
+		saveResult = false;
+
+	if (!sm->setUINT(_T("MpegStreamerDestinationPort"), m_serverConfig.getMpegStreamerDestinationPort()))
+		saveResult = false;
+
+	if (!sm->setUINT(_T("MpegStreamerFramerate"), m_serverConfig.getMpegStreamerFramerate()))
+		saveResult = false;
+
+	if (!sm->setUINT(_T("MpegStreamerDelayMss"), m_serverConfig.getMpegStreamerDelayMss()))
+		saveResult = false;
+
+	if (!sm->setBoolean(_T("MpegStreamerRfbVideoTunedOff"), m_serverConfig.isMpegStreamerRfbVideoTunedOff()))
+		saveResult = false;
+
+	if (!sm->setBoolean(_T("MpegStreamerWindowHidden"), m_serverConfig.isMpegStreamerWindowHidden()))
+		saveResult = false;
+	
+	StringStorage ss;
+	m_serverConfig.getMpegStreamerCapturedDesktopDeviceName(&ss);
+	if (!sm->setString(_T("MpegStreamerCapturedDesktopDeviceName"), ss.getString()))
+		saveResult = false;
+	
+	LONG ui1, ui2, ui3, ui4;
+	m_serverConfig.getMpegStreamerCapturedArea(&ui1, &ui2, &ui3, &ui4);
+	if (!sm->setLong(_T("MpegStreamerCapturedAreaX"), ui1) || !sm->setLong(_T("MpegStreamerCapturedAreaY"), ui2) || !sm->setLong(_T("MpegStreamerCapturedAreaWidth"), ui3) || !sm->setLong(_T("MpegStreamerCapturedAreaHeight"), ui4))
+		saveResult = false;
+
+	m_serverConfig.getMpegStreamerCapturedWindowTitle(&ss);
+	if (!sm->setString(_T("MpegStreamerCapturedWindowTitle"), ss.getString()))
+		saveResult = false;
+
+	return saveResult;
+}
+
+bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *config)
+{
+	bool loadResult = true;
+
+	bool b;
+	if (!sm->getBoolean(_T("EnableMpegStreamer"), &b))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.enableMpegStreamer(b);
+	}
+
+	UINT ui;
+	if (!sm->getUINT(_T("MpegStreamerDestinationPort"), &ui))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setMpegStreamerDestinationPort(ui);
+	}
+
+	if (!sm->getUINT(_T("MpegStreamerFramerate"), &ui))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setMpegStreamerFramerate(ui);
+	}
+
+	if (!sm->getUINT(_T("MpegStreamerDelayMss"), &ui))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setMpegStreamerDelayMss(ui);
+	}
+
+	if (!sm->getBoolean(_T("MpegStreamerRfbVideoTunedOff"), &b))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.turnOffMpegStreamerRfbVideo(b);
+	}
+
+	if (!sm->getBoolean(_T("MpegStreamerWindowHidden"), &b))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.hideMpegStreamerWindow(b);
+	}
+
+	StringStorage ss;
+	if (!sm->getString(_T("MpegStreamerCapturedDesktopDeviceName"), &ss))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setMpegStreamerCapturedDesktopDeviceName(ss.getString());
+	}
+
+	UINT ui1, ui2, ui3, ui4;
+	if (!sm->getUINT(_T("MpegStreamerCapturedAreaX"), &ui1)|| !sm->getUINT(_T("MpegStreamerCapturedAreaY"), &ui2)|| !sm->getUINT(_T("MpegStreamerCapturedAreaWidth"), &ui3)|| !sm->getUINT(_T("MpegStreamerCapturedAreaHeight"), &ui4))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setMpegStreamerCapturedArea(ui1, ui2, ui3, ui4);
+	}
+
+	if (!sm->getString(_T("MpegStreamerCapturedWindowTitle"), &ss))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setMpegStreamerCapturedWindowTitle(ss.getString());
+	}
+
+	return loadResult;
+}

@@ -95,6 +95,9 @@ private:
   bool saveBonjourConfig(SettingsManager *sm);
   bool loadBonjourConfig(SettingsManager *sm, ServerConfig *config);
 
+  bool saveMpegStreamerConfig(SettingsManager *sm);
+  bool loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *config);
+
   bool save(SettingsManager *sm);
   bool load(SettingsManager *sm);
 

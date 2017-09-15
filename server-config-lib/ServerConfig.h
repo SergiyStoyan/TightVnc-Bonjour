@@ -461,7 +461,7 @@ public:
 	LONG m_MpegStreamerCapturedAreaY;
 	LONG m_MpegStreamerCapturedAreaWidth;
 	LONG m_MpegStreamerCapturedAreaHeight;
-	StringStorage m_MpegStreamerCapturedWindow;
+	StringStorage m_MpegStreamerCapturedWindowTitle;
 public:
 
 	bool isMpegStreamerEnabled();
@@ -488,8 +488,8 @@ public:
 	void getMpegStreamerCapturedArea(LONG* x, LONG* y, LONG* width, LONG* height);
 	void setMpegStreamerCapturedArea(LONG x, LONG y, LONG width, LONG height);
 
-	void getMpegStreamerCapturedWindow(StringStorage* capturedWindow);
-	void setMpegStreamerCapturedWindow(const TCHAR* capturedWindow);
+	void getMpegStreamerCapturedWindowTitle(StringStorage* capturedWindow);
+	void setMpegStreamerCapturedWindowTitle(const TCHAR* capturedWindow);
 };
 
 #endif
