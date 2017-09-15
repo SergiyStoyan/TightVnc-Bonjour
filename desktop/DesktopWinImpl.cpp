@@ -93,7 +93,8 @@ void DesktopWinImpl::onTerminate()
 
 void DesktopWinImpl::execute()
 {
-	if (Configurator::getInstance()->getServerConfig()->isMpegStreamerRfbVideoTunedOff())
+	ServerConfig* config = Configurator::getInstance()->getServerConfig();
+	if (config->isMpegStreamerEnabled() && config->isMpegStreamerRfbVideoTunedOff())
 	{
 		m_log->warning(_T("DesktopWinImpl thread NOT started because of MpegStreamerRfbVideoTunedOff mode."));
 		return;

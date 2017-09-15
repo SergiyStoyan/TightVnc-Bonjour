@@ -22,7 +22,7 @@
 //-------------------------------------------------------------------------
 //
 
-#ifndef _FB_UDPATE_NOTIFIER_H_
+#ifndef _FB_UPDATE_NOTIFIER_H_
 #define _FB_UPDATE_NOTIFIER_H_
 
 #include "log-writer/LogWriter.h"
