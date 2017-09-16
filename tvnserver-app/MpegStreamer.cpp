@@ -172,6 +172,7 @@ void MpegStreamer::Start(ULONG ip)
 		default:
 			throw new Exception(_T("Unexpected option"));
 		}
+		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop  -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
 		DWORD dwCreationFlags = 0;
 		if(config->isMpegStreamerWindowHidden())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;

@@ -70,7 +70,7 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 		break;
 	case IDC_COMBO_MPEG_STREAMER_MONOTORS:
 	case IDC_COMBO_MPEG_STREAMER_WINDOWS:
-		if (notificationID == 1/*||notificationID == 9*/)
+		if (notificationID == CBN_SELCHANGE)
 		{
 			/*StringStorage ss;
 			ss.format(_T("%d"), notificationID);
