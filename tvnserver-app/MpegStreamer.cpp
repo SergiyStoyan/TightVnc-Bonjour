@@ -148,7 +148,7 @@ void MpegStreamer::Start(ULONG ip)
 			LONG x, y, w, h;
 			if (!get_display_virtual_area(dn, &x, &y, &w, &h))
 			{
-				log->error(_T("MpegStreamer: Could not get desktop dimensions. The entire virtual desktop will be used."));
+				log->error(_T("MpegStreamer: Could not get desktop dimensions for '%s'. The entire virtual desktop will be streamed."), dn.getString());
 				ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop  -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
 			}
 			else

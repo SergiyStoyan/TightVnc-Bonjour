@@ -114,29 +114,6 @@ void MpegStreamerConfigDialog::onMpegStreamerEnabled()
 
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
-//
-//void MpegStreamerConfigDialog::onMpegStreamerCapturedDisplaySet()
-//{
-//	m_destinationPort.setEnabled(m_enableMpegStreamer.isChecked());
-//	m_framerate.setEnabled(m_enableMpegStreamer.isChecked());
-//	m_delayMss.setEnabled(m_enableMpegStreamer.isChecked());
-//	m_turnOffRfbVideo.setEnabled(m_enableMpegStreamer.isChecked());
-//	m_hideStreamerWindow.setEnabled(m_enableMpegStreamer.isChecked());
-//
-//	m_captureDisplay.setEnabled(m_enableMpegStreamer.isChecked());
-//	m_displays.setEnabled(m_captureDisplay.isChecked());
-//
-//	m_captureArea.setEnabled(m_enableMpegStreamer.isChecked());
-//	m_capturedAreaLeft.setEnabled(m_captureArea.isChecked());
-//	m_capturedAreaTop.setEnabled(m_captureArea.isChecked());
-//	m_capturedAreaWidth.setEnabled(m_captureArea.isChecked());
-//	m_capturedAreaHeight.setEnabled(m_captureArea.isChecked());
-//
-//	m_captureWindow.setEnabled(m_enableMpegStreamer.isChecked());
-//	m_windows.setEnabled(m_captureWindow.isChecked());
-//
-//	((ConfigDialog *)m_parent)->updateApplyButtonState();
-//}
 
 void MpegStreamerConfigDialog::onMpegStreamerChange()
 {
@@ -176,6 +153,56 @@ bool MpegStreamerConfigDialog::validateInput()
 			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 		return false;
 	}
+	
+	if (m_captureDisplay.isChecked())
+	{
+		if (m_displays.getSelectedItemIndex() < 0)
+		{
+			MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_DISPLAY_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+			return false;
+		}
+	}
+	else if (m_captureArea.isChecked())
+	{
+		m_capturedAreaLeft.getText(&ss);
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+			MessageBox(m_ctrlThis.getWindow(),
+				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
+				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+			return false;
+		}
+		m_capturedAreaTop.getText(&ss);
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+			MessageBox(m_ctrlThis.getWindow(),
+				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
+				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+			return false;
+		}
+		m_capturedAreaWidth.getText(&ss);
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+			MessageBox(m_ctrlThis.getWindow(),
+				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
+				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+			return false;
+		}
+		m_capturedAreaHeight.getText(&ss);
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+			MessageBox(m_ctrlThis.getWindow(),
+				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
+				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+			return false;
+		}
+	}
+	else if (m_captureWindow.isChecked())
+	{
+		if (m_windows.getSelectedItemIndex() < 0)
+		{
+			MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_WINDOW_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+			return false;
+		}
+	}
+	else
+		MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_MODE_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 
 	return true;
 }
@@ -327,9 +354,7 @@ void MpegStreamerConfigDialog::apply()
 	{
 		m_config->setMpegStreamerCaptureMode(ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY);
 
-		if (m_displays.getSelectedItemIndex() < 0)
-			MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_DISPLAY_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-		else
+		if (m_displays.getSelectedItemIndex() >= 0)
 		{
 			WCHAR* ws = (WCHAR*)m_displays.getItemData(m_displays.getSelectedItemIndex());
 #ifdef UNICODE
@@ -339,8 +364,8 @@ void MpegStreamerConfigDialog::apply()
 			//TCHAR == char	
 			TO BE IMPLEMENTED!
 #endif
+			m_config->setMpegStreamerCapturedDisplayDeviceName(ss.getString());
 		}
-		m_config->setMpegStreamerCapturedDisplayDeviceName(ss.getString());
 	}
 	else if (m_captureArea.isChecked())
 	{
@@ -360,11 +385,20 @@ void MpegStreamerConfigDialog::apply()
 	else if (m_captureWindow.isChecked())
 	{
 		m_config->setMpegStreamerCaptureMode(ServerConfig::MPEG_STREAMER_CAPTURE_MODE_WINDOW);
+
+		if (m_windows.getSelectedItemIndex() >= 0)
+		{
+			WCHAR* ws = (WCHAR*)m_windows.getItemData(m_windows.getSelectedItemIndex());
+#ifdef UNICODE
+			//TCHAR == WCHAR
+			ss = StringStorage(ws);
+#else
+			//TCHAR == char	
+			TO BE IMPLEMENTED!
+#endif
+			m_config->setMpegStreamerCapturedWindowTitle(ss.getString());
+		}
 	}
 	else
 		MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_MODE_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-
-	//MessageBox(m_ctrlThis.getWindow(),
-	//	ss.getString(),
-	//	_T("222"), MB_ICONSTOP | MB_OK);
 }

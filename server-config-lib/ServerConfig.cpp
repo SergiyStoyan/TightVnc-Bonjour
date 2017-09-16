@@ -57,10 +57,14 @@ ServerConfig::ServerConfig()
   m_BonjourServicePort = 5353;
   m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
 
-  m_enableMpegStreamer = true;
+  m_enableMpegStreamer = false;
   m_MpegStreamerDestinationPort = 5920;
   m_MpegStreamerFramerate = 10;
   m_MpegStreamerDelayMss = 500;
+  m_MpegStreamerCapturedAreaX = 0;
+  m_MpegStreamerCapturedAreaY = 0;
+  m_MpegStreamerCapturedAreaWidth = 0;
+  m_MpegStreamerCapturedAreaHeight = 0;
 }
 
 ServerConfig::~ServerConfig()
