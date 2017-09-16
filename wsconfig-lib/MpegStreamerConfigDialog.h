@@ -56,7 +56,7 @@ protected:
 	// Controls event handlers.
 	//
 
-	void onMpegStreamerEnabledClick();
+	void onMpegStreamerEnabled();
 	//void onMpegStreamerCapturedDisplaySet();
 	void onMpegStreamerChange();
 

@@ -87,7 +87,7 @@ BOOL MpegStreamer::get_display_virtual_area(const StringStorage display_name, LO
 {
 	wcsncpy(display_device_name, display_name.getString(), sizeof(display_device_name) / sizeof(WCHAR));
 	EnumDisplayMonitors(NULL, NULL, MpegStreamer::MonitorEnumProc, 0);
-	if (!display_info.szDevice[0])
+	if (!display_info.cbSize)
 		return FALSE;
 	*x = display_info.rcMonitor.left;
 	*y = display_info.rcMonitor.top;
@@ -99,12 +99,12 @@ MONITORINFOEX MpegStreamer::display_info = MONITORINFOEX();
 WCHAR MpegStreamer::display_device_name[CCHDEVICENAME];
 BOOL CALLBACK MpegStreamer::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
 {
-	//DisplayInfo.cbSize = sizeof(MONITORINFOEX);
+	display_info.cbSize = sizeof(MONITORINFOEX);
 	if (!GetMonitorInfo(hMonitor, &display_info))
 		return TRUE;// continue enumerating
 	if (!wcscmp(display_info.szDevice, display_device_name))
 		return FALSE;//stop enumerating
-	ZeroMemory(display_info.szDevice, sizeof(display_info.szDevice) / sizeof(WCHAR));
+	display_info.cbSize = 0;
 	return TRUE;// continue enumerating
 }
 

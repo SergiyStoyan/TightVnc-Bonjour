@@ -50,17 +50,17 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 	switch (controlID)
 	{
 	case IDC_MPEG_STREAMER_ENABLED:
+	case IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO:
+	case IDC_MPEG_STREAMER_HIDE_WINDOW:
 	case IDC_RADIO_MPEG_STREAMER_MONITOR:
 	case IDC_RADIO_MPEG_STREAMER_AREA:
 	case IDC_RADIO_MPEG_STREAMER_WINDOW:
 		if (notificationID == BN_CLICKED)
-			onMpegStreamerEnabledClick();
+			onMpegStreamerEnabled();
 		break;
 	case IDC_MPEG_STREAMER_DESTINATION_PORT:
 	case IDC_MPEG_STREAMER_FRAMERATE:
 	case IDC_MPEG_STREAMER_START_DELAY:
-	case IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO:
-	case IDC_MPEG_STREAMER_HIDE_WINDOW:
 	case IDC_MPEG_STREAMER_AREA_LEFT:
 	case IDC_MPEG_STREAMER_AREA_TOP:
 	case IDC_MPEG_STREAMER_AREA_WIDTH:
@@ -92,7 +92,7 @@ BOOL MpegStreamerConfigDialog::onInitDialog()
   return TRUE;
 }
 
-void MpegStreamerConfigDialog::onMpegStreamerEnabledClick()
+void MpegStreamerConfigDialog::onMpegStreamerEnabled()
 {
 	m_destinationPort.setEnabled(m_enableMpegStreamer.isChecked());
 	m_framerate.setEnabled(m_enableMpegStreamer.isChecked());
@@ -101,16 +101,16 @@ void MpegStreamerConfigDialog::onMpegStreamerEnabledClick()
 	m_hideStreamerWindow.setEnabled(m_enableMpegStreamer.isChecked());
 
 	m_captureDisplay.setEnabled(m_enableMpegStreamer.isChecked());
-	m_displays.setEnabled(m_captureDisplay.isChecked());
+	m_displays.setEnabled(m_enableMpegStreamer.isChecked() && m_captureDisplay.isChecked());
 
 	m_captureArea.setEnabled(m_enableMpegStreamer.isChecked());
-	m_capturedAreaLeft.setEnabled(m_captureArea.isChecked());
-	m_capturedAreaTop.setEnabled(m_captureArea.isChecked());
-	m_capturedAreaWidth.setEnabled(m_captureArea.isChecked());
-	m_capturedAreaHeight.setEnabled(m_captureArea.isChecked());
+	m_capturedAreaLeft.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
+	m_capturedAreaTop.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
+	m_capturedAreaWidth.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
+	m_capturedAreaHeight.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
 
 	m_captureWindow.setEnabled(m_enableMpegStreamer.isChecked());
-	m_windows.setEnabled(m_captureWindow.isChecked());
+	m_windows.setEnabled(m_enableMpegStreamer.isChecked() && m_captureWindow.isChecked());
 
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
@@ -183,7 +183,6 @@ bool MpegStreamerConfigDialog::validateInput()
 void MpegStreamerConfigDialog::updateUI()
 {
 	m_enableMpegStreamer.check(m_config->isMpegStreamerEnabled());
-	MpegStreamerConfigDialog::onMpegStreamerEnabledClick();
 
 	TCHAR ts[255];
 	m_destinationPort.setText(_itot(m_config->getMpegStreamerDestinationPort(), ts, 10));
@@ -215,6 +214,7 @@ void MpegStreamerConfigDialog::updateUI()
 		m_captureDisplay.check(true);
 		break;
 	}
+	onMpegStreamerEnabled();
 }
 
 void MpegStreamerConfigDialog::set_monitors() 
@@ -235,7 +235,7 @@ void MpegStreamerConfigDialog::set_monitors()
 	{
 		Screen* s = (*i);
 		EnumDisplayDevices(s->DeviceName, 0, &dd, 0);
-		wcsncpy(s->DeviceName, dd.DeviceName, sizeof(s->DeviceName) / sizeof(WCHAR));
+		//wcsncpy(s->DeviceName, dd.DeviceName, sizeof(s->DeviceName) / sizeof(WCHAR));//this name is more detailed and so cannot be used when seek by EnumDisplayMonitors
 		wcsncpy(s->DeviceString, dd.DeviceString, sizeof(s->DeviceString) / sizeof(WCHAR));
 	}
 
@@ -276,6 +276,10 @@ BOOL CALLBACK MpegStreamerConfigDialog::MonitorEnumProc(HMONITOR hMonitor, HDC h
 	mi->cbSize = sizeof(MONITORINFOEX);
 	if (!GetMonitorInfo(hMonitor, mi))
 		return TRUE;// continue enumerating
+	
+	/*StringStorage ss;
+	ss.format(_T("%d,%d,%d,%d"), mi->rcWork.left, mi->rcWork.top, mi->rcWork.right - mi->rcWork.left, mi->rcWork.bottom - mi->rcWork.top);
+	MessageBox(NULL, ss.getString(), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);*/
 
 	MpegStreamerConfigDialog::Screen* s = new MpegStreamerConfigDialog::Screen();
 	s->x = mi->rcMonitor.left;
