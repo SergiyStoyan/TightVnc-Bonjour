@@ -57,12 +57,15 @@ protected:
 	//
 
 	void onMpegStreamerEnabledClick();
+	//void onMpegStreamerCapturedDisplaySet();
 	void onMpegStreamerChange();
 
 private:
 	void initControls();
 	void set_monitors(); 
 	void set_area();
+
+	static BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 
 	// Configuration
 	ServerConfig *m_config;

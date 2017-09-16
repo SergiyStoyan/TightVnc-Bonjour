@@ -143,11 +143,13 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt16(m_MpegStreamerDelayMss);
   output->writeInt8(m_turnOffMpegStreamerRfbVideo ? 1 : 0);
   output->writeInt8(m_hideMpegStreamerWindow ? 1 : 0);
-  output->writeUTF8(m_MpegStreamerCapturedDesktopDeviceName.getString());
+  output->writeUTF8(m_MpegStreamerCapturedDisplayDeviceName.getString());
   output->writeInt32(m_MpegStreamerCapturedAreaX);
   output->writeInt32(m_MpegStreamerCapturedAreaY);
   output->writeInt32(m_MpegStreamerCapturedAreaWidth);
-  output->writeInt32(m_MpegStreamerCapturedAreaHeight);  
+  output->writeInt32(m_MpegStreamerCapturedAreaHeight);
+  output->writeUTF8(m_MpegStreamerCapturedWindowTitle.getString());
+  output->writeInt16(m_MpegStreamerCaptureMode);
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -229,11 +231,13 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_MpegStreamerDelayMss = input->readInt16();
   m_turnOffMpegStreamerRfbVideo = input->readInt8() == 1;
   m_hideMpegStreamerWindow = input->readInt8() == 1;
-  input->readUTF8(&m_MpegStreamerCapturedDesktopDeviceName);
+  input->readUTF8(&m_MpegStreamerCapturedDisplayDeviceName);
   m_MpegStreamerCapturedAreaX = input->readInt32();
   m_MpegStreamerCapturedAreaY = input->readInt32();
   m_MpegStreamerCapturedAreaWidth = input->readInt32();
   m_MpegStreamerCapturedAreaHeight = input->readInt32();
+  input->readUTF8(&m_MpegStreamerCapturedWindowTitle);
+  m_MpegStreamerCaptureMode = input->readInt16();
 
   input->readUTF8(&m_logFilePath);
 }
@@ -916,16 +920,16 @@ void ServerConfig::hideMpegStreamerWindow(bool hide)
 	m_hideMpegStreamerWindow = hide;
 }
 
-void ServerConfig::getMpegStreamerCapturedDesktopDeviceName(StringStorage* capturedDesktopDeviceName)
+void ServerConfig::getMpegStreamerCapturedDisplayDeviceName(StringStorage* capturedDisplayDeviceName)
 {
 	AutoLock lock(&m_objectCS);
-	*capturedDesktopDeviceName = m_MpegStreamerCapturedDesktopDeviceName;
+	*capturedDisplayDeviceName = m_MpegStreamerCapturedDisplayDeviceName;
 }
 
-void ServerConfig::setMpegStreamerCapturedDesktopDeviceName(const TCHAR* capturedDesktopDeviceName)
+void ServerConfig::setMpegStreamerCapturedDisplayDeviceName(const TCHAR* capturedDisplayDeviceName)
 {
 	AutoLock lock(&m_objectCS);
-	m_MpegStreamerCapturedDesktopDeviceName.setString(capturedDesktopDeviceName);
+	m_MpegStreamerCapturedDisplayDeviceName.setString(capturedDisplayDeviceName);
 }
 
 void ServerConfig::getMpegStreamerCapturedArea(LONG* x, LONG* y, LONG* width, LONG* height)

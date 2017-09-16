@@ -83,6 +83,31 @@ MpegStreamer::MpegStreamer(ULONG ip, USHORT port)
 	this->address = SocketAddressIPv4::resolve(ip, port);
 }
 
+BOOL MpegStreamer::get_display_virtual_area(const StringStorage display_name, LONG* x, LONG* y, LONG* width, LONG* height)
+{
+	wcsncpy(display_device_name, display_name.getString(), sizeof(display_device_name) / sizeof(WCHAR));
+	EnumDisplayMonitors(NULL, NULL, MpegStreamer::MonitorEnumProc, 0);
+	if (!display_info.szDevice[0])
+		return FALSE;
+	*x = display_info.rcMonitor.left;
+	*y = display_info.rcMonitor.top;
+	*width = display_info.rcMonitor.right - display_info.rcMonitor.left;
+	*height = display_info.rcMonitor.bottom - display_info.rcMonitor.top;
+	return TRUE;
+}
+MONITORINFOEX MpegStreamer::display_info = MONITORINFOEX();
+WCHAR MpegStreamer::display_device_name[CCHDEVICENAME];
+BOOL CALLBACK MpegStreamer::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+	//DisplayInfo.cbSize = sizeof(MONITORINFOEX);
+	if (!GetMonitorInfo(hMonitor, &display_info))
+		return TRUE;// continue enumerating
+	if (!wcscmp(display_info.szDevice, display_device_name))
+		return FALSE;//stop enumerating
+	ZeroMemory(display_info.szDevice, sizeof(display_info.szDevice) / sizeof(WCHAR));
+	return TRUE;// continue enumerating
+}
+
 void MpegStreamer::Start(ULONG ip)
 {
 	if (!initialized)
@@ -112,13 +137,41 @@ void MpegStreamer::Start(ULONG ip)
 		si.cb = sizeof(si);
 		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		StringStorage ss;
-		//ms->address.toString2(&ss);
-		//if(1)//window title
-		//	ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i title=\"%s\" -f mpegts udp://%s"), config->getMpegStreamerFramerate(), config->getMpegStreamerCapturedWindowTitle(), ss.getString());
-		//else if(2)//region in the virtual desktop
-		//	ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), offset_x, offset_y, video_size_x, video_size_y, ss.getString());
-		//
-		ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop  -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+		ms->address.toString2(&ss);
+		switch (config->getMpegStreamerCaptureMode())
+		{
+		case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY:
+		{
+			//getting dimensions of the monitors to cut off it from the virtual desktop
+			StringStorage dn;
+			config->getMpegStreamerCapturedDisplayDeviceName(&dn);
+			LONG x, y, w, h;
+			if (!get_display_virtual_area(dn, &x, &y, &w, &h))
+			{
+				log->error(_T("MpegStreamer: Could not get desktop dimensions. The entire virtual desktop will be used."));
+				ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop  -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+			}
+			else
+				ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), x, y, w, h, ss.getString());
+			break;
+		}
+		case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_AREA:
+		{
+			LONG x, y, w, h;
+			config->getMpegStreamerCapturedArea(&x, &y, &w, &h);
+			ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), x, y, w, h, ss.getString());
+			break;
+		}
+		case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_WINDOW:
+		{
+			StringStorage wt;
+			config->getMpegStreamerCapturedWindowTitle(&wt);
+			ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i title=\"%s\" -f mpegts udp://%s"), config->getMpegStreamerFramerate(), wt.getString(), ss.getString());
+			break;
+		}
+		default:
+			throw new Exception(_T("Unexpected option"));
+		}
 		DWORD dwCreationFlags = 0;
 		if(config->isMpegStreamerWindowHidden())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;

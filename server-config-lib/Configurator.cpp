@@ -939,8 +939,8 @@ bool Configurator::saveMpegStreamerConfig(SettingsManager *sm)
 		saveResult = false;
 	
 	StringStorage ss;
-	m_serverConfig.getMpegStreamerCapturedDesktopDeviceName(&ss);
-	if (!sm->setString(_T("MpegStreamerCapturedDesktopDeviceName"), ss.getString()))
+	m_serverConfig.getMpegStreamerCapturedDisplayDeviceName(&ss);
+	if (!sm->setString(_T("MpegStreamerCapturedDisplayDeviceName"), ss.getString()))
 		saveResult = false;
 	
 	LONG ui1, ui2, ui3, ui4;
@@ -1007,11 +1007,11 @@ bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *con
 	}
 
 	StringStorage ss;
-	if (!sm->getString(_T("MpegStreamerCapturedDesktopDeviceName"), &ss))
+	if (!sm->getString(_T("MpegStreamerCapturedDisplayDeviceName"), &ss))
 		loadResult = false;
 	else {
 		m_isConfigLoadedPartly = true;
-		m_serverConfig.setMpegStreamerCapturedDesktopDeviceName(ss.getString());
+		m_serverConfig.setMpegStreamerCapturedDisplayDeviceName(ss.getString());
 	}
 
 	UINT ui1, ui2, ui3, ui4;

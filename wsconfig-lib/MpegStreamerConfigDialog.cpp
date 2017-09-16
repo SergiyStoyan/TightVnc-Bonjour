@@ -71,7 +71,12 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 	case IDC_COMBO_MPEG_STREAMER_MONOTORS:
 	case IDC_COMBO_MPEG_STREAMER_WINDOWS:
 		if (notificationID == 1/*||notificationID == 9*/)
+		{
+			/*StringStorage ss;
+			ss.format(_T("%d"), notificationID);
+			MessageBox(m_ctrlThis.getWindow(), ss.getString(), _T("222"), MB_ICONSTOP | MB_OK);*/
 			onMpegStreamerChange();
+		}
 		break;
 	}
 	return TRUE;
@@ -109,6 +114,29 @@ void MpegStreamerConfigDialog::onMpegStreamerEnabledClick()
 
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
+//
+//void MpegStreamerConfigDialog::onMpegStreamerCapturedDisplaySet()
+//{
+//	m_destinationPort.setEnabled(m_enableMpegStreamer.isChecked());
+//	m_framerate.setEnabled(m_enableMpegStreamer.isChecked());
+//	m_delayMss.setEnabled(m_enableMpegStreamer.isChecked());
+//	m_turnOffRfbVideo.setEnabled(m_enableMpegStreamer.isChecked());
+//	m_hideStreamerWindow.setEnabled(m_enableMpegStreamer.isChecked());
+//
+//	m_captureDisplay.setEnabled(m_enableMpegStreamer.isChecked());
+//	m_displays.setEnabled(m_captureDisplay.isChecked());
+//
+//	m_captureArea.setEnabled(m_enableMpegStreamer.isChecked());
+//	m_capturedAreaLeft.setEnabled(m_captureArea.isChecked());
+//	m_capturedAreaTop.setEnabled(m_captureArea.isChecked());
+//	m_capturedAreaWidth.setEnabled(m_captureArea.isChecked());
+//	m_capturedAreaHeight.setEnabled(m_captureArea.isChecked());
+//
+//	m_captureWindow.setEnabled(m_enableMpegStreamer.isChecked());
+//	m_windows.setEnabled(m_captureWindow.isChecked());
+//
+//	((ConfigDialog *)m_parent)->updateApplyButtonState();
+//}
 
 void MpegStreamerConfigDialog::onMpegStreamerChange()
 {
@@ -174,13 +202,13 @@ void MpegStreamerConfigDialog::updateUI()
 
 	switch (m_config->getMpegStreamerCaptureMode())
 	{
-	case MpegStreamerCaptureDisplay:
+	case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY:
 		m_captureDisplay.check(true);
 		break;
-	case MpegStreamerCaptureArea:
+	case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_AREA:
 		m_captureArea.check(true);
 		break;
-	case MpegStreamerCaptureWindow:
+	case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_WINDOW:
 		m_captureWindow.check(true);
 		break;
 	default:
@@ -189,24 +217,6 @@ void MpegStreamerConfigDialog::updateUI()
 	}
 }
 
-BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
-{
-	MONITORINFOEX* mi = new MONITORINFOEX();
-	mi->cbSize = sizeof(MONITORINFOEX);
-	if (!GetMonitorInfo(hMonitor, mi))
-		return TRUE;// continue enumerating
-
-	MpegStreamerConfigDialog::Screen* s = new MpegStreamerConfigDialog::Screen();
-	s->x = mi->rcMonitor.left;
-	s->y = mi->rcMonitor.top;
-	s->width = mi->rcMonitor.right - mi->rcMonitor.left;
-	s->height = mi->rcMonitor.bottom - mi->rcMonitor.top;
-	wcsncpy(s->DeviceName, mi->szDevice, sizeof(s->DeviceName) / sizeof(WCHAR));
-	MpegStreamerConfigDialog::Screens.push_back(s);
-
-	return TRUE;// continue enumerating
-}
-MpegStreamerConfigDialog::ScreenList MpegStreamerConfigDialog::Screens = MpegStreamerConfigDialog::ScreenList();
 void MpegStreamerConfigDialog::set_monitors() 
 {
 	int numberOfScreens = GetSystemMetrics(SM_CMONITORS);
@@ -234,13 +244,13 @@ void MpegStreamerConfigDialog::set_monitors()
 	for (ScreenList::iterator i = Screens.begin(); i != Screens.end(); i++)
 	{
 		Screen* s = (*i);
-		ss.format(_T("%s (%d,%d),(%dx%d)"), s->DeviceString, s->x, s->y, s->width, s->height);
+		ss.format(_T("%s (%d,%d)(%dx%d)"), s->DeviceString, s->x, s->y, s->width, s->height);
 		m_displays.addItem(ss.getString(), s->DeviceName);
 	}
 
 	//select
 	StringStorage dn;
-	m_config->getMpegStreamerCapturedDesktopDeviceName(&dn);
+	m_config->getMpegStreamerCapturedDisplayDeviceName(&dn);
 	for (int i = m_displays.getItemsCount() - 1; i >= 0; i--)
 	{
 		WCHAR* ws = (WCHAR*)m_displays.getItemData(i);
@@ -258,6 +268,24 @@ void MpegStreamerConfigDialog::set_monitors()
 			break;
 		}
 	}
+}
+MpegStreamerConfigDialog::ScreenList MpegStreamerConfigDialog::Screens = MpegStreamerConfigDialog::ScreenList();
+BOOL CALLBACK MpegStreamerConfigDialog::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+	MONITORINFOEX* mi = new MONITORINFOEX();
+	mi->cbSize = sizeof(MONITORINFOEX);
+	if (!GetMonitorInfo(hMonitor, mi))
+		return TRUE;// continue enumerating
+
+	MpegStreamerConfigDialog::Screen* s = new MpegStreamerConfigDialog::Screen();
+	s->x = mi->rcMonitor.left;
+	s->y = mi->rcMonitor.top;
+	s->width = mi->rcMonitor.right - mi->rcMonitor.left;
+	s->height = mi->rcMonitor.bottom - mi->rcMonitor.top;
+	wcsncpy(s->DeviceName, mi->szDevice, sizeof(s->DeviceName) / sizeof(WCHAR));
+	MpegStreamerConfigDialog::Screens.push_back(s);
+
+	return TRUE;// continue enumerating
 }
 
 void MpegStreamerConfigDialog::set_area()
@@ -291,49 +319,46 @@ void MpegStreamerConfigDialog::apply()
 
 	m_config->hideMpegStreamerWindow(m_hideStreamerWindow.isChecked());
 
-	if (m_displays.getSelectedItemIndex() >= 0)
-	{
-		WCHAR* ws = (WCHAR*)m_displays.getItemData(m_displays.getSelectedItemIndex());
-#ifdef UNICODE
-		//TCHAR == WCHAR
-		ss = StringStorage(ws);
-#else
-		//TCHAR == char	
-		TO BE IMPLEMENTED!
-#endif
-			/*for (ScreenList::iterator i = Screens.begin(); i != Screens.end(); i++)
-			{
-				Screen* s = (*i);
-				if (!wcsncmp(s->DeviceName, ws, sizeof(s->DeviceName) / sizeof(WCHAR)))
-				{
-					m_capturedAreaLeft = s->x;
-					break;
-				}
-			}*/
-	}
-	else
-		ss.format(_T(""));
-	m_config->setMpegStreamerCapturedDesktopDeviceName(ss.getString());
-
-	LONG x, y, w, h;
-	m_capturedAreaLeft.getText(&ss);
-	x = _ttoi(ss.getString());
-	m_capturedAreaTop.getText(&ss);
-	y = _ttoi(ss.getString());
-	m_capturedAreaWidth.getText(&ss);
-	w = _ttoi(ss.getString());
-	m_capturedAreaHeight.getText(&ss);
-	h = _ttoi(ss.getString());
-	m_config->setMpegStreamerCapturedArea(x, y, w, h);
-
 	if (m_captureDisplay.isChecked())
 	{
-		m_config->setMpegStreamerCaptureMode(MpegStreamerCaptureDisplay);
+		m_config->setMpegStreamerCaptureMode(ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY);
+
+		if (m_displays.getSelectedItemIndex() < 0)
+			MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_DISPLAY_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+		else
+		{
+			WCHAR* ws = (WCHAR*)m_displays.getItemData(m_displays.getSelectedItemIndex());
+#ifdef UNICODE
+			//TCHAR == WCHAR
+			ss = StringStorage(ws);
+#else
+			//TCHAR == char	
+			TO BE IMPLEMENTED!
+#endif
+		}
+		m_config->setMpegStreamerCapturedDisplayDeviceName(ss.getString());
 	}
 	else if (m_captureArea.isChecked())
-		m_config->setMpegStreamerCaptureMode(MpegStreamerCaptureArea);
+	{
+		m_config->setMpegStreamerCaptureMode(ServerConfig::MPEG_STREAMER_CAPTURE_MODE_AREA);
+
+		LONG x, y, w, h;
+		m_capturedAreaLeft.getText(&ss);
+		x = _ttoi(ss.getString());
+		m_capturedAreaTop.getText(&ss);
+		y = _ttoi(ss.getString());
+		m_capturedAreaWidth.getText(&ss);
+		w = _ttoi(ss.getString());
+		m_capturedAreaHeight.getText(&ss);
+		h = _ttoi(ss.getString());
+		m_config->setMpegStreamerCapturedArea(x, y, w, h);
+	}
 	else if (m_captureWindow.isChecked())
-		m_config->setMpegStreamerCaptureMode(MpegStreamerCaptureWindow);
+	{
+		m_config->setMpegStreamerCaptureMode(ServerConfig::MPEG_STREAMER_CAPTURE_MODE_WINDOW);
+	}
+	else
+		MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_MODE_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 
 	//MessageBox(m_ctrlThis.getWindow(),
 	//	ss.getString(),

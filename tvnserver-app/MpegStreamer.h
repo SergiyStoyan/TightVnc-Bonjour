@@ -60,6 +60,10 @@ private:
 	static bool initialized;
 	static LogWriter* log;
 	//static ServerConfig* serverConfig;
+	static BOOL get_display_virtual_area(const StringStorage display_name, LONG* x, LONG* y, LONG* width, LONG* height);
+	static MONITORINFOEX display_info;
+	static WCHAR display_device_name[CCHDEVICENAME];
+	static BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 };
 
 #endif
