@@ -34,6 +34,8 @@ class MpegStreamer
 		void onTvnServerShutdown();
 	};
 
+	~MpegStreamer();
+
 public:
 	static void Initialize(LogWriter* log, TvnServer* tvnServer, Configurator* configurator);
 
@@ -45,12 +47,17 @@ public:
 
 private:
 	MpegStreamer(ULONG ip, USHORT port);
-	void destroy();
 
 	StringStorage commandLine;
 	PROCESS_INFORMATION processInformation;
 	//Process* process;
 	SocketAddressIPv4 address; 
+
+	BOOL redirect_process_output2log(STARTUPINFO* si);
+	HANDLE childProcessStdErrRead;
+	HANDLE childProcessStdErrWrite;
+	HANDLE readChildProcessOutputThread;
+	static DWORD WINAPI readChildProcessOutput(void* Param);
 
 	static HANDLE anti_zombie_job;
 	static MpegStreamer* get(ULONG ip);

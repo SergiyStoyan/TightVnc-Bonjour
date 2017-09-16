@@ -60,19 +60,13 @@ void MpegStreamer::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator
 }
 
 MpegStreamer* MpegStreamer::get(ULONG ip)
-{
-	//ULONG ip = SocketAddressIPv4::resolve(host, 0).getSockAddr().sin_addr.S_un.S_addr;
-	//ULONG ip = address.getSockAddr().sin_addr.S_un.S_addr;
-	//USHORT port = address.getSockAddr().sin_port;
-	
+{	
 	AutoLock l(&lock);
 	for (MpegStreamerList::iterator i = mpegStreamerList.begin(); i != mpegStreamerList.end(); i++)
 	{
 		MpegStreamer* ms = (*i);
 		if (ms->address.getSockAddr().sin_addr.S_un.S_addr != ip)
 			continue;
-		//if (sss->address.getSockAddr().sin_port != port)
-		//	continue;
 		return ms;
 	}
 	return NULL;
@@ -80,32 +74,52 @@ MpegStreamer* MpegStreamer::get(ULONG ip)
 
 MpegStreamer::MpegStreamer(ULONG ip, USHORT port)
 { 
-	this->address = SocketAddressIPv4::resolve(ip, port);
+	address = SocketAddressIPv4::resolve(ip, port);
+	readChildProcessOutputThread = NULL;
+	childProcessStdErrRead = NULL;
+	childProcessStdErrWrite = NULL;
 }
 
-BOOL MpegStreamer::get_display_virtual_area(const StringStorage display_name, LONG* x, LONG* y, LONG* width, LONG* height)
+MpegStreamer::~MpegStreamer()
 {
-	wcsncpy(display_device_name, display_name.getString(), sizeof(display_device_name) / sizeof(WCHAR));
-	EnumDisplayMonitors(NULL, NULL, MpegStreamer::MonitorEnumProc, 0);
-	if (!display_info.cbSize)
-		return FALSE;
-	*x = display_info.rcMonitor.left;
-	*y = display_info.rcMonitor.top;
-	*width = display_info.rcMonitor.right - display_info.rcMonitor.left;
-	*height = display_info.rcMonitor.bottom - display_info.rcMonitor.top;
-	return TRUE;
-}
-MONITORINFOEX MpegStreamer::display_info = MONITORINFOEX();
-WCHAR MpegStreamer::display_device_name[CCHDEVICENAME];
-BOOL CALLBACK MpegStreamer::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
-{
-	display_info.cbSize = sizeof(MONITORINFOEX);
-	if (!GetMonitorInfo(hMonitor, &display_info))
-		return TRUE;// continue enumerating
-	if (!wcscmp(display_info.szDevice, display_device_name))
-		return FALSE;//stop enumerating
-	display_info.cbSize = 0;
-	return TRUE;// continue enumerating
+	AutoLock l(&lock);
+
+	DWORD ec;
+	if (GetExitCodeProcess(processInformation.hProcess, &ec) && ec == STILL_ACTIVE)
+	{
+		try
+		{
+			if (!TerminateProcess(processInformation.hProcess, 0))
+				throw SystemException();
+		}
+		catch (SystemException &e)
+		{
+			log->error(_T("MpegStreamer: Could not terminate process for %s\r\nError: %s"), commandLine.getString(), e.getMessage());
+			//!!!return;//!!! it must be removed from the list. Otherwise it may duplicate in the list.
+		}
+	}
+	DWORD state = WaitForSingleObject(processInformation.hProcess, 1000);
+	if (state != WAIT_OBJECT_0)
+		log->interror(_T("MpegStreamer: !!!ZOMBIE PROCESS RUNNING!!!: %s"), commandLine.getString());
+
+	if (processInformation.hProcess)
+	{
+		CloseHandle(processInformation.hProcess);
+		CloseHandle(processInformation.hThread);
+	}
+
+	if (childProcessStdErrWrite)
+		CloseHandle(childProcessStdErrWrite);
+	if (childProcessStdErrRead)
+		CloseHandle(childProcessStdErrRead);
+	if (readChildProcessOutputThread)
+		TerminateThread(readChildProcessOutputThread, 0);
+
+	mpegStreamerList.remove(this);
+
+	StringStorage ss;
+	address.toString2(&ss);
+	log->message(_T("MpegStreamer: Stopped for address: %s"), ss.getString());
 }
 
 void MpegStreamer::Start(ULONG ip)
@@ -127,7 +141,7 @@ void MpegStreamer::Start(ULONG ip)
 
 	MpegStreamer* ms;
 	for (ms = MpegStreamer::get(ip); ms; ms = MpegStreamer::get(ip))
-		ms->destroy();
+		delete(ms);
 
 	ms = new MpegStreamer(ip, config->getMpegStreamerDestinationPort());
 	try
@@ -135,6 +149,8 @@ void MpegStreamer::Start(ULONG ip)
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
+		if (config->isMpegStreamerWindowHidden())
+			ms->redirect_process_output2log(&si);
 		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		StringStorage ss;
 		ms->address.toString2(&ss);
@@ -172,11 +188,12 @@ void MpegStreamer::Start(ULONG ip)
 		default:
 			throw new Exception(_T("Unexpected option"));
 		}
-		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop  -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop1 -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+		log->message(_T("MpegStreamer: Launching:\r\n%s"), ms->commandLine.getString());
 		DWORD dwCreationFlags = 0;
 		if(config->isMpegStreamerWindowHidden())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;
-		if (!CreateProcess(NULL, (LPTSTR)ms->commandLine.getString(), NULL, NULL, FALSE, dwCreationFlags, NULL, NULL, &si, &ms->processInformation))
+		if (!CreateProcess(NULL, (LPTSTR)ms->commandLine.getString(), NULL, NULL, TRUE, dwCreationFlags, NULL, NULL, &si, &ms->processInformation))
 			throw SystemException();
 	}
 	catch (SystemException &e)
@@ -204,10 +221,83 @@ void MpegStreamer::Start(ULONG ip)
 	log->message(_T("MpegStreamer: Started for: %s"), ss.getString());
 }
 
+BOOL MpegStreamer::get_display_virtual_area(const StringStorage display_name, LONG* x, LONG* y, LONG* width, LONG* height)
+{
+	wcsncpy(display_device_name, display_name.getString(), sizeof(display_device_name) / sizeof(WCHAR));
+	EnumDisplayMonitors(NULL, NULL, MpegStreamer::MonitorEnumProc, 0);
+	if (!display_info.cbSize)
+		return FALSE;
+	*x = display_info.rcMonitor.left;
+	*y = display_info.rcMonitor.top;
+	*width = display_info.rcMonitor.right - display_info.rcMonitor.left;
+	*height = display_info.rcMonitor.bottom - display_info.rcMonitor.top;
+	return TRUE;
+}
+MONITORINFOEX MpegStreamer::display_info = MONITORINFOEX();
+WCHAR MpegStreamer::display_device_name[CCHDEVICENAME];
+BOOL CALLBACK MpegStreamer::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+	display_info.cbSize = sizeof(MONITORINFOEX);
+	if (!GetMonitorInfo(hMonitor, &display_info))
+		return TRUE;// continue enumerating
+	if (!wcscmp(display_info.szDevice, display_device_name))
+		return FALSE;//stop enumerating
+	display_info.cbSize = 0;
+	return TRUE;// continue enumerating
+}
+
+BOOL MpegStreamer::redirect_process_output2log(STARTUPINFO* si)
+{
+	SECURITY_ATTRIBUTES saAttr;
+	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+	saAttr.bInheritHandle = TRUE;
+	saAttr.lpSecurityDescriptor = NULL;
+
+	if (CreatePipe(&childProcessStdErrRead, &childProcessStdErrWrite, &saAttr, 0))
+	{
+		if (SetHandleInformation(childProcessStdErrRead, HANDLE_FLAG_INHERIT, 0))
+		{
+			si->hStdError = childProcessStdErrWrite;
+			//si->hStdOutput = childProcessStdErrWrite;
+			si->dwFlags |= STARTF_USESTDHANDLES;
+
+			readChildProcessOutputThread = CreateThread(0, 0, readChildProcessOutput, this, 0, 0);
+			if (readChildProcessOutputThread)
+				return TRUE;
+			else
+				log->interror(_T("MpegStreamer: Could not create readErrorOutputFromChildProcessThread"));
+		}
+		else
+			log->interror(_T("MpegStreamer: Could not SetHandleInformation. Error: %d"), GetLastError());
+	}
+	else
+		log->interror(_T("MpegStreamer: Could not CreatePipe. Error: %d"), GetLastError());
+
+	CloseHandle(childProcessStdErrRead);
+	CloseHandle(childProcessStdErrWrite);
+	si->dwFlags = 0;
+	si->hStdError = NULL;
+	si->hStdOutput = NULL;
+
+	return FALSE;
+}
+DWORD WINAPI MpegStreamer::readChildProcessOutput(void* Param)
+{
+	MpegStreamer* ms = (MpegStreamer*)Param;
+	DWORD dwRead;
+	CHAR chBuf[512]; 
+	while (ReadFile(ms->childProcessStdErrRead, chBuf, sizeof(chBuf), &dwRead, NULL) && dwRead)
+	{
+		std::string s = std::string(chBuf, dwRead);
+		log->error(_T("MpegStreamer: FFMPEG output: %s"), s); 
+	}
+	return 0;
+}
+
 void MpegStreamer::Stop(ULONG ip)
 {
-	MpegStreamer* sss = MpegStreamer::get(ip);
-	if (!sss)
+	MpegStreamer* ms = MpegStreamer::get(ip);
+	if (!ms)
 	{
 		SocketAddressIPv4 s = SocketAddressIPv4::resolve(ip, 0);
 		StringStorage ss;
@@ -215,41 +305,7 @@ void MpegStreamer::Stop(ULONG ip)
 		log->interror(_T("MpegStreamer: No service exists for address: %s"), ss.getString());
 		return;
 	}
-	sss->destroy();
-}
-
-void MpegStreamer::destroy()
-{
-	AutoLock l(&lock);
-
-	DWORD ec;
-	if (GetExitCodeProcess(processInformation.hProcess, &ec) && ec == STILL_ACTIVE)
-	{
-		try
-		{
-			if (!TerminateProcess(processInformation.hProcess, 0))
-				throw SystemException();
-		}
-		catch (SystemException &e)
-		{
-			log->error(_T("MpegStreamer: Could not terminate process for %s\r\nError: %s"), commandLine.getString(), e.getMessage());
-			//!!!return;//!!! it must be removed from the list. Otherwise it may duplicate in the list.
-		}
-	}
-	DWORD state = WaitForSingleObject(processInformation.hProcess, 1000);
-	if (state != WAIT_OBJECT_0)
-		log->interror(_T("MpegStreamer: !!!ZOMBIE PROCESS RUNNING!!!: %s"), commandLine.getString());
-
-	CloseHandle(processInformation.hProcess);
-	CloseHandle(processInformation.hThread);
-	mpegStreamerList.remove(this);
-
-	StringStorage ss;
-	address.toString2(&ss);
-	log->message(_T("MpegStreamer: Stopped for address: %s"), ss.getString());
-
-	delete(this);//!!!ATTENTION: can be applied only to objects created by 'new'!!!
-	//!!!this object must be forgotten after this line!!!
+	delete(ms);
 }
 
 void MpegStreamer::StopAll()
@@ -258,8 +314,8 @@ void MpegStreamer::StopAll()
 	MpegStreamerList list = mpegStreamerList;//copy to another list to iterate while removing objects from the base one
 	for (MpegStreamerList::iterator i = list.begin(); i != list.end(); i++)
 	{
-		MpegStreamer* sss = (*i);
-		sss->destroy();
+		MpegStreamer* ms = (*i);
+		delete(ms);
 	}
 	log->message(_T("MpegStreamer: Stopped all."));
 }
