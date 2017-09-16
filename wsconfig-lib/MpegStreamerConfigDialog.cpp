@@ -270,7 +270,7 @@ void MpegStreamerConfigDialog::set_monitors()
 	for (ScreenList::iterator i = screens.begin(); i != screens.end(); i++)
 	{
 		Screen* s = (*i);
-		ss.format(_T("%s (%d,%d)(%dx%d)"), s->DeviceString, s->x, s->y, s->width, s->height);
+		ss.format(_T("%s (%dx%d)"), s->DeviceString, s->width, s->height);
 		m_displays.addItem(ss.getString(), s->DeviceName);
 	}
 
@@ -343,7 +343,7 @@ void MpegStreamerConfigDialog::set_area()
 
 void MpegStreamerConfigDialog::set_windows()
 {
-	EnumWindows(EnumWindowsProc, (LPARAM)this);
+	EnumWindows(EnumWindowsProc, (LPARAM)&m_windows);
 	
 	//select
 	StringStorage wt;
@@ -359,18 +359,27 @@ void MpegStreamerConfigDialog::set_windows()
 		}
 	}
 }
-//void MpegStreamerConfigDialog::clear_windows()
-//{
-//	for (Window* s : windows)
-//		delete s;
-//	screens.clear();
-//}
 BOOL CALLBACK MpegStreamerConfigDialog::EnumWindowsProc(_In_ HWND hwnd, _In_ LPARAM lParam)
 {
 	WCHAR title[512];
 	if (GetWindowText(hwnd, title, sizeof(title)))
 	{
+		StringStorage t;
+#ifdef UNICODE
+			//TCHAR == WCHAR
+			t = StringStorage(title);
+#else
+			//TCHAR == char	
+			TO BE IMPLEMENTED!
+#endif
 		ComboBox* cb = (ComboBox*)lParam;
+		for (int i = cb->getItemsCount() - 1; i >= 0; i--)
+		{
+			StringStorage ss;
+			cb->getItemText(i, &ss);
+			if(ss.isEqualTo(&t))
+				return TRUE;// continue enumerating
+		}
 		cb->addItem(title);
 	}
 	return TRUE;// continue enumerating
@@ -434,14 +443,7 @@ void MpegStreamerConfigDialog::apply()
 
 		if (m_windows.getSelectedItemIndex() >= 0)
 		{
-			WCHAR* ws = (WCHAR*)m_windows.getItemData(m_windows.getSelectedItemIndex());
-#ifdef UNICODE
-			//TCHAR == WCHAR
-			ss = StringStorage(ws);
-#else
-			//TCHAR == char	
-			TO BE IMPLEMENTED!
-#endif
+			m_windows.getItemText(m_windows.getSelectedItemIndex(), &ss);
 			m_config->setMpegStreamerCapturedWindowTitle(ss.getString());
 		}
 	}

@@ -69,13 +69,6 @@ private:
 	static void clear_screens();
 	static BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 
-	/*struct Window
-	{
-		WCHAR Title[512];
-	};
-	typedef list<Window*> WindowList;
-	static WindowList windows;*/
-	//static void clear_windows();
 	static BOOL CALLBACK EnumWindowsProc(_In_ HWND hwnd, _In_ LPARAM lParam);
 
 	// Configuration
