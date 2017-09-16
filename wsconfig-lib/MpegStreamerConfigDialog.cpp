@@ -17,6 +17,7 @@ MpegStreamerConfigDialog::MpegStreamerConfigDialog()
 
 MpegStreamerConfigDialog::~MpegStreamerConfigDialog()
 {
+	clear_screens();
 }
 
 void MpegStreamerConfigDialog::setParentDialog(BaseDialog *dialog)
@@ -165,28 +166,28 @@ bool MpegStreamerConfigDialog::validateInput()
 	else if (m_captureArea.isChecked())
 	{
 		m_capturedAreaLeft.getText(&ss);
-		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 0) {
 			MessageBox(m_ctrlThis.getWindow(),
 				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
 				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 			return false;
 		}
 		m_capturedAreaTop.getText(&ss);
-		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 0) {
 			MessageBox(m_ctrlThis.getWindow(),
 				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
 				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 			return false;
 		}
 		m_capturedAreaWidth.getText(&ss);
-		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 0) {
 			MessageBox(m_ctrlThis.getWindow(),
 				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
 				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
 			return false;
 		}
 		m_capturedAreaHeight.getText(&ss);
-		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+		if (!CommonInputValidation::parseNumber(&ss, &i) || i < 0) {
 			MessageBox(m_ctrlThis.getWindow(),
 				StringTable::getString(IDS_SET_MPEG_STREAMER_AREA_ERROR),
 				StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
@@ -226,6 +227,8 @@ void MpegStreamerConfigDialog::updateUI()
 
 	set_area();
 
+	set_windows();
+
 	switch (m_config->getMpegStreamerCaptureMode())
 	{
 	case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY:
@@ -246,19 +249,15 @@ void MpegStreamerConfigDialog::updateUI()
 
 void MpegStreamerConfigDialog::set_monitors() 
 {
-	int numberOfScreens = GetSystemMetrics(SM_CMONITORS);
-	int width = GetSystemMetrics(SM_CXSCREEN);
-	int height = GetSystemMetrics(SM_CYSCREEN);
-
-	Screens.clear();
+	clear_screens();
 
 	//getting dimensions of the monitors
-	EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, 0);
+	EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&screens);
 
 	//getting names of real monitors
 	DISPLAY_DEVICE dd;
 	dd.cb = sizeof(dd);
-	for (ScreenList::iterator i = Screens.begin(); i != Screens.end(); i++)
+	for (ScreenList::iterator i = screens.begin(); i != screens.end(); i++)
 	{
 		Screen* s = (*i);
 		EnumDisplayDevices(s->DeviceName, 0, &dd, 0);
@@ -268,7 +267,7 @@ void MpegStreamerConfigDialog::set_monitors()
 
 	//fill dropdown list
 	StringStorage ss;
-	for (ScreenList::iterator i = Screens.begin(); i != Screens.end(); i++)
+	for (ScreenList::iterator i = screens.begin(); i != screens.end(); i++)
 	{
 		Screen* s = (*i);
 		ss.format(_T("%s (%d,%d)(%dx%d)"), s->DeviceString, s->x, s->y, s->width, s->height);
@@ -296,25 +295,37 @@ void MpegStreamerConfigDialog::set_monitors()
 		}
 	}
 }
-MpegStreamerConfigDialog::ScreenList MpegStreamerConfigDialog::Screens = MpegStreamerConfigDialog::ScreenList();
+MpegStreamerConfigDialog::ScreenList MpegStreamerConfigDialog::screens = ScreenList();
+void MpegStreamerConfigDialog::clear_screens()
+{
+	for (Screen* s : screens) 
+		delete s;
+	screens.clear();
+}
 BOOL CALLBACK MpegStreamerConfigDialog::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
 {
 	MONITORINFOEX* mi = new MONITORINFOEX();
 	mi->cbSize = sizeof(MONITORINFOEX);
 	if (!GetMonitorInfo(hMonitor, mi))
+	{
+		delete(mi);
 		return TRUE;// continue enumerating
+	}
 	
 	/*StringStorage ss;
 	ss.format(_T("%d,%d,%d,%d"), mi->rcWork.left, mi->rcWork.top, mi->rcWork.right - mi->rcWork.left, mi->rcWork.bottom - mi->rcWork.top);
 	MessageBox(NULL, ss.getString(), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);*/
 
-	MpegStreamerConfigDialog::Screen* s = new MpegStreamerConfigDialog::Screen();
+	Screen* s = new Screen();
 	s->x = mi->rcMonitor.left;
 	s->y = mi->rcMonitor.top;
 	s->width = mi->rcMonitor.right - mi->rcMonitor.left;
 	s->height = mi->rcMonitor.bottom - mi->rcMonitor.top;
 	wcsncpy(s->DeviceName, mi->szDevice, sizeof(s->DeviceName) / sizeof(WCHAR));
-	MpegStreamerConfigDialog::Screens.push_back(s);
+	delete(mi);
+
+	ScreenList* screens = (ScreenList*)dwData;
+	screens->push_back(s);
 
 	return TRUE;// continue enumerating
 }
@@ -328,6 +339,41 @@ void MpegStreamerConfigDialog::set_area()
 	m_capturedAreaTop.setText(_itot(y, ts, 10));
 	m_capturedAreaWidth.setText(_itot(w, ts, 10));
 	m_capturedAreaHeight.setText(_itot(h, ts, 10));
+}
+
+void MpegStreamerConfigDialog::set_windows()
+{
+	EnumWindows(EnumWindowsProc, (LPARAM)this);
+	
+	//select
+	StringStorage wt;
+	m_config->getMpegStreamerCapturedWindowTitle(&wt);
+	for (int i = m_windows.getItemsCount() - 1; i >= 0; i--)
+	{
+		StringStorage ss;
+		m_windows.getItemText(i, &ss);
+		if (ss.isEqualTo(&wt))
+		{
+			m_windows.setSelectedItem(i);
+			break;
+		}
+	}
+}
+//void MpegStreamerConfigDialog::clear_windows()
+//{
+//	for (Window* s : windows)
+//		delete s;
+//	screens.clear();
+//}
+BOOL CALLBACK MpegStreamerConfigDialog::EnumWindowsProc(_In_ HWND hwnd, _In_ LPARAM lParam)
+{
+	WCHAR title[512];
+	if (GetWindowText(hwnd, title, sizeof(title)))
+	{
+		ComboBox* cb = (ComboBox*)lParam;
+		cb->addItem(title);
+	}
+	return TRUE;// continue enumerating
 }
 
 void MpegStreamerConfigDialog::apply()
