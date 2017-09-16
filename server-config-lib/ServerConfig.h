@@ -462,6 +462,10 @@ public:
 	LONG m_MpegStreamerCapturedAreaWidth;
 	LONG m_MpegStreamerCapturedAreaHeight;
 	StringStorage m_MpegStreamerCapturedWindowTitle;
+	uint16_t m_MpegStreamerCaptureMode;
+#define MpegStreamerCaptureDisplay 1
+#define MpegStreamerCaptureArea 2
+#define MpegStreamerCaptureWindow 3
 public:
 
 	bool isMpegStreamerEnabled();
@@ -490,6 +494,9 @@ public:
 
 	void getMpegStreamerCapturedWindowTitle(StringStorage* capturedWindow);
 	void setMpegStreamerCapturedWindowTitle(const TCHAR* capturedWindow);
+
+	uint16_t getMpegStreamerCaptureMode();
+	void setMpegStreamerCaptureMode(uint16_t captureMode);
 };
 
 #endif

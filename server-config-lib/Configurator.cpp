@@ -951,6 +951,9 @@ bool Configurator::saveMpegStreamerConfig(SettingsManager *sm)
 	m_serverConfig.getMpegStreamerCapturedWindowTitle(&ss);
 	if (!sm->setString(_T("MpegStreamerCapturedWindowTitle"), ss.getString()))
 		saveResult = false;
+	
+	if (!sm->setUINT(_T("MpegStreamerCaptureMode"), m_serverConfig.getMpegStreamerCaptureMode()))
+		saveResult = false;
 
 	return saveResult;
 }
@@ -1024,6 +1027,13 @@ bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *con
 	else {
 		m_isConfigLoadedPartly = true;
 		m_serverConfig.setMpegStreamerCapturedWindowTitle(ss.getString());
+	}
+
+	if (!sm->getUINT(_T("MpegStreamerCaptureMode"), &ui))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.setMpegStreamerCaptureMode(ui);
 	}
 
 	return loadResult;

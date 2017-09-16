@@ -30,6 +30,8 @@ Backend: udp://10.10.1.1:5920
 5) Advertise this capability onto Boujour with port to use but ONLY if authenticated user. 
 
 
+BTW for unclear reason some windows are producing only blank screen while other ones are captured even being overlapped.
+
 
 QUESTIONS:
 

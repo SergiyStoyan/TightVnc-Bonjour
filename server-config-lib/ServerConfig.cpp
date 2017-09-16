@@ -957,3 +957,15 @@ void ServerConfig::setMpegStreamerCapturedWindowTitle(const TCHAR* capturedWindo
 	AutoLock lock(&m_objectCS);
 	m_MpegStreamerCapturedWindowTitle.setString(capturedWindowTitle);
 }
+
+uint16_t ServerConfig::getMpegStreamerCaptureMode()
+{
+	AutoLock lock(&m_objectCS);
+	return m_MpegStreamerCaptureMode;
+}
+
+void ServerConfig::setMpegStreamerCaptureMode(uint16_t captureMode)
+{
+	AutoLock lock(&m_objectCS);
+	m_MpegStreamerCaptureMode = captureMode;
+}

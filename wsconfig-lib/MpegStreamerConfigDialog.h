@@ -61,20 +61,27 @@ protected:
 
 private:
 	void initControls();
-	void set_monitors();
-	//BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
+	void set_monitors(); 
+	void set_area();
 
 	// Configuration
 	ServerConfig *m_config;
 	// Controls
 	CheckBox m_enableMpegStreamer;
-	TextBox m_MpegStreamerDestinationPort;
-	TextBox m_MpegStreamerFramerate;
-	TextBox m_MpegStreamerDelayMss;
+	TextBox m_destinationPort;
+	TextBox m_framerate;
+	TextBox m_delayMss;
 	CheckBox m_turnOffRfbVideo;
 	CheckBox m_hideStreamerWindow;
-	ComboBox m_desktops;
+	ComboBox m_displays;
+	TextBox m_capturedAreaLeft;
+	TextBox m_capturedAreaTop;
+	TextBox m_capturedAreaWidth;
+	TextBox m_capturedAreaHeight;
 	ComboBox m_windows;
+	CheckBox m_captureDisplay;//actually it is radiobox
+	CheckBox m_captureArea;//actually it is radiobox
+	CheckBox m_captureWindow;//actually it is radiobox
 
 	BaseDialog *m_parent;
 };
