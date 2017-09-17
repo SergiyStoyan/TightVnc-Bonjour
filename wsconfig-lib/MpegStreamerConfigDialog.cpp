@@ -102,6 +102,7 @@ void MpegStreamerConfigDialog::onMpegStreamerEnabled()
 	m_delayMss.setEnabled(m_enableMpegStreamer.isChecked());
 	m_turnOffRfbVideo.setEnabled(m_enableMpegStreamer.isChecked());
 	m_hideStreamerWindow.setEnabled(m_enableMpegStreamer.isChecked());
+	m_logProcessOutput.setEnabled(m_enableMpegStreamer.isChecked());
 
 	m_captureDisplay.setEnabled(m_enableMpegStreamer.isChecked());
 	m_displays.setEnabled(m_enableMpegStreamer.isChecked() && m_captureDisplay.isChecked());
