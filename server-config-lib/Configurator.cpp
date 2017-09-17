@@ -955,6 +955,9 @@ bool Configurator::saveMpegStreamerConfig(SettingsManager *sm)
 	if (!sm->setUINT(_T("MpegStreamerCaptureMode"), m_serverConfig.getMpegStreamerCaptureMode()))
 		saveResult = false;
 
+	if (!sm->setBoolean(_T("logMpegStreamerProcessOutput"), m_serverConfig.logMpegStreamerProcessOutput()))
+		saveResult = false;
+
 	return saveResult;
 }
 
@@ -1034,6 +1037,13 @@ bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *con
 	else {
 		m_isConfigLoadedPartly = true;
 		m_serverConfig.setMpegStreamerCaptureMode(ui);
+	}
+
+	if (!sm->getBoolean(_T("logMpegStreamerProcessOutput"), &b))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.logMpegStreamerProcessOutput(b);
 	}
 
 	return loadResult;

@@ -466,6 +466,7 @@ public:
 	static const unsigned char MPEG_STREAMER_CAPTURE_MODE_DISPLAY = 1;
 	static const unsigned char  MPEG_STREAMER_CAPTURE_MODE_AREA = 2;
 	static const unsigned char  MPEG_STREAMER_CAPTURE_MODE_WINDOW = 3;
+	bool m_logMpegStreamerProcessOutput;
 public:
 
 	bool isMpegStreamerEnabled();
@@ -497,6 +498,9 @@ public:
 
 	uint16_t getMpegStreamerCaptureMode();
 	void setMpegStreamerCaptureMode(uint16_t captureMode);
+
+	bool logMpegStreamerProcessOutput();
+	void logMpegStreamerProcessOutput(bool log);
 };
 
 #endif

@@ -80,6 +80,7 @@ private:
 	TextBox m_delayMss;
 	CheckBox m_turnOffRfbVideo;
 	CheckBox m_hideStreamerWindow;
+	CheckBox m_logProcessOutput;
 	ComboBox m_displays;
 	TextBox m_capturedAreaLeft;
 	TextBox m_capturedAreaTop;

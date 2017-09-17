@@ -29,42 +29,43 @@
 #include "file-lib/File.h"
 
 ServerConfig::ServerConfig()
-: m_rfbPort(5900), m_httpPort(5800),
-  m_disconnectAction(DA_DO_NOTHING), m_logLevel(0), m_useControlAuth(false),
-  m_controlAuthAlwaysChecking(false),
-  m_acceptRfbConnections(true), m_useAuthentication(true),
-  m_onlyLoopbackConnections(false), m_acceptHttpConnections(true),
-  m_enableAppletParamInUrl(true), m_enableFileTransfers(true),
-  m_mirrorDriverAllowed(true),
-  m_removeWallpaper(true), m_hasReadOnlyPassword(false),
-  m_hasPrimaryPassword(false), m_alwaysShared(false), m_neverShared(false),
-  m_disconnectClients(true), m_pollingInterval(1000), m_localInputPriorityTimeout(3),
-  m_blockLocalInput(false), m_blockRemoteInput(false), m_localInputPriority(false),
-  m_defaultActionAccept(false), m_queryTimeout(30),
-  m_allowLoopbackConnections(false),
-  m_videoRecognitionInterval(3000), m_grabTransparentWindows(true),
-  m_saveLogToAllUsersPath(false), m_hasControlPassword(false),
-  m_showTrayIcon(true),
-  m_idleTimeout(0)
+	: m_rfbPort(5900), m_httpPort(5800),
+	m_disconnectAction(DA_DO_NOTHING), m_logLevel(0), m_useControlAuth(false),
+	m_controlAuthAlwaysChecking(false),
+	m_acceptRfbConnections(true), m_useAuthentication(true),
+	m_onlyLoopbackConnections(false), m_acceptHttpConnections(true),
+	m_enableAppletParamInUrl(true), m_enableFileTransfers(true),
+	m_mirrorDriverAllowed(true),
+	m_removeWallpaper(true), m_hasReadOnlyPassword(false),
+	m_hasPrimaryPassword(false), m_alwaysShared(false), m_neverShared(false),
+	m_disconnectClients(true), m_pollingInterval(1000), m_localInputPriorityTimeout(3),
+	m_blockLocalInput(false), m_blockRemoteInput(false), m_localInputPriority(false),
+	m_defaultActionAccept(false), m_queryTimeout(30),
+	m_allowLoopbackConnections(false),
+	m_videoRecognitionInterval(3000), m_grabTransparentWindows(true),
+	m_saveLogToAllUsersPath(false), m_hasControlPassword(false),
+	m_showTrayIcon(true),
+	m_idleTimeout(0)
 {
-  memset(m_primaryPassword,  0, sizeof(m_primaryPassword));
-  memset(m_readonlyPassword, 0, sizeof(m_readonlyPassword));
-  memset(m_controlPassword,  0, sizeof(m_controlPassword));
-  
-  m_enableBonjourService = true;
-  m_useWindowsUserAsBonjourServiceName = true;
-  m_BonjourServiceName = StringStorage(_T("-UNKNOWN-"));
-  m_BonjourServicePort = 5353;
-  m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
+	memset(m_primaryPassword, 0, sizeof(m_primaryPassword));
+	memset(m_readonlyPassword, 0, sizeof(m_readonlyPassword));
+	memset(m_controlPassword, 0, sizeof(m_controlPassword));
 
-  m_enableMpegStreamer = false;
-  m_MpegStreamerDestinationPort = 5920;
-  m_MpegStreamerFramerate = 10;
-  m_MpegStreamerDelayMss = 500;
-  m_MpegStreamerCapturedAreaX = 0;
-  m_MpegStreamerCapturedAreaY = 0;
-  m_MpegStreamerCapturedAreaWidth = 0;
-  m_MpegStreamerCapturedAreaHeight = 0;
+	m_enableBonjourService = true;
+	m_useWindowsUserAsBonjourServiceName = true;
+	m_BonjourServiceName = StringStorage(_T("-UNKNOWN-"));
+	m_BonjourServicePort = 5353;
+	m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
+
+	m_enableMpegStreamer = false;
+	m_MpegStreamerDestinationPort = 5920;
+	m_MpegStreamerFramerate = 10;
+	m_MpegStreamerDelayMss = 500;
+	m_MpegStreamerCapturedAreaX = 0;
+	m_MpegStreamerCapturedAreaY = 0;
+	m_MpegStreamerCapturedAreaWidth = 0;
+	m_MpegStreamerCapturedAreaHeight = 0;
+	m_logMpegStreamerProcessOutput = false;
 }
 
 ServerConfig::~ServerConfig()
@@ -154,6 +155,7 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt32(m_MpegStreamerCapturedAreaHeight);
   output->writeUTF8(m_MpegStreamerCapturedWindowTitle.getString());
   output->writeInt16(m_MpegStreamerCaptureMode);
+  output->writeInt8(m_logMpegStreamerProcessOutput ? 1 : 0);
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -242,6 +244,7 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_MpegStreamerCapturedAreaHeight = input->readInt32();
   input->readUTF8(&m_MpegStreamerCapturedWindowTitle);
   m_MpegStreamerCaptureMode = input->readInt16();
+  m_logMpegStreamerProcessOutput = input->readInt8() == 1;
 
   input->readUTF8(&m_logFilePath);
 }
@@ -976,4 +979,16 @@ void ServerConfig::setMpegStreamerCaptureMode(uint16_t captureMode)
 {
 	AutoLock lock(&m_objectCS);
 	m_MpegStreamerCaptureMode = captureMode;
+}
+
+bool ServerConfig::logMpegStreamerProcessOutput()
+{
+	AutoLock lock(&m_objectCS);
+	return m_logMpegStreamerProcessOutput;
+}
+
+void ServerConfig::logMpegStreamerProcessOutput(bool log)
+{
+	AutoLock lock(&m_objectCS);
+	m_logMpegStreamerProcessOutput = log;
 }

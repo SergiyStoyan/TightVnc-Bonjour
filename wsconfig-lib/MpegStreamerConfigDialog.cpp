@@ -44,6 +44,7 @@ void MpegStreamerConfigDialog::initControls()
 	m_captureDisplay.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_MONITOR));
 	m_captureArea.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_AREA));
 	m_captureWindow.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_WINDOW));
+	m_logProcessOutput.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE));	
 }
 
 BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
@@ -53,6 +54,7 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 	case IDC_MPEG_STREAMER_ENABLED:
 	case IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO:
 	case IDC_MPEG_STREAMER_HIDE_WINDOW:
+	case IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE:
 	case IDC_RADIO_MPEG_STREAMER_MONITOR:
 	case IDC_RADIO_MPEG_STREAMER_AREA:
 	case IDC_RADIO_MPEG_STREAMER_WINDOW:
