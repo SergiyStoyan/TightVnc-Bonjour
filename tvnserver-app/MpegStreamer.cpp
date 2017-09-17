@@ -149,8 +149,8 @@ void MpegStreamer::Start(ULONG ip)
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
-		if (config->isMpegStreamerWindowHidden())
-			ms->redirect_process_output2log(&si);
+		//if (config->isMpegStreamerWindowHidden())//!!!BUG!!! - stdout could not be separated from strerr
+		//	ms->redirect_process_output2log(&si);
 		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		StringStorage ss;
 		ms->address.toString2(&ss);
@@ -258,7 +258,10 @@ BOOL MpegStreamer::redirect_process_output2log(STARTUPINFO* si)
 		if (SetHandleInformation(childProcessStdErrRead, HANDLE_FLAG_INHERIT, 0))
 		{
 			si->hStdError = childProcessStdErrWrite;
-			//si->hStdOutput = childProcessStdErrWrite;
+			/*HANDLE r, w;
+			if(CreatePipe(&r, &w, &saAttr, 0) && SetHandleInformation(r, HANDLE_FLAG_INHERIT, 0))
+				si->hStdOutput = w;*/
+			si->hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 			si->dwFlags |= STARTF_USESTDHANDLES;
 
 			readChildProcessOutputThread = CreateThread(0, 0, readChildProcessOutput, this, 0, 0);
@@ -286,6 +289,7 @@ DWORD WINAPI MpegStreamer::readChildProcessOutput(void* Param)
 	MpegStreamer* ms = (MpegStreamer*)Param;
 	DWORD dwRead;
 	CHAR chBuf[2512]; 
+	bool command_line_printed = false;
 	while (ReadFile(ms->childProcessStdErrRead, chBuf, sizeof(chBuf) - 1, &dwRead, NULL) && dwRead)
 	{
 		chBuf[dwRead] = '\0';
@@ -297,6 +301,11 @@ DWORD WINAPI MpegStreamer::readChildProcessOutput(void* Param)
 		//TCHAR == char	
 		strcpy((char *)m, chBuf);
 #endif
+		if (!command_line_printed)
+		{
+			command_line_printed = true;
+			log->error(_T("MpegStreamer: FFMPEG COMMAND LINE: %s"), ms->commandLine);
+		}
 		log->error(_T("MpegStreamer: FFMPEG ERROR OUTPUT: %s"), m); 
 	}
 	return 0;
