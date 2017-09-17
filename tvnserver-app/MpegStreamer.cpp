@@ -149,8 +149,8 @@ void MpegStreamer::Start(ULONG ip)
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
-		//if (config->isMpegStreamerWindowHidden())//!!!BUG!!! - stdout could not be separated from strerr
-		//	ms->redirect_process_output2log(&si);
+		//if (config->isMpegStreamerWindowHidden())
+			//ms->redirect_process_output2log(&si);//!!!BUG!!! - stdout could not be separated from strerr
 		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		StringStorage ss;
 		ms->address.toString2(&ss);
@@ -189,6 +189,14 @@ void MpegStreamer::Start(ULONG ip)
 			throw new Exception(_T("Unexpected option"));
 		}
 		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop1 -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+		if (config->logMpegStreamerProcessOutput())
+		{
+			/*ms->commandLine.appendString(_T(" >\""));
+			StringStorage ld;
+			config->getLogFileDir(&ld);
+			ms->commandLine.appendString(ld.getString());
+			ms->commandLine.appendString(_T("\\ffmpeg.log\" 2>&1"));*/
+		}
 		log->message(_T("MpegStreamer: Launching:\r\n%s"), ms->commandLine.getString());
 		DWORD dwCreationFlags = 0;
 		if(config->isMpegStreamerWindowHidden())
