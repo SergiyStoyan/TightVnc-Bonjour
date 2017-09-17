@@ -225,6 +225,8 @@ void MpegStreamerConfigDialog::updateUI()
 
 	m_hideStreamerWindow.check(m_config->isMpegStreamerWindowHidden());
 
+	m_logProcessOutput.check(m_config->logMpegStreamerProcessOutput());
+
 	set_monitors();
 
 	set_area();
