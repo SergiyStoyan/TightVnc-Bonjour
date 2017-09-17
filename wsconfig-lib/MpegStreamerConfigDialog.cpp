@@ -407,6 +407,8 @@ void MpegStreamerConfigDialog::apply()
 
 	m_config->hideMpegStreamerWindow(m_hideStreamerWindow.isChecked());
 
+	m_config->logMpegStreamerProcessOutput(m_logProcessOutput.isChecked());
+
 	if (m_captureDisplay.isChecked())
 	{
 		m_config->setMpegStreamerCaptureMode(ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY);
