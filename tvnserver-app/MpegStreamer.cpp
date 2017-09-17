@@ -285,11 +285,19 @@ DWORD WINAPI MpegStreamer::readChildProcessOutput(void* Param)
 {
 	MpegStreamer* ms = (MpegStreamer*)Param;
 	DWORD dwRead;
-	CHAR chBuf[512]; 
-	while (ReadFile(ms->childProcessStdErrRead, chBuf, sizeof(chBuf), &dwRead, NULL) && dwRead)
+	CHAR chBuf[2512]; 
+	while (ReadFile(ms->childProcessStdErrRead, chBuf, sizeof(chBuf) - 1, &dwRead, NULL) && dwRead)
 	{
-		std::string s = std::string(chBuf, dwRead);
-		log->error(_T("MpegStreamer: FFMPEG output: %s"), s); 
+		chBuf[dwRead] = '\0';
+		TCHAR m[sizeof(chBuf)];
+#ifdef UNICODE
+		//TCHAR == WCHAR
+		mbstowcs(m, chBuf, sizeof(m));
+#else
+		//TCHAR == char	
+		strcpy((char *)m, chBuf);
+#endif
+		log->error(_T("MpegStreamer: FFMPEG ERROR OUTPUT: %s"), m); 
 	}
 	return 0;
 }
