@@ -7,6 +7,8 @@
 
 #include "MpegStreamer.h"
 #include <tchar.h>
+#include <iostream>
+#include <ctime>
 
 void MpegStreamer::MpegStreamerConfigReloadListener::onConfigReload(ServerConfig *serverConfig)
 {
@@ -191,30 +193,40 @@ void MpegStreamer::Start(ULONG ip)
 		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop1 -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
 		if (config->logMpegStreamerProcessOutput())
 		{
-			StringStorage ld;
-			config->getLogFileDir(&ld);
-			ss.format(_T("%s\\ffmpeg.log"), ld.getString());
+			StringStorage lf;
+			config->getLogFileDir(&ss);
+			lf.format(_T("%s\\ffmpeg.log"), ss.getString());
 			SECURITY_ATTRIBUTES sa;
 			sa.nLength = sizeof(sa);
 			sa.lpSecurityDescriptor = NULL;
 			sa.bInheritHandle = TRUE;
-			HANDLE h = CreateFile(ss.getString(), GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, &sa, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			HANDLE h = CreateFile(lf.getString(), GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, &sa, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if(!h)
-				log->error(_T("MpegStreamer: CreateFile: Error: %d"), GetLastError());
+				log->error(_T("MpegStreamer: Could not create child process log:\r\n%s\r\nCreateFile: Error: %d"), lf.getString(), GetLastError());
 			else
 			{
-				log->message(_T("MpegStreamer: FFMPEG log:\r\n%s"), ss.getString());
-				DWORD dwBytesWritten = 0;
-				ss.format(_T("COMMAND LINE:\r\n%s\r\n\r\n\r\n"), ms->commandLine.getString());
+				log->message(_T("MpegStreamer: FFMPEG log:\r\n%s"), lf.getString());
+				ss.format(_T("COMMAND LINE:\r\n%s\r\n\r\n"), ms->commandLine.getString(), time);
 #ifdef UNICODE
 				//TCHAR == WCHAR
-				char s[2000];
-				wcstombs(s, ss.getString(), ss.getSize() > sizeof(s) ? ss.getSize() : sizeof(s));
+				char buffer[2000];
+				wcstombs(buffer, ss.getString(), ss.getSize() > sizeof(buffer) ? ss.getSize() : sizeof(buffer));
 #else
 				//TCHAR == char	
 				TO BE IMPLEMENTED
 #endif
-				WriteFile(h, s, strlen(s), &dwBytesWritten, NULL);
+				DWORD dwBytesWritten = 0;
+				WriteFile(h, buffer, strlen(buffer), &dwBytesWritten, NULL);
+
+				time_t rawtime;
+				struct tm * timeinfo;
+				time(&rawtime);
+				timeinfo = localtime(&rawtime);
+				char tb[80];
+				strftime(tb, sizeof(tb), "%Y-%m-%d %I:%M:%S", timeinfo);
+				sprintf(buffer, "STARTED:\r\n%s\r\n\r\n", tb);
+				WriteFile(h, buffer, strlen(buffer), &dwBytesWritten, NULL);
+
 				si.hStdError = h;
 				si.hStdOutput = h;
 				si.dwFlags |= STARTF_USESTDHANDLES;
