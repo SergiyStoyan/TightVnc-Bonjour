@@ -66,6 +66,7 @@ ServerConfig::ServerConfig()
 	m_MpegStreamerCapturedAreaWidth = 0;
 	m_MpegStreamerCapturedAreaHeight = 0;
 	m_logMpegStreamerProcessOutput = false;
+	m_MpegStreamerCaptureMode = MPEG_STREAMER_CAPTURE_MODE_DISPLAY;
 }
 
 ServerConfig::~ServerConfig()
