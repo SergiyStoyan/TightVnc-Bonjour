@@ -148,12 +148,6 @@ void MpegStreamer::Start(ULONG ip)
 	ms = new MpegStreamer(ip, config->getMpegStreamerDestinationPort());
 	try
 	{
-		STARTUPINFO si;
-		ZeroMemory(&si, sizeof(si));
-		si.cb = sizeof(si);
-		//if (config->isMpegStreamerWindowHidden())
-			//ms->redirect_process_output2log(&si);//!!!BUG!!! - stdout could not be separated from strerr
-		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		StringStorage ss;
 		ms->address.toString2(&ss);
 		switch (config->getMpegStreamerCaptureMode())
@@ -191,6 +185,12 @@ void MpegStreamer::Start(ULONG ip)
 			throw new Exception(_T("Unexpected option"));
 		}
 		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop1 -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+		STARTUPINFO si;
+		ZeroMemory(&si, sizeof(si));
+		si.cb = sizeof(si);
+		//if (config->isMpegStreamerWindowHidden())
+			//ms->redirect_process_output2log(&si);//!!!BUG!!! - stdout could not be separated from strerr
+		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		if (config->logMpegStreamerProcessOutput())
 		{
 			StringStorage lf;
@@ -201,7 +201,7 @@ void MpegStreamer::Start(ULONG ip)
 			sa.lpSecurityDescriptor = NULL;
 			sa.bInheritHandle = TRUE;
 			HANDLE h = CreateFile(lf.getString(), GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, &sa, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-			if(!h)
+			if(h == INVALID_HANDLE_VALUE)
 				log->error(_T("MpegStreamer: Could not create child process log:\r\n%s\r\nCreateFile: Error: %d"), lf.getString(), GetLastError());
 			else
 			{
@@ -304,7 +304,7 @@ BOOL MpegStreamer::redirect_process_output2log(STARTUPINFO* si)
 			/*HANDLE r, w;
 			if(CreatePipe(&r, &w, &saAttr, 0) && SetHandleInformation(r, HANDLE_FLAG_INHERIT, 0))
 				si->hStdOutput = w;*/
-			si->hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+			si->hStdOutput = INVALID_HANDLE_VALUE;// GetStdHandle(STD_OUTPUT_HANDLE);
 			si->dwFlags |= STARTF_USESTDHANDLES;
 
 			readChildProcessOutputThread = CreateThread(0, 0, readChildProcessOutput, this, 0, 0);
