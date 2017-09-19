@@ -33,8 +33,7 @@ void MpegStreamerConfigDialog::initControls()
 	m_destinationUdpPort.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_UDP_DESTINATION_PORT));
 	m_destinationSrtpPort.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_SRTP_DESTINATION_PORT));
 	m_encryptionKey.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_ENCRYPTION_KEY));
-	m_useUdp.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_UDP));
-	m_useSrtp.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_SRTP));
+	m_useSrtp.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_USE_SRTP));
 	m_framerate.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_FRAMERATE));
 	m_delayMss.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_START_DELAY));
 	m_turnOffRfbVideo.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO));
@@ -62,8 +61,7 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 	case IDC_RADIO_MPEG_STREAMER_MONITOR:
 	case IDC_RADIO_MPEG_STREAMER_AREA:
 	case IDC_RADIO_MPEG_STREAMER_WINDOW:
-	case IDC_RADIO_MPEG_STREAMER_UDP:
-	case IDC_RADIO_MPEG_STREAMER_SRTP:
+	case IDC_MPEG_STREAMER_USE_SRTP:
 		if (notificationID == BN_CLICKED)
 			onMpegStreamerEnabled();
 		break;
@@ -103,7 +101,7 @@ BOOL MpegStreamerConfigDialog::onInitDialog()
 
 void MpegStreamerConfigDialog::onMpegStreamerEnabled()
 {
-	m_destinationUdpPort.setEnabled(m_enableMpegStreamer.isChecked() && m_useUdp.isChecked());
+	m_destinationUdpPort.setEnabled(m_enableMpegStreamer.isChecked() && !m_useSrtp.isChecked());
 	m_destinationSrtpPort.setEnabled(m_enableMpegStreamer.isChecked() && m_useSrtp.isChecked());
 	m_encryptionKey.setEnabled(m_enableMpegStreamer.isChecked() && m_useSrtp.isChecked());
 	m_framerate.setEnabled(m_enableMpegStreamer.isChecked());
@@ -250,11 +248,8 @@ void MpegStreamerConfigDialog::updateUI()
 	StringStorage ss;
 	m_config->getMpegStreamerEncryptionKey(&ss);
 	m_encryptionKey.setText(ss.getString());
-
-	if(m_config->useMpegStreamerUdp())
-		m_useUdp.check(true);
-	else
-		m_useSrtp.check(true);
+	
+	m_useSrtp.check(!m_config->useMpegStreamerUdp());
 
 	m_framerate.setText(_itot(m_config->getMpegStreamerFramerate(), ts, 10));
 
@@ -444,7 +439,7 @@ void MpegStreamerConfigDialog::apply()
 	m_encryptionKey.getText(&ss);
 	m_config->setMpegStreamerEncryptionKey(ss.getString());
 
-	m_config->useMpegStreamerUdp(m_useUdp.isChecked());
+	m_config->useMpegStreamerUdp(!m_useSrtp.isChecked());
 
 	m_framerate.getText(&ss);
 	m_config->setMpegStreamerFramerate(_ttoi(ss.getString()));

@@ -78,8 +78,7 @@ private:
 	TextBox m_destinationUdpPort;
 	TextBox m_destinationSrtpPort;
 	TextBox m_encryptionKey;
-	CheckBox m_useUdp;//actually it is radiobox
-	CheckBox m_useSrtp;//actually it is radiobox
+	CheckBox m_useSrtp;
 	TextBox m_framerate;
 	TextBox m_delayMss;
 	CheckBox m_turnOffRfbVideo;
