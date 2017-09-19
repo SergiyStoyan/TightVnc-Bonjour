@@ -66,6 +66,8 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 			onMpegStreamerEnabled();
 		break;
 	case IDC_MPEG_STREAMER_UDP_DESTINATION_PORT:
+	case IDC_MPEG_STREAMER_SRTP_DESTINATION_PORT:
+	case IDC_MPEG_STREAMER_ENCRYPTION_KEY:
 	case IDC_MPEG_STREAMER_FRAMERATE:
 	case IDC_MPEG_STREAMER_START_DELAY:
 	case IDC_MPEG_STREAMER_AREA_LEFT:
@@ -158,7 +160,7 @@ bool MpegStreamerConfigDialog::validateInput()
 		return false;
 
 	m_encryptionKey.getText(&ss);
-	if (ss.getLength() < 30)
+	if (ss.getLength() < 40)
 	{
 		MessageBox(m_ctrlThis.getWindow(),
 			StringTable::getString(IDS_SET_MPEG_STREAMER_ENCRYPTION_KEY_ERROR),

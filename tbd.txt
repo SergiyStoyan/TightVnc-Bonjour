@@ -45,6 +45,8 @@ ffplay -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params zzzzzzzzzzzzzzzzzz
 receive:
 ffplay -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz srtp://client:8888 -fast -fs
 
+ffplay -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params 1234567890123456789012345678901234567890 srtp://127.0.0.1:5920
+
 
 
 

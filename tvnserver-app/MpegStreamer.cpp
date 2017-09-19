@@ -151,14 +151,18 @@ void MpegStreamer::Start(ULONG ip)
 	if (config->useMpegStreamerUdp())
 	{
 		ms = new MpegStreamer(ip, config->getMpegStreamerDestinationUdpPort());
-		command_line2.format(_T("-f mpegts udp://%s"), ms->address);
+		StringStorage ipp; 
+		ms->address.toString2(&ipp);
+		command_line2.format(_T("-f mpegts udp://%s"), ipp.getString());
 	}
 	else
 	{
 		ms = new MpegStreamer(ip, config->getMpegStreamerDestinationSrtpPort());
 		StringStorage ek;
 		config->getMpegStreamerEncryptionKey(&ek);
-		command_line2.format(_T("-f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params %s srtp://%s"), ek.getString(), ms->address);
+		StringStorage ipp;
+		ms->address.toString2(&ipp);
+		command_line2.format(_T("-f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params %s srtp://%s"), ek.getString(), ipp.getString());
 	}
 	try
 	{
