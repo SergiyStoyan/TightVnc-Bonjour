@@ -106,6 +106,7 @@ void MpegStreamerConfigDialog::onMpegStreamerEnabled()
 	m_destinationUdpPort.setEnabled(m_enableMpegStreamer.isChecked() && !m_useSrtp.isChecked());
 	m_destinationSrtpPort.setEnabled(m_enableMpegStreamer.isChecked() && m_useSrtp.isChecked());
 	m_encryptionKey.setEnabled(m_enableMpegStreamer.isChecked() && m_useSrtp.isChecked());
+	m_useSrtp.setEnabled(m_enableMpegStreamer.isChecked());
 	m_framerate.setEnabled(m_enableMpegStreamer.isChecked());
 	m_delayMss.setEnabled(m_enableMpegStreamer.isChecked());
 	m_turnOffRfbVideo.setEnabled(m_enableMpegStreamer.isChecked());
