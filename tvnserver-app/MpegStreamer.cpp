@@ -234,14 +234,9 @@ void MpegStreamer::Start(ULONG ip)
 #endif
 				DWORD dwBytesWritten = 0;
 				WriteFile(h, buffer, strlen(buffer), &dwBytesWritten, NULL);
-
-				time_t rawtime;
-				struct tm * timeinfo;
-				time(&rawtime);
-				timeinfo = localtime(&rawtime);
-				char tb[80];
-				strftime(tb, sizeof(tb), "%Y-%m-%d %I:%M:%S", timeinfo);
-				sprintf(buffer, "STARTED:\r\n%s\r\n\r\n", tb);
+				SYSTEMTIME t;
+				GetLocalTime(&t);
+				sprintf(buffer, "STARTED:\r\n%d-%d-%d %d:%d:%d\r\n\r\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
 				WriteFile(h, buffer, strlen(buffer), &dwBytesWritten, NULL);
 
 				si.hStdError = h;

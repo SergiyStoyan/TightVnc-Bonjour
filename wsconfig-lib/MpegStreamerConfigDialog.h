@@ -48,6 +48,7 @@ protected:
 	void onMpegStreamerEnabled();
 	//void onMpegStreamerCapturedDisplaySet();
 	void onMpegStreamerChange();
+	void onOpenLogDir();
 
 private:
 	void initControls();
@@ -93,6 +94,7 @@ private:
 	CheckBox m_captureDisplay;//actually it is radiobox
 	CheckBox m_captureArea;//actually it is radiobox
 	CheckBox m_captureWindow;//actually it is radiobox
+	Control m_openLogDir;
 
 	BaseDialog *m_parent;
 };

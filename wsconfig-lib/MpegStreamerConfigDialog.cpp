@@ -9,6 +9,8 @@
 #include "ConfigDialog.h"
 #include "tvnserver/resource.h"
 #include "CommonInputValidation.h"
+#include "tvnserver-app/NamingDefs.h"
+#include "win-system/Process.h"
 
 MpegStreamerConfigDialog::MpegStreamerConfigDialog()
 : BaseDialog(IDD_CONFIG_MPEG_STREAMER_PAGE), m_parent(NULL)
@@ -47,7 +49,9 @@ void MpegStreamerConfigDialog::initControls()
 	m_captureDisplay.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_MONITOR));
 	m_captureArea.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_AREA));
 	m_captureWindow.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_WINDOW));
-	m_logProcessOutput.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE));	
+	m_logProcessOutput.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE));
+
+	m_openLogDir.setWindow(GetDlgItem(dialogHwnd, IDC_IDC_MPEG_STREAMER_OPEN_LOG_DIR_BUTTON));
 }
 
 BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
@@ -86,6 +90,10 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 			MessageBox(m_ctrlThis.getWindow(), ss.getString(), _T("222"), MB_ICONSTOP | MB_OK);*/
 			onMpegStreamerChange();
 		}
+		break;
+	case IDC_IDC_MPEG_STREAMER_OPEN_LOG_DIR_BUTTON:
+		if (notificationID == BN_CLICKED)
+			onOpenLogDir();
 		break;
 	}
 	return TRUE;
@@ -131,6 +139,25 @@ void MpegStreamerConfigDialog::onMpegStreamerEnabled()
 void MpegStreamerConfigDialog::onMpegStreamerChange()
 {
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
+}
+
+void MpegStreamerConfigDialog::onOpenLogDir()
+{
+	StringStorage logDir;
+	m_config->getLogFileDir(&logDir);
+	StringStorage command;
+	command.format(_T("explorer /select,%s\\%s.log"), logDir.getString(), LogNames::SERVER_LOG_FILE_STUB_NAME);
+	Process explorer(command.getString());
+	try
+	{
+		explorer.start();
+	}
+	catch (Exception &e)
+	{
+		MessageBox(m_ctrlThis.getWindow(),
+			e.getMessage(),
+			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+	}
 }
 
 bool MpegStreamerConfigDialog::validateInput()
