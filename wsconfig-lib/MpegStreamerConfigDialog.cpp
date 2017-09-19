@@ -251,6 +251,11 @@ void MpegStreamerConfigDialog::updateUI()
 	m_config->getMpegStreamerEncryptionKey(&ss);
 	m_encryptionKey.setText(ss.getString());
 
+	if(m_config->useMpegStreamerUdp())
+		m_useUdp.check(true);
+	else
+		m_useSrtp.check(true);
+
 	m_framerate.setText(_itot(m_config->getMpegStreamerFramerate(), ts, 10));
 
 	m_delayMss.setText(_itot(m_config->getMpegStreamerDelayMss(), ts, 10));
