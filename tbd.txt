@@ -30,25 +30,21 @@ Backend: udp://10.10.1.1:5920
 5) Advertise this capability onto Boujour with port to use but ONLY if authenticated user. 
 
 
-BTW for unclear reason some windows are producing only blank screen while other ones are captured even being overlapped.
-
-
-ffmpeg.exe -f gdigrab -framerate 10 -i title="C:\Users\S\AppData\Roaming\CisteraVNC" -f mpegts udp://192.168.2.12:5920
-
-
 QUESTIONS:
 
 AES encryption:
 ffmpeg -r 24 -f x11grab -s 1280x1024 -i :0.0 -c:v libx264 -crf 35 -pix_fmt yuv420p -threads 4 -preset fast -tune fastdecode -bsf:v h264_mp4toannexb -movflags +faststart -f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz "srtp://10.0.0.100:8888"
 
-ffmpeg -r 24 -f gdigrab -i desktop -c:v libx264 -crf 35 -pix_fmt yuv420p -threads 4 -preset fast -tune fastdecode -bsf:v h264_mp4toannexb -movflags +faststart -f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz "srtp://10.0.0.100:8888"
+ffmpeg -r 24 -f gdigrab -i desktop -c:v libx264 -crf 35 -pix_fmt yuv420p -threads 4 -preset fast -tune fastdecode -bsf:v h264_mp4toannexb -movflags +faststart -f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 "srtp://10.0.0.100:8888"
+
+ffmpeg -f gdigrab -framerate 10 -i title="tbd.txt - Notepad" -f rtp_mpegts -acodec mp3 -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz srtp://127.0.0.1:5920
+
+ffplay -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz srtp://127.0.0.1:5920
+
 
 receive:
 ffplay -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz srtp://client:8888 -fast -fs
 
 
 
-
-
-parameters of streaming are: framerate, port, screen coordinates, start delay, suppress RFB video, hide ffmpeg window. Those are pre-configured on VNC server.
 

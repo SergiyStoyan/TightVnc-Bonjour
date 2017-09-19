@@ -58,7 +58,10 @@ ServerConfig::ServerConfig()
 	m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
 
 	m_enableMpegStreamer = false;
-	m_MpegStreamerDestinationPort = 5920;
+	m_MpegStreamerDestinationUdpPort = 5920;
+	m_MpegStreamerDestinationSrtpPort = 5921;
+	m_MpegStreamerEncryptionKey = StringStorage(_T("123456789012345678901234567890"));
+	m_useMpegStreamerUdp = true;
 	m_MpegStreamerFramerate = 10;
 	m_MpegStreamerDelayMss = 500;
 	m_MpegStreamerCapturedAreaX = 0;
@@ -144,7 +147,10 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeUTF8(m_BonjourServiceType.getString());
 
   output->writeInt8(m_enableMpegStreamer ? 1 : 0);
-  output->writeInt16(m_MpegStreamerDestinationPort);
+  output->writeInt16(m_MpegStreamerDestinationUdpPort);
+  output->writeInt16(m_MpegStreamerDestinationSrtpPort);
+  output->writeUTF8(m_MpegStreamerEncryptionKey.getString());
+  output->writeInt8(m_useMpegStreamerUdp ? 1 : 0);
   output->writeInt16(m_MpegStreamerFramerate);
   output->writeInt16(m_MpegStreamerDelayMss);
   output->writeInt8(m_turnOffMpegStreamerRfbVideo ? 1 : 0);
@@ -233,7 +239,10 @@ void ServerConfig::deserialize(DataInputStream *input)
   input->readUTF8(&m_BonjourServiceType);
 
   m_enableMpegStreamer = input->readInt8() == 1;
-  m_MpegStreamerDestinationPort = input->readInt16();
+  m_MpegStreamerDestinationUdpPort = input->readInt16();
+  m_MpegStreamerDestinationSrtpPort = input->readInt16();
+  input->readUTF8(&m_MpegStreamerEncryptionKey);
+  m_useMpegStreamerUdp = input->readInt8() == 1;
   m_MpegStreamerFramerate = input->readInt16();
   m_MpegStreamerDelayMss = input->readInt16();
   m_turnOffMpegStreamerRfbVideo = input->readInt8() == 1;
@@ -868,16 +877,52 @@ void ServerConfig::enableMpegStreamer(bool enabled)
 	m_enableMpegStreamer = enabled;
 }
 
-uint16_t ServerConfig::getMpegStreamerDestinationPort()
+uint16_t ServerConfig::getMpegStreamerDestinationUdpPort()
 {
 	AutoLock lock(&m_objectCS);
-	return m_MpegStreamerDestinationPort;
+	return m_MpegStreamerDestinationUdpPort;
 }
 
-void ServerConfig::setMpegStreamerDestinationPort(uint16_t mpegStreamerDestinationPort)
+void ServerConfig::setMpegStreamerDestinationUdpPort(uint16_t mpegStreamerDestinationUdpPort)
 {
 	AutoLock lock(&m_objectCS);
-	m_MpegStreamerDestinationPort = mpegStreamerDestinationPort;
+	m_MpegStreamerDestinationUdpPort = mpegStreamerDestinationUdpPort;
+}
+
+uint16_t ServerConfig::getMpegStreamerDestinationSrtpPort()
+{
+	AutoLock lock(&m_objectCS);
+	return m_MpegStreamerDestinationSrtpPort;
+}
+
+void ServerConfig::setMpegStreamerDestinationSrtpPort(uint16_t mpegStreamerDestinationSrtpPort)
+{
+	AutoLock lock(&m_objectCS);
+	m_MpegStreamerDestinationSrtpPort = mpegStreamerDestinationSrtpPort;
+}
+
+void ServerConfig::getMpegStreamerEncryptionKey(StringStorage* encryptionKey)
+{
+	AutoLock lock(&m_objectCS);
+	*encryptionKey = m_MpegStreamerEncryptionKey;
+}
+
+void ServerConfig::setMpegStreamerEncryptionKey(const TCHAR* encryptionKey)
+{
+	AutoLock lock(&m_objectCS);
+	m_MpegStreamerEncryptionKey.setString(encryptionKey);
+}
+
+bool ServerConfig::useMpegStreamerUdp()
+{
+	AutoLock lock(&m_objectCS);
+	return m_useMpegStreamerUdp;
+}
+
+void ServerConfig::useMpegStreamerUdp(bool use)
+{
+	AutoLock lock(&m_objectCS);
+	m_useMpegStreamerUdp = use;
 }
 
 uint16_t ServerConfig::getMpegStreamerFramerate()

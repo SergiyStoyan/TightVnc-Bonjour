@@ -145,11 +145,23 @@ void MpegStreamer::Start(ULONG ip)
 	for (ms = MpegStreamer::get(ip); ms; ms = MpegStreamer::get(ip))
 		delete(ms);
 
-	ms = new MpegStreamer(ip, config->getMpegStreamerDestinationPort());
+	StringStorage command_line1;
+	command_line1.format(_T("ffmpeg.exe -f gdigrab -framerate %d"), config->getMpegStreamerFramerate());
+	StringStorage command_line2;
+	if (config->useMpegStreamerUdp())
+	{
+		ms = new MpegStreamer(ip, config->getMpegStreamerDestinationUdpPort());
+		command_line2.format(_T("-f mpegts udp://%s"), ms->address);
+	}
+	else
+	{
+		ms = new MpegStreamer(ip, config->getMpegStreamerDestinationSrtpPort());
+		StringStorage ek;
+		config->getMpegStreamerEncryptionKey(&ek);
+		command_line2.format(_T("-f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params %s srtp://%s"), ek.getString(), ms->address);
+	}
 	try
 	{
-		StringStorage ss;
-		ms->address.toString2(&ss);
 		switch (config->getMpegStreamerCaptureMode())
 		{
 		case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY:
@@ -161,41 +173,41 @@ void MpegStreamer::Start(ULONG ip)
 			if (!get_display_virtual_area(dn, &x, &y, &w, &h))
 			{
 				log->error(_T("MpegStreamer: Could not get desktop dimensions for '%s'. The entire virtual desktop will be streamed."), dn.getString());
-				ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop  -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+				ms->commandLine.format(_T("%s -i desktop %s"), command_line1.getString(), command_line2.getString());
 			}
 			else
-				ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), x, y, w, h, ss.getString());
+				ms->commandLine.format(_T("%s -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop %s"), command_line1.getString(), x, y, w, h, command_line2.getString());
 			break;
 		}
 		case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_AREA:
 		{
 			LONG x, y, w, h;
 			config->getMpegStreamerCapturedArea(&x, &y, &w, &h);
-			ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop -f mpegts udp://%s"), config->getMpegStreamerFramerate(), x, y, w, h, ss.getString());
+			ms->commandLine.format(_T("%s -offset_x %d -offset_y %d -video_size %dx%d -show_region 1 -i desktop %s"), command_line1.getString(), x, y, w, h, command_line2.getString());
 			break;
 		}
 		case ServerConfig::MPEG_STREAMER_CAPTURE_MODE_WINDOW:
 		{
 			StringStorage wt;
 			config->getMpegStreamerCapturedWindowTitle(&wt);
-			ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i title=\"%s\" -f mpegts udp://%s"), config->getMpegStreamerFramerate(), wt.getString(), ss.getString());
+			ms->commandLine.format(_T("%s -i title=\"%s\" %s"), command_line1.getString(), wt.getString(), command_line2.getString());
 			break;
 		}
 		default:
 			throw new Exception(_T("Unexpected option"));
 		}
-		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop1 -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());
+		//ms->commandLine.format(_T("ffmpeg.exe -f gdigrab -framerate %d -i desktop1 -f mpegts udp://%s"), config->getMpegStreamerFramerate(), ss.getString());//TEST
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
 		//if (config->isMpegStreamerWindowHidden())
-			//ms->redirect_process_output2log(&si);//!!!BUG!!! - stdout could not be separated from strerr
+			//ms->redirect_process_output2log(&si);//!!!BUG (windows7?)!!! - stdout could not be separated from strerr
 		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		if (config->logMpegStreamerProcessOutput())
 		{
-			StringStorage lf;
-			config->getLogFileDir(&ss);
-			lf.format(_T("%s\\ffmpeg.log"), ss.getString());
+			StringStorage ld, lf;
+			config->getLogFileDir(&ld);
+			lf.format(_T("%s\\ffmpeg.log"), ld.getString());
 			SECURITY_ATTRIBUTES sa;
 			sa.nLength = sizeof(sa);
 			sa.lpSecurityDescriptor = NULL;
@@ -205,6 +217,7 @@ void MpegStreamer::Start(ULONG ip)
 				log->error(_T("MpegStreamer: Could not create child process log:\r\n%s\r\nCreateFile: Error: %d"), lf.getString(), GetLastError());
 			else
 			{
+				StringStorage ss;
 				log->message(_T("MpegStreamer: FFMPEG log:\r\n%s"), lf.getString());
 				ss.format(_T("COMMAND LINE:\r\n%s\r\n\r\n"), ms->commandLine.getString(), time);
 #ifdef UNICODE
