@@ -22,6 +22,10 @@
 //-------------------------------------------------------------------------
 //
 
+//#include <winsock2.h>//added for WSASetSocketSecurity()
+//#include <mstcpip.h>//added for WSASetSocketSecurity()
+//#include <Ws2tcpip.h>//added for WSASetSocketSecurity()
+
 #include <stdlib.h>
 #include "SocketAddressIPv4.h"
 #include "SocketAddressIPv4.h"
