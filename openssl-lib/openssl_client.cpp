@@ -103,7 +103,7 @@ void cleanup_openssl()
 
 SSL_CTX *create_context()
 {
-	const SSL_METHOD* method = SSLv23_server_method();
+	const SSL_METHOD* method = SSLv23_client_method();
 	SSL_CTX* ctx = SSL_CTX_new(method);
 	if (!ctx) {
 		printf(ossl_err_as_string());

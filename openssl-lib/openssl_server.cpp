@@ -1,4 +1,6 @@
 #pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"libssl.lib")
+#pragma comment(lib,"libcrypto.lib")
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -7,6 +9,19 @@
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+
+char *ossl_err_as_string(void)
+{
+	BIO *bio = BIO_new(BIO_s_mem());
+	ERR_print_errors(bio);
+	char *buf = NULL;
+	size_t len = BIO_get_mem_data(bio, &buf);
+	char *ret = (char *)calloc(1, 1 + len);
+	if (ret)
+		memcpy(ret, buf, len);
+	BIO_free(bio);
+	return ret;
+}
 
 void receiving(void* ssl_)
 {
@@ -85,10 +100,9 @@ SSL_CTX *create_context()
 	method = SSLv23_server_method();
 
 	ctx = SSL_CTX_new(method);
-	if (!ctx) {
-		perror("Unable to create SSL context");
-		//ERR_print_errors_fp(stderr);
-		exit(EXIT_FAILURE);
+	if (!ctx) 
+	{
+		printf(ossl_err_as_string());
 	}
 
 	return ctx;
@@ -98,14 +112,14 @@ void configure_context(SSL_CTX *ctx)
 {//openssl.exe req -newkey rsa:2048 -config cnf/openssl.cnf  -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
 	SSL_CTX_set_ecdh_auto(ctx, 1);
 
-	if (SSL_CTX_use_certificate_file(ctx, "certificate.pem", SSL_FILETYPE_PEM) <= 0) {
-		//ERR_print_errors_fp(stderr);
-		exit(EXIT_FAILURE);
+	if (SSL_CTX_use_certificate_file(ctx, "certificate.pem", SSL_FILETYPE_PEM) <= 0)
+	{
+		printf(ossl_err_as_string());
 	}
 
-	if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0) {
-		//ERR_print_errors_fp(stderr);
-		exit(EXIT_FAILURE);
+	if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0) 
+	{
+		printf(ossl_err_as_string());
 	}
 }
 
@@ -129,15 +143,15 @@ int main(int argc, char **argv)
 
 		SOCKET client = accept(sock, (struct sockaddr*)&addr, &len);
 		if (client < 0) {
-			perror("Unable to accept");
-			exit(EXIT_FAILURE);
+			printf(ossl_err_as_string());
 		}
 
 		ssl = SSL_new(ctx);
 		SSL_set_fd(ssl, client);
 
-		if (SSL_accept(ssl) <= 0) {
-			//ERR_print_errors_fp(stderr);
+		int c = SSL_accept(ssl);
+		if (c <= 0) {
+			printf(ossl_err_as_string());
 		}
 		else
 		{
@@ -152,4 +166,6 @@ int main(int argc, char **argv)
 	closesocket(sock);
 	SSL_CTX_free(ctx);
 	cleanup_openssl();
+
+	getc(stdin);
 }
