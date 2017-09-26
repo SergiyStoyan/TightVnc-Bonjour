@@ -35,37 +35,113 @@
 
 #include <crtdbg.h>
 
-SocketIPv4::SocketIPv4(bool ssl)
-: m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false),
-  m_wsaStartup(1, 2)
+SocketIPv4::SocketIPv4(bool useSsl)
+	: m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false),
+	m_wsaStartup(1, 2)
 {
-  m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  m_isClosed = false;
+	m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	m_isClosed = false;
 
-  if (m_socket == INVALID_SOCKET) {
-    throw SocketException();
-  }
+	if (m_socket == INVALID_SOCKET) {
+		throw SocketException();
+	}
 
-  m_ssl = ssl;
+	m_useSsl = useSsl;
+
+	if (m_useSsl)
+		initializeSsl();
 }
 
 SocketIPv4::~SocketIPv4()
 {
+	if (m_useSsl)
+	{
+		if (m_ssl)
+			SSL_free(m_ssl);
+		if (m_sslCtx)
+			SSL_CTX_free(m_sslCtx);
+		cleanupSsl();
+	}
+
 #ifdef _WIN32
-  ::closesocket(m_socket);
+	::closesocket(m_socket);
 #else
-  ::close(m_socket);
+	::close(m_socket);
 #endif
 
-  AutoLock l(&m_mutex);
+	AutoLock l(&m_mutex);
 
-  if (m_peerAddr) {
-    delete m_peerAddr;
-  }
+	if (m_peerAddr) {
+		delete m_peerAddr;
+	}
 
-  if (m_localAddr) {
-    delete m_localAddr;
-  }
+	if (m_localAddr) {
+		delete m_localAddr;
+	}
+}
+
+void SocketIPv4::initializeSsl()
+{
+	if (!sslInitialized)
+	{
+		ERR_load_crypto_strings();
+		SSL_load_error_strings();
+		OpenSSL_add_ssl_algorithms();
+	}
+	m_sslCtx = createSslContext();
+	configureSslContext(m_sslCtx);
+}
+
+void SocketIPv4::cleanupSsl()
+{
+	EVP_cleanup();
+	sslInitialized = false;
+}
+
+void SocketIPv4::get_ssl_errors(TCHAR* m)
+{
+	BIO *bio = BIO_new(BIO_s_mem());
+	ERR_print_errors(bio);
+	char buffer[2000];
+	size_t len = BIO_get_mem_data(bio, &buffer);
+	if (m)
+#ifdef UNICODE
+		//TCHAR == WCHAR
+		mbstowcs(m, buffer, len > sizeof(m)? len : sizeof(m));
+#else
+		//TCHAR == char	
+		memcpy(m, buffer, len > sizeof(m) ? len : sizeof(m));
+#endif
+	BIO_free(bio);
+}
+
+SSL_CTX* SocketIPv4::createSslContext()
+{
+	const SSL_METHOD* method = m_isBound ? SSLv23_server_method(): SSLv23_client_method();
+	SSL_CTX* ctx = SSL_CTX_new(method);
+	if (!ctx)
+	{
+		TCHAR m[2000];
+		get_ssl_errors(m);
+		throw SocketException(m);
+	}
+	return ctx;
+}
+
+void SocketIPv4::configureSslContext(SSL_CTX* ctx)
+{
+	//SSL_CTX_set_ecdh_auto(ctx, 1);
+
+	/* Set the key and cert */
+	//if (SSL_CTX_use_certificate_file(ctx, "cert.pem", SSL_FILETYPE_PEM) <= 0) {
+	//	//ERR_print_errors_fp(stderr);
+	//	exit(EXIT_FAILURE);
+	//}
+
+	//if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0) {
+	//	//ERR_print_errors_fp(stderr);
+	//	exit(EXIT_FAILURE);
+	//}
 }
 
 void SocketIPv4::connect(const TCHAR *host, unsigned short port)
@@ -81,6 +157,18 @@ void SocketIPv4::connect(const SocketAddressIPv4 &addr)
 
   if (::connect(m_socket, (const sockaddr *)&targetSockAddr, addr.getAddrLen()) == SOCKET_ERROR) {
     throw SocketException();
+  }
+
+  if (m_useSsl)
+  {
+	  m_ssl = SSL_new(m_sslCtx);
+	  SSL_set_fd(m_ssl, m_socket);
+	  if (SSL_connect(m_ssl) <= 0)
+	  {
+		  TCHAR m[2000];
+		  get_ssl_errors(m);
+		  throw SocketException(m);
+	  }
   }
 
   AutoLock l(&m_mutex);
@@ -168,31 +256,43 @@ SocketIPv4 *SocketIPv4::accept()
   }
 
   // Fall out with exception, no need to check if accepted is NULL
-  accepted->set(result);
+  accepted->set(result); 
   return accepted; // Valid and initialized
 }
 
 void SocketIPv4::set(SOCKET socket)
 {
-  AutoLock l(&m_mutex);
+	AutoLock l(&m_mutex);
 
 #ifdef _WIN32
-  ::closesocket(m_socket);
+	::closesocket(m_socket);
 #else
-  ::close(m_socket);
+	::close(m_socket);
 #endif
-  m_socket = socket;
+	m_socket = socket;
 
-  // Set local and peer addresses for new socket
-  struct sockaddr_in addr;
-  socklen_t addrlen = sizeof(struct sockaddr_in);
-  if (getsockname(socket, (struct sockaddr *)&addr, &addrlen) == 0) {
-    m_localAddr = new SocketAddressIPv4(addr);
-  }
+	// Set local and peer addresses for new socket
+	struct sockaddr_in addr;
+	socklen_t addrlen = sizeof(struct sockaddr_in);
+	if (getsockname(socket, (struct sockaddr *)&addr, &addrlen) == 0) {
+		m_localAddr = new SocketAddressIPv4(addr);
+	}
 
-  if (getpeername(socket, (struct sockaddr *)&addr, &addrlen) == 0) {
-    m_peerAddr = new SocketAddressIPv4(addr);
-  }
+	if (getpeername(socket, (struct sockaddr *)&addr, &addrlen) == 0) {
+		m_peerAddr = new SocketAddressIPv4(addr);
+	}
+
+	if (m_useSsl)
+	{
+		m_ssl = SSL_new(m_sslCtx);
+		SSL_set_fd(m_ssl, m_socket);
+		if (SSL_accept(m_ssl) <= 0)
+		{
+			TCHAR m[2000];
+			get_ssl_errors(m);
+			throw SocketException(m);
+		}
+	}
 }
 
 SOCKET SocketIPv4::getAcceptedSocket(struct sockaddr_in *addr)

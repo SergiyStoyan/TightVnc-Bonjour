@@ -36,6 +36,12 @@
 #include "win-system/WsaStartup.h"
 #include "thread/LocalMutex.h"
 
+#pragma comment(lib,"ws2_32.lib")//ssl support
+#pragma comment(lib,"libssl.lib")//ssl support
+#pragma comment(lib,"libcrypto.lib")//ssl support
+#include <openssl/ssl.h>//ssl support
+#include <openssl/err.h>//ssl support
+
 /**
  * IPv4 Socket class.
  *
@@ -183,7 +189,18 @@ protected:
   /**
   * Flag determinating if socket is using SSL.
   */
-  bool m_ssl;
+  bool m_useSsl;
+
+  SSL m_ssl;
+  SSL_CTX* m_sslCtx;
+
+  void initializeSsl();
+  static bool sslInitialized = false;
+  void cleanupSsl();
+  SSL_CTX* createSslContext();
+  void configureSslContext(SSL_CTX* ctx);
+  void get_ssl_errors(TCHAR* m)
+
 };
 
 #endif
