@@ -120,7 +120,7 @@ public:
   //       If you use this component under Windows, you should call
   //       WindowsSocket::startup() prior to calling this constructor.
   //
-  RemoteViewerCore(const TCHAR *host, UINT16 port,
+  RemoteViewerCore(const TCHAR *host, UINT16 port, bool ssl,
                    CoreEventsAdapter *adapter,
                    Logger *logger = 0,
                    bool sharedFlag = true);
@@ -217,7 +217,7 @@ public:
   //       If you use this component under Windows, you should call
   //       WindowsSocket::startup() prior to calling function.
   //
-  void start(const TCHAR *host, UINT16 port,
+  void start(const TCHAR *host, UINT16 port, bool ssl,
              CoreEventsAdapter *adapter,
              bool sharedFlag = true);
 

@@ -37,7 +37,7 @@ public:
 
   // HWND mainWindow is handle of main window of program.
   // this window received and processing messages "WM_USER_NEW_LISTENING"
-  ConnectionListener(WindowsApplication *application, UINT16 port = DEFAULT_PORT);
+  ConnectionListener(WindowsApplication *application, bool ssl, UINT16 port = DEFAULT_PORT);
 
   virtual ~ConnectionListener();
 

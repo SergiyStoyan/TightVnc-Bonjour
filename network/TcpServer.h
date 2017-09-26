@@ -49,9 +49,10 @@ public:
    * @throws Exception if fail to create tcp server.
    */
   TcpServer(const TCHAR *bindHost,
-            unsigned short bindPort,
-            bool autoStart = false,
-            bool lockAddr = false) throw(Exception);
+	  unsigned short bindPort, 
+	  bool ssl,
+	  bool autoStart = false,
+	  bool lockAddr = false) throw(Exception);
   /**
    * Closes listening socket, terminates tcp server thread and
    * deletes tcp server object.

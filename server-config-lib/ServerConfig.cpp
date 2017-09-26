@@ -351,16 +351,31 @@ int ServerConfig::getRfbPort()
   return m_rfbPort;
 }
 
+bool ServerConfig::useRfbSsl()
+{
+	AutoLock lock(&m_objectCS);
+	//return m_rfbSsl;
+	return true;
+}
+
+void ServerConfig::useRfbSsl(bool ssl)
+{
+	AutoLock lock(&m_objectCS);
+	m_rfbSsl = ssl;
+}
+
 void ServerConfig::setHttpPort(int port)
 {
-  AutoLock lock(&m_objectCS);
-  if (port > 65535) {
-    m_httpPort = 65535;
-  } else if (port < 0) {
-    m_httpPort = 1;
-  } else {
-    m_httpPort = port;
-  }
+	AutoLock lock(&m_objectCS);
+	if (port > 65535) {
+		m_httpPort = 65535;
+	}
+	else if (port < 0) {
+		m_httpPort = 1;
+	}
+	else {
+		m_httpPort = port;
+	}
 }
 
 int ServerConfig::getHttpPort()

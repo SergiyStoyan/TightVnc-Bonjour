@@ -70,7 +70,7 @@ RemoteViewerCore::RemoteViewerCore(Logger *logger)
   init();
 }
 
-RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port,
+RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port, bool ssl,
                                    CoreEventsAdapter *adapter,
                                    Logger *logger,
                                    bool sharedFlag)
@@ -82,7 +82,7 @@ RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port,
 {
   init();
 
-  start(host, port, adapter, sharedFlag);
+  start(host, port, ssl, adapter, sharedFlag);
 }
 
 RemoteViewerCore::RemoteViewerCore(SocketIPv4 *socket,
@@ -191,10 +191,11 @@ void RemoteViewerCore::start(CoreEventsAdapter *adapter,
 
 void RemoteViewerCore::start(const TCHAR *host,
                              UINT16 port,
+							bool ssl,
                              CoreEventsAdapter *adapter,
                              bool sharedFlag)
 {
-  m_tcpConnection.bind(host, port);
+  m_tcpConnection.bind(host, port, ssl);
   start(adapter, sharedFlag);
 }
 void RemoteViewerCore::start(SocketIPv4 *socket,

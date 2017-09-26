@@ -42,7 +42,7 @@ OutgoingRfbConnectionThread::~OutgoingRfbConnectionThread()
 
 void OutgoingRfbConnectionThread::execute()
 {
-  SocketIPv4 *socket = new SocketIPv4();
+  SocketIPv4 *socket = new SocketIPv4(false);
 
   try {
     socket->connect(m_connectHost.getString(), m_connectPort);

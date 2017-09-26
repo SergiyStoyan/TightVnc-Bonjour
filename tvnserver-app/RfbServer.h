@@ -48,7 +48,7 @@ public:
    * if not set, then view port is full screen.
    * @throws Exception when failed to create tcp server.
    */
-  RfbServer(const TCHAR *bindHost, unsigned short bindPort,
+  RfbServer(const TCHAR *bindHost, unsigned short bindPort, bool ssl,
             RfbClientManager *clientManager,
             bool lockAddr,
             LogWriter *log,

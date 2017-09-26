@@ -119,7 +119,7 @@ void ViewerInstance::start()
     StringStorage strHost;
     m_condata.getReducedHost(&strHost);
     UINT16 portVal = m_condata.getPort();
-    m_viewerCore.start(strHost.getString(), portVal,
+    m_viewerCore.start(strHost.getString(), portVal, m_condata.isSsl(),
                        &m_viewerWnd, m_conConf.getSharedFlag());
   }
 }

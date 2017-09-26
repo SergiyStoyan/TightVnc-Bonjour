@@ -47,7 +47,7 @@ public:
   /**
    * Creates new socket.
    */
-  SocketIPv4();
+  SocketIPv4(bool ssl);
   /**
    * Deletes and closes socket.
    */
@@ -176,9 +176,14 @@ protected:
   SocketAddressIPv4 *m_peerAddr;
 
   /**
-   * Flag determinating if socket is server or client socket.
-   */
+  * Flag determinating if socket is server or client socket.
+  */
   bool m_isBound;
+
+  /**
+  * Flag determinating if socket is using SSL.
+  */
+  bool m_ssl;
 };
 
 #endif

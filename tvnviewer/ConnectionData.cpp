@@ -192,5 +192,10 @@ void ConnectionData::getReducedHost(StringStorage *strHost) const
 
 int ConnectionData::getPort() const
 {
-  return m_hostPath.getVncPort();
+	return m_hostPath.getVncPort();
+}
+
+bool ConnectionData::isSsl() const
+{
+	return true;
 }

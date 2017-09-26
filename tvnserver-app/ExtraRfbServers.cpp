@@ -131,7 +131,7 @@ bool ExtraRfbServers::startUp(bool asService, RfbClientManager *mgr)
       m_log->detail(_T("Starting extra RFB server at port %d"), port);
 
       try {
-        RfbServer *s = new RfbServer(bindHost, port, mgr, asService, m_log, &rect);
+        RfbServer *s = new RfbServer(bindHost, port, false, mgr, asService, m_log, &rect);
         m_servers.push_back(s);
         m_log->message(_T("Started extra RFB server at port %d"), port);
       } catch (Exception &ex) {

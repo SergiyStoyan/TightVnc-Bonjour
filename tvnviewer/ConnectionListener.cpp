@@ -29,9 +29,9 @@
 
 const TCHAR ConnectionListener::DEFAULT_HOST[] = _T("0.0.0.0");
 
-ConnectionListener::ConnectionListener(WindowsApplication *application,
+ConnectionListener::ConnectionListener(WindowsApplication *application, bool ssl,
                                        UINT16 port)
-: TcpServer(DEFAULT_HOST, port, true),
+: TcpServer(DEFAULT_HOST, port, ssl),
   m_application(application)
 {
 }

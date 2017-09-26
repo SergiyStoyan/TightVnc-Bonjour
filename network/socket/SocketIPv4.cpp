@@ -35,7 +35,7 @@
 
 #include <crtdbg.h>
 
-SocketIPv4::SocketIPv4()
+SocketIPv4::SocketIPv4(bool ssl)
 : m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false),
   m_wsaStartup(1, 2)
 {
@@ -45,6 +45,8 @@ SocketIPv4::SocketIPv4()
   if (m_socket == INVALID_SOCKET) {
     throw SocketException();
   }
+
+  m_ssl = ssl;
 }
 
 SocketIPv4::~SocketIPv4()
@@ -153,7 +155,7 @@ SocketIPv4 *SocketIPv4::accept()
   SocketIPv4 *accepted;
 
   try {
-    accepted = new SocketIPv4(); 
+    accepted = new SocketIPv4(m_ssl); 
     accepted->close();
   } catch(...) {
     // Cleanup and throw further

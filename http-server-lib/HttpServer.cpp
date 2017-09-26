@@ -28,7 +28,7 @@
 #include "thread/ZombieKiller.h"
 
 HttpServer::HttpServer(const TCHAR *bindHost, unsigned short bindPort, bool lockAddr, LogWriter *log)
-: TcpServer(bindHost, bindPort, true, lockAddr),
+: TcpServer(bindHost, bindPort, false, lockAddr),
   m_log(log)
 {
   m_log->message(_T("Http server started"));

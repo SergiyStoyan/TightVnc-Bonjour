@@ -104,6 +104,9 @@ public:
 	void setRfbPort(int port);
 	int getRfbPort();
 
+	void useRfbSsl(bool ssl);
+	bool useRfbSsl();
+
 	void setHttpPort(int port);
 	int getHttpPort();
 
@@ -284,6 +287,7 @@ protected:
 	//
 
 	int m_rfbPort;
+	bool m_rfbSsl;
 	int m_httpPort;
 
 	//

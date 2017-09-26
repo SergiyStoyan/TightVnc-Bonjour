@@ -50,6 +50,8 @@ public:
   //
   int getPort() const;
 
+  bool isSsl() const;
+
   //
   // This method return true, if hostname isn't set.
   //
