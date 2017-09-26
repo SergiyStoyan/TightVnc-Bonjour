@@ -50,157 +50,156 @@
 class SocketIPv4
 {
 public:
-  /**
-   * Creates new socket.
-   */
-  SocketIPv4(bool ssl);
-  /**
-   * Deletes and closes socket.
-   */
-  virtual ~SocketIPv4();
+	/**
+	 * Creates new socket.
+	 */
+	SocketIPv4(bool ssl);
+	/**
+	 * Deletes and closes socket.
+	 */
+	virtual ~SocketIPv4();
 
-  /**
-   * Connects to remote host.
-   * @param host host to connect.
-   * @param port port to connect.
-   * @throws SocketException on fail.
-   */
-  void connect(const TCHAR *host, unsigned short port) throw(SocketException);
-  /**
-   * Connects to remote host.
-   * @param addr address to connect.
-   * @throws SocketException on fail.
-   */
-  void connect(const SocketAddressIPv4 &addr) throw(SocketException);
-  /**
-   * Closes socket.
-   * @throws SocketException on fail.
-   */
-  void close() throw(SocketException);
-  /**
-   * Shutdowns socket.
-   * @param how how to shutdown socket (SD_RECEIVE|SD_SEND|SD_BOTH).
-   * @throws SocketException on fail.
-   */
-  void shutdown(int how) throw(SocketException);
-  /**
-   * Binds socket to specified address.
-   * @param bindHost host to bind.
-   * @param bindPort port to bind.
-   * @throws SocketException on fail.
-   */
-  void bind(const TCHAR *bindHost, unsigned int bindPort);
-  /**
-   * Binds socket to socket address.
-   * @throws SocketException on fail.
-   */
-  void bind(const SocketAddressIPv4 &addr) throw(SocketException);
-  /**
-   * Checks if this socket is bound and used for server needs.
-   * @return true if socket used as server and successfully bounded, false otherwise.
-   */
-  bool isBound();
-  /**
-   * Socket listen method.
-   * @param backlog max count of connections in pool.
-   * @throws SocketException on fail.
-   */
-  void listen(int backlog) throw(SocketException);
+	/**
+	 * Connects to remote host.
+	 * @param host host to connect.
+	 * @param port port to connect.
+	 * @throws SocketException on fail.
+	 */
+	void connect(const TCHAR *host, unsigned short port) throw(SocketException);
+	/**
+	 * Connects to remote host.
+	 * @param addr address to connect.
+	 * @throws SocketException on fail.
+	 */
+	void connect(const SocketAddressIPv4 &addr) throw(SocketException);
+	/**
+	 * Closes socket.
+	 * @throws SocketException on fail.
+	 */
+	void close() throw(SocketException);
+	/**
+	 * Shutdowns socket.
+	 * @param how how to shutdown socket (SD_RECEIVE|SD_SEND|SD_BOTH).
+	 * @throws SocketException on fail.
+	 */
+	void shutdown(int how) throw(SocketException);
+	/**
+	 * Binds socket to specified address.
+	 * @param bindHost host to bind.
+	 * @param bindPort port to bind.
+	 * @throws SocketException on fail.
+	 */
+	void bind(const TCHAR *bindHost, unsigned int bindPort);
+	/**
+	 * Binds socket to socket address.
+	 * @throws SocketException on fail.
+	 */
+	void bind(const SocketAddressIPv4 &addr) throw(SocketException);
+	/**
+	 * Checks if this socket is bound and used for server needs.
+	 * @return true if socket used as server and successfully bounded, false otherwise.
+	 */
+	bool isBound();
+	/**
+	 * Socket listen method.
+	 * @param backlog max count of connections in pool.
+	 * @throws SocketException on fail.
+	 */
+	void listen(int backlog) throw(SocketException);
 
-  /**
-   * Accepts incoming connection.
-   * @throws SocketException on fail.
-   * @return newly allocated socket that contain incoming connections.
-   */
-  SocketIPv4 *accept() throw(SocketException);
+	/**
+	 * Accepts incoming connection.
+	 * @throws SocketException on fail.
+	 * @return newly allocated socket that contain incoming connections.
+	 */
+	SocketIPv4 *accept() throw(SocketException);
 
-  /**
-   * Sends data to socket.
-   *
-   * @param data buffer to send.
-   * @param size bytes to send.
-   * @param [optional] flags socket flags.
-   * @return count to sent bytes.
-   * @throw IOException on error.
-   */
-  int send(const char *data, int size, int flags = 0) throw(IOException);
-  /**
-   * Receives data from socket.
-   *
-   * @param buffer buffer to receive data.
-   * @param size count of bytes to read from socket.
-   * @param flags recv flags.
-   * @return count of read bytes.
-   * @throws IOException on fail.
-   */
-  int recv(char *buffer, int size, int flags = 0) throw(IOException);
+	/**
+	 * Sends data to socket.
+	 *
+	 * @param data buffer to send.
+	 * @param size bytes to send.
+	 * @param [optional] flags socket flags.
+	 * @return count to sent bytes.
+	 * @throw IOException on error.
+	 */
+	int send(const char *data, int size, int flags = 0) throw(IOException);
+	/**
+	 * Receives data from socket.
+	 *
+	 * @param buffer buffer to receive data.
+	 * @param size count of bytes to read from socket.
+	 * @param flags recv flags.
+	 * @return count of read bytes.
+	 * @throws IOException on fail.
+	 */
+	int recv(char *buffer, int size, int flags = 0) throw(IOException);
 
-  /**
-   * Returns local address of socket (for listening socket).
-   * @param addr output parameter that will contain socket address.
-   * @return true on success, false on fail.
-   */
-  bool getLocalAddr(SocketAddressIPv4 *addr);
-  /**
-   * Returns peer address.
-   * @param addr output parameter that will contain socket address.
-   * @return true on success, false on fail.
-   */
-  bool getPeerAddr(SocketAddressIPv4 *addr);
+	/**
+	 * Returns local address of socket (for listening socket).
+	 * @param addr output parameter that will contain socket address.
+	 * @return true on success, false on fail.
+	 */
+	bool getLocalAddr(SocketAddressIPv4 *addr);
+	/**
+	 * Returns peer address.
+	 * @param addr output parameter that will contain socket address.
+	 * @return true on success, false on fail.
+	 */
+	bool getPeerAddr(SocketAddressIPv4 *addr);
 
-  /* Auxiliary */
-  void setSocketOptions(int level, int name, void *value, socklen_t len) throw(SocketException);
-  void getSocketOptions(int level, int name, void *value, socklen_t *len) throw(SocketException);
+	/* Auxiliary */
+	void setSocketOptions(int level, int name, void *value, socklen_t len) throw(SocketException);
+	void getSocketOptions(int level, int name, void *value, socklen_t *len) throw(SocketException);
 
-  /* Socket options */
-  void enableNaggleAlgorithm(bool enabled) throw(SocketException);
-  void setExclusiveAddrUse() throw(SocketException);
+	/* Socket options */
+	void enableNaggleAlgorithm(bool enabled) throw(SocketException);
+	void setExclusiveAddrUse() throw(SocketException);
 
 private:
-  WsaStartup m_wsaStartup;
+	WsaStartup m_wsaStartup;
 
 protected:
-  // Returns a SOCKET object with performed accept operation.
-  // Throws SocketException on an error.
-  SOCKET getAcceptedSocket(struct sockaddr_in *addr);
+	// Returns a SOCKET object with performed accept operation.
+	// Throws SocketException on an error.
+	SOCKET getAcceptedSocket(struct sockaddr_in *addr);
 
-  // Closes old socket and sets handler to new one
-  void set(SOCKET socket);
+	// Closes old socket and sets handler to new one
+	void set(SOCKET socket);
 
-  /**
-   * Mutex for thread-safety.
-   */
-  LocalMutex m_mutex;
+	/**
+	 * Mutex for thread-safety.
+	 */
+	LocalMutex m_mutex;
 
-  /**
-   * WinSock socket.
-   */
-  SOCKET m_socket;
-  bool m_isClosed;
+	/**
+	 * WinSock socket.
+	 */
+	SOCKET m_socket;
+	bool m_isClosed;
 
-  SocketAddressIPv4 *m_localAddr;
-  SocketAddressIPv4 *m_peerAddr;
+	SocketAddressIPv4 *m_localAddr;
+	SocketAddressIPv4 *m_peerAddr;
 
-  /**
-  * Flag determinating if socket is server or client socket.
-  */
-  bool m_isBound;
+	/**
+	* Flag determinating if socket is server or client socket.
+	*/
+	bool m_isBound;
 
-  /**
-  * Flag determinating if socket is using SSL.
-  */
-  bool m_useSsl;
+	/**
+	* Flag determinating if socket is using SSL.
+	*/
+	bool m_useSsl;
 
-  SSL m_ssl;
-  SSL_CTX* m_sslCtx;
+	SSL m_ssl;
+	SSL_CTX* m_sslCtx;
 
-  void initializeSsl();
-  static bool sslInitialized = false;
-  void cleanupSsl();
-  SSL_CTX* createSslContext();
-  void configureSslContext(SSL_CTX* ctx);
-  void get_ssl_errors(TCHAR* m)
-
+	void initializeSsl();
+	static bool sslInitialized = false;
+	void cleanupSsl();
+	SSL_CTX* createSslContext();
+	void configureSslContext(SSL_CTX* ctx);
+	void get_ssl_errors(TCHAR* m);
 };
 
 #endif
