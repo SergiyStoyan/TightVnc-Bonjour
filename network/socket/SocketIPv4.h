@@ -191,14 +191,17 @@ protected:
 	*/
 	bool m_useSsl;
 	SSL* m_ssl;
+	void createSslSocket(bool server);
+	void destroySslSocket();
 	static SSL_CTX* m_sslCtx;
-	void initializeSsl();
+	void initializeSsl(bool server);
 	static bool sslInitialized;
 	static void shutdownSsl();
 	static int countOfSocketIPv4;
 	SSL_CTX* createSslContext();
-	void configureSslContext(SSL_CTX* ctx);
+	void configureSslContext(SSL_CTX* ctx, bool server);
 	void getSslErrors(TCHAR* m);
+	void throwSslException();
 };
 
 #endif

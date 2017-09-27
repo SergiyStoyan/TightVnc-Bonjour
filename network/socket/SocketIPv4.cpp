@@ -46,31 +46,16 @@ SocketIPv4::SocketIPv4(bool useSsl)
 	}
 
 	m_useSsl = useSsl;
-
-	if (m_useSsl)
-	{
-		countOfSocketIPv4++;
-		initializeSsl();
-	}
 }
 
 bool SocketIPv4::sslInitialized = false;
 int SocketIPv4::countOfSocketIPv4 = 0;
 SSL_CTX* SocketIPv4::m_sslCtx = NULL;
+SSL* m_ssl = NULL;
 
 SocketIPv4::~SocketIPv4()
 {
-	if (m_useSsl != NULL)
-	{
-		if (m_ssl != NULL) 
-		{
-			SSL_free(m_ssl);
-			m_ssl = NULL;
-		}
-		countOfSocketIPv4--;
-		if (!countOfSocketIPv4)
-			shutdownSsl();
-	}
+	destroySslSocket();
 
 #ifdef _WIN32
 	::closesocket(m_socket);
@@ -89,7 +74,43 @@ SocketIPv4::~SocketIPv4()
 	}
 }
 
-void SocketIPv4::initializeSsl()
+void SocketIPv4::createSslSocket(bool server)
+{
+	if (m_ssl != NULL)
+		return;
+
+	countOfSocketIPv4++;
+	initializeSsl(m_isBound);
+
+	m_ssl = SSL_new(m_sslCtx);
+	if(m_ssl == NULL)
+		throwSslException();
+	SSL_set_fd(m_ssl, m_socket);
+	if (server)
+	{
+		if (SSL_accept(m_ssl) <= 0)
+			throwSslException();
+	}
+	else
+	{
+		if (SSL_connect(m_ssl) <= 0)
+			throwSslException();
+	}
+}
+
+void SocketIPv4::destroySslSocket()
+{
+	if (m_ssl != NULL)
+	{
+		SSL_free(m_ssl);
+		m_ssl = NULL;
+		countOfSocketIPv4--;
+		if (!countOfSocketIPv4)
+			shutdownSsl();
+	}
+}
+
+void SocketIPv4::initializeSsl(bool server)
 {
 	if (!sslInitialized)
 	{
@@ -103,7 +124,7 @@ void SocketIPv4::initializeSsl()
 	if (m_sslCtx == NULL)
 	{
 		m_sslCtx = createSslContext();
-		configureSslContext(m_sslCtx);
+		configureSslContext(m_sslCtx, server);
 	}
 }
 
@@ -129,7 +150,8 @@ void SocketIPv4::getSslErrors(TCHAR* m)
 {
 	BIO *bio = BIO_new(BIO_s_mem());
 	ERR_print_errors(bio);
-	char buffer[2000];
+	//char buffer[2000];
+	char* buffer = NULL;
 	size_t len = BIO_get_mem_data(bio, &buffer);
 	if (m)
 #ifdef UNICODE
@@ -142,40 +164,35 @@ void SocketIPv4::getSslErrors(TCHAR* m)
 	BIO_free(bio);
 }
 
+void SocketIPv4::throwSslException()
+{
+	TCHAR m[2000];
+	getSslErrors(m);
+	throw SocketException(m);
+}
+
 SSL_CTX* SocketIPv4::createSslContext()
 {
 	const SSL_METHOD* method = m_isBound ? SSLv23_server_method(): SSLv23_client_method();
 	SSL_CTX* ctx = SSL_CTX_new(method);
-	if (!ctx)
-	{
-		TCHAR m[2000];
-		getSslErrors(m);
-		throw SocketException(m);
-	}
+	if (ctx == NULL)
+		throwSslException();
 	return ctx;
 }
 
-void SocketIPv4::configureSslContext(SSL_CTX* ctx)
+void SocketIPv4::configureSslContext(SSL_CTX* ctx, bool server)
 {
-	if (!m_isBound)//client
+	if (!server)
 		return;
 	//create self-signed certificate and key
 	//>openssl.exe req -newkey rsa:2048 -config cnf/openssl.cnf  -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
 	SSL_CTX_set_ecdh_auto(ctx, 1);
 
 	if (SSL_CTX_use_certificate_file(ctx, "certificate.pem", SSL_FILETYPE_PEM) <= 0)
-	{
-		TCHAR m[2000];
-		getSslErrors(m);
-		throw SocketException(m);
-	}
+		throwSslException();
 
 	if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0)
-	{
-		TCHAR m[2000];
-		getSslErrors(m);
-		throw SocketException(m);
-	}
+		throwSslException();
 }
 
 void SocketIPv4::connect(const TCHAR *host, unsigned short port)
@@ -194,16 +211,7 @@ void SocketIPv4::connect(const SocketAddressIPv4 &addr)
   }
 
   if (m_useSsl)
-  {
-	  m_ssl = SSL_new(m_sslCtx);
-	  SSL_set_fd(m_ssl, m_socket);
-	  if (SSL_connect(m_ssl) <= 0)
-	  {
-		  TCHAR m[2000];
-		  getSslErrors(m);
-		  throw SocketException(m);
-	  }
-  }
+	  createSslSocket(false);
 
   AutoLock l(&m_mutex);
 
@@ -223,9 +231,11 @@ void SocketIPv4::close()
 
 void SocketIPv4::shutdown(int how)
 {
-  if (::shutdown(m_socket, how) == SOCKET_ERROR) {
-    throw SocketException();
-  }
+	destroySslSocket();
+
+	if (::shutdown(m_socket, how) == SOCKET_ERROR) {
+		throw SocketException();
+	}
 }
 
 void SocketIPv4::bind(const TCHAR *bindHost, unsigned int bindPort)
@@ -277,7 +287,7 @@ SocketIPv4 *SocketIPv4::accept()
   SocketIPv4 *accepted;
 
   try {
-    accepted = new SocketIPv4(m_ssl); 
+    accepted = new SocketIPv4(m_useSsl); 
     accepted->close();
   } catch(...) {
     // Cleanup and throw further
@@ -305,6 +315,9 @@ void SocketIPv4::set(SOCKET socket)
 #endif
 	m_socket = socket;
 
+	if (m_useSsl)
+		createSslSocket(true);
+
 	// Set local and peer addresses for new socket
 	struct sockaddr_in addr;
 	socklen_t addrlen = sizeof(struct sockaddr_in);
@@ -315,54 +328,43 @@ void SocketIPv4::set(SOCKET socket)
 	if (getpeername(socket, (struct sockaddr *)&addr, &addrlen) == 0) {
 		m_peerAddr = new SocketAddressIPv4(addr);
 	}
-
-	if (m_useSsl)
-	{
-		m_ssl = SSL_new(m_sslCtx);
-		SSL_set_fd(m_ssl, m_socket);
-		if (SSL_accept(m_ssl) <= 0)
-		{
-			TCHAR m[2000];
-			getSslErrors(m);
-			throw SocketException(m);
-		}
-	}
 }
 
 SOCKET SocketIPv4::getAcceptedSocket(struct sockaddr_in *addr)
 {
-  socklen_t addrlen = sizeof(struct sockaddr_in);
-  fd_set afd;
+	socklen_t addrlen = sizeof(struct sockaddr_in);
+	fd_set afd;
 
-  timeval timeout;
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 200000;
-  SOCKET result = INVALID_SOCKET;
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 200000;
+	SOCKET result = INVALID_SOCKET;
 
-  while (true) {
-    FD_ZERO(&afd);
-    FD_SET(m_socket, &afd);
+	while (true) {
+		FD_ZERO(&afd);
+		FD_SET(m_socket, &afd);
 
-    // FIXME: The select() and accept() function can provoke an system
-    // exception, if it allows by project settings and closesocket() has alredy
-    // been called.
-    int ret = select((int)m_socket + 1, &afd, NULL, NULL, &timeout);
+		// FIXME: The select() and accept() function can provoke an system
+		// exception, if it allows by project settings and closesocket() has alredy
+		// been called.
+		int ret = select((int)m_socket + 1, &afd, NULL, NULL, &timeout);
 
-    if (m_isClosed || ret == SOCKET_ERROR) {
-      throw SocketException();
-    } else if (ret == 0) {
-      continue;
-    } else if (ret > 0) {
-      if (FD_ISSET(m_socket, &afd)) {
-        result = ::accept(m_socket, (struct sockaddr*)addr, &addrlen);
-        if (result == INVALID_SOCKET) {
-          throw SocketException();
-        }
-        break;
-      } // if.
-    } // if select ret > 0.
-  } // while waiting for incoming connection.
-  return result;
+		if (m_isClosed || ret == SOCKET_ERROR)
+			throw SocketException();
+		else if (ret == 0)
+			continue;
+		else if (ret > 0)
+		{
+			if (FD_ISSET(m_socket, &afd))
+			{
+				result = ::accept(m_socket, (struct sockaddr*)addr, &addrlen);
+				if (result == INVALID_SOCKET)
+					throw SocketException();
+				break;
+			} // if.
+		} // if select ret > 0.
+	} // while waiting for incoming connection.
+	return result;
 }
 
 int SocketIPv4::send(const char *data, int size, int flags)
