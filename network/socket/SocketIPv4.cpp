@@ -157,18 +157,25 @@ SSL_CTX* SocketIPv4::createSslContext()
 
 void SocketIPv4::configureSslContext(SSL_CTX* ctx)
 {
-	//SSL_CTX_set_ecdh_auto(ctx, 1);
+	if (!m_isBound)//client
+		return;
+	//create self-signed certificate and key
+	//>openssl.exe req -newkey rsa:2048 -config cnf/openssl.cnf  -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
+	SSL_CTX_set_ecdh_auto(ctx, 1);
 
-	/* Set the key and cert */
-	//if (SSL_CTX_use_certificate_file(ctx, "cert.pem", SSL_FILETYPE_PEM) <= 0) {
-	//	//ERR_print_errors_fp(stderr);
-	//	exit(EXIT_FAILURE);
-	//}
+	if (SSL_CTX_use_certificate_file(ctx, "certificate.pem", SSL_FILETYPE_PEM) <= 0)
+	{
+		TCHAR m[2000];
+		getSslErrors(m);
+		throw SocketException(m);
+	}
 
-	//if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0) {
-	//	//ERR_print_errors_fp(stderr);
-	//	exit(EXIT_FAILURE);
-	//}
+	if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0)
+	{
+		TCHAR m[2000];
+		getSslErrors(m);
+		throw SocketException(m);
+	}
 }
 
 void SocketIPv4::connect(const TCHAR *host, unsigned short port)
