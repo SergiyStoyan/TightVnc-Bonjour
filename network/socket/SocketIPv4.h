@@ -190,16 +190,15 @@ protected:
 	* Flag determinating if socket is using SSL.
 	*/
 	bool m_useSsl;
-
 	SSL* m_ssl;
-	SSL_CTX* m_sslCtx;
-
+	static SSL_CTX* m_sslCtx;
 	void initializeSsl();
 	static bool sslInitialized;
-	void cleanupSsl();
+	static void shutdownSsl();
+	static int countOfSocketIPv4;
 	SSL_CTX* createSslContext();
 	void configureSslContext(SSL_CTX* ctx);
-	void get_ssl_errors(TCHAR* m);
+	void getSslErrors(TCHAR* m);
 };
 
 #endif

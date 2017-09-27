@@ -36,8 +36,7 @@
 #include <crtdbg.h>
 
 SocketIPv4::SocketIPv4(bool useSsl)
-	: m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false),
-	m_wsaStartup(1, 2)
+	: m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false), m_wsaStartup(1, 2)
 {
 	m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	m_isClosed = false;
@@ -49,20 +48,28 @@ SocketIPv4::SocketIPv4(bool useSsl)
 	m_useSsl = useSsl;
 
 	if (m_useSsl)
+	{
+		countOfSocketIPv4++;
 		initializeSsl();
+	}
 }
 
 bool SocketIPv4::sslInitialized = false;
+int SocketIPv4::countOfSocketIPv4 = 0;
+SSL_CTX* SocketIPv4::m_sslCtx = NULL;
 
 SocketIPv4::~SocketIPv4()
 {
-	if (m_useSsl)
+	if (m_useSsl != NULL)
 	{
-		if (m_ssl)
+		if (m_ssl != NULL) 
+		{
 			SSL_free(m_ssl);
-		if (m_sslCtx)
-			SSL_CTX_free(m_sslCtx);
-		cleanupSsl();
+			m_ssl = NULL;
+		}
+		countOfSocketIPv4--;
+		if (!countOfSocketIPv4)
+			shutdownSsl();
 	}
 
 #ifdef _WIN32
@@ -86,21 +93,39 @@ void SocketIPv4::initializeSsl()
 {
 	if (!sslInitialized)
 	{
+		sslInitialized = true;
 		ERR_load_crypto_strings();
 		SSL_load_error_strings();
+		//SSL_library_init();
 		OpenSSL_add_ssl_algorithms();
+		//OPENSSL_config(NULL);
 	}
-	m_sslCtx = createSslContext();
-	configureSslContext(m_sslCtx);
+	if (m_sslCtx == NULL)
+	{
+		m_sslCtx = createSslContext();
+		configureSslContext(m_sslCtx);
+	}
 }
 
-void SocketIPv4::cleanupSsl()
+void SocketIPv4::shutdownSsl()
 {
+	//Not really necessary, since resources will be freed on process termination
+	ERR_free_strings();
+	//RAND_cleanup();
 	EVP_cleanup();
+	// this seems to cause double-frees for me: ENGINE_cleanup ();
+	//CONF_modules_free();
+	ERR_remove_state(0);
 	sslInitialized = false;
+
+	if (m_sslCtx)
+	{
+		SSL_CTX_free(m_sslCtx);
+		m_sslCtx = NULL;
+	}
 }
 
-void SocketIPv4::get_ssl_errors(TCHAR* m)
+void SocketIPv4::getSslErrors(TCHAR* m)
 {
 	BIO *bio = BIO_new(BIO_s_mem());
 	ERR_print_errors(bio);
@@ -124,7 +149,7 @@ SSL_CTX* SocketIPv4::createSslContext()
 	if (!ctx)
 	{
 		TCHAR m[2000];
-		get_ssl_errors(m);
+		getSslErrors(m);
 		throw SocketException(m);
 	}
 	return ctx;
@@ -168,7 +193,7 @@ void SocketIPv4::connect(const SocketAddressIPv4 &addr)
 	  if (SSL_connect(m_ssl) <= 0)
 	  {
 		  TCHAR m[2000];
-		  get_ssl_errors(m);
+		  getSslErrors(m);
 		  throw SocketException(m);
 	  }
   }
@@ -291,7 +316,7 @@ void SocketIPv4::set(SOCKET socket)
 		if (SSL_accept(m_ssl) <= 0)
 		{
 			TCHAR m[2000];
-			get_ssl_errors(m);
+			getSslErrors(m);
 			throw SocketException(m);
 		}
 	}
