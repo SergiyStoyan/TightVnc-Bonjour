@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="socket">
-      <UniqueIdentifier>{cacce44a-9390-4bc1-a256-bd074cb355f4}</UniqueIdentifier>
+      <UniqueIdentifier>{da690e9d-b3ba-41eb-9d32-2359a2500f30}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

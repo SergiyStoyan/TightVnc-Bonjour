@@ -191,11 +191,11 @@ protected:
 	*/
 	bool m_useSsl;
 
-	SSL m_ssl;
+	SSL* m_ssl;
 	SSL_CTX* m_sslCtx;
 
 	void initializeSsl();
-	static bool sslInitialized = false;
+	static bool sslInitialized;
 	void cleanupSsl();
 	SSL_CTX* createSslContext();
 	void configureSslContext(SSL_CTX* ctx);

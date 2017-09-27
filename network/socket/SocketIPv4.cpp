@@ -52,6 +52,8 @@ SocketIPv4::SocketIPv4(bool useSsl)
 		initializeSsl();
 }
 
+bool SocketIPv4::sslInitialized = false;
+
 SocketIPv4::~SocketIPv4()
 {
 	if (m_useSsl)
@@ -333,34 +335,47 @@ SOCKET SocketIPv4::getAcceptedSocket(struct sockaddr_in *addr)
 
 int SocketIPv4::send(const char *data, int size, int flags)
 {
-  int result;
-  
-  result = ::send(m_socket, data, size, flags);
+	int result;
 
-  if (result == -1) {
-    throw IOException(_T("Failed to send data to socket."));
-  }
-  
-  return result;
+	if (m_useSsl)
+	{
+		result = SSL_write(m_ssl, data, size);
+		if (result == 0)
+			throw IOException(_T("Connection has been gracefully closed"));
+		if (result < 0)
+			throw IOException(_T("Failed to write data to SSL socket."));
+	}
+	else
+	{
+		result = ::send(m_socket, data, size, flags);
+		if (result == -1)
+			throw IOException(_T("Failed to send data to socket."));
+	}
+
+	return result;
 }
 
 int SocketIPv4::recv(char *buffer, int size, int flags)
 {
-  int result;
+	int result;
 
-  result = ::recv(m_socket, buffer, size, flags);
-
-  // Connection has been gracefully closed.
-  if (result == 0) {
-    throw IOException(_T("Connection has been gracefully closed"));
-  }
-
-  // SocketIPv4 error.
-  if (result == SOCKET_ERROR) {
-    throw IOException(_T("Failed to recv data from socket."));
-  }
-
-  return result;
+	if (m_useSsl)
+	{
+		result = SSL_read(m_ssl, buffer, size);
+		if (result == 0)
+			throw IOException(_T("Connection has been gracefully closed"));
+		if (result < 0)
+			throw IOException(_T("Failed to read data from SSL socket."));
+	}
+	else
+	{
+		result = ::recv(m_socket, buffer, size, flags);
+		if (result == 0)
+			throw IOException(_T("Connection has been gracefully closed"));
+		if (result == SOCKET_ERROR)
+			throw IOException(_T("Failed to recv data from socket.")); 
+	}
+	return result;
 }
 
 bool SocketIPv4::getLocalAddr(SocketAddressIPv4 *addr)
