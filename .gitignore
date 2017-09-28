@@ -3,6 +3,8 @@
 
 _*
 
+enc_temp_folder
+
 # User-specific files
 *.suo
 *.user

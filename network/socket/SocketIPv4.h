@@ -200,7 +200,7 @@ protected:
 	static int countOfSocketIPv4;
 	SSL_CTX* createSslContext();
 	void configureSslContext(SSL_CTX* ctx, bool server);
-	void getSslErrors(TCHAR* m);
+	void getSslErrors(TCHAR* m, int size);
 	void throwSslException();
 };
 
