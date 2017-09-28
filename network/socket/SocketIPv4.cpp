@@ -30,6 +30,7 @@
 #include "SocketAddressIPv4.h"
 #include "SocketAddressIPv4.h"
 #include "SocketIPv4.h"
+#include "win-system/Environment.h"
 
 #include "thread/AutoLock.h"
 
@@ -122,10 +123,7 @@ void SocketIPv4::initializeSsl(bool server)
 		//OPENSSL_config(NULL);
 	}
 	if (m_sslCtx == NULL)
-	{
-		m_sslCtx = createSslContext();
-		configureSslContext(m_sslCtx, server);
-	}
+		m_sslCtx = createSslContext(server);
 }
 
 void SocketIPv4::shutdownSsl()
@@ -172,28 +170,41 @@ void SocketIPv4::throwSslException()
 	throw SocketException(m);
 }
 
-SSL_CTX* SocketIPv4::createSslContext()
+SSL_CTX* SocketIPv4::createSslContext(bool server)
 {
-	const SSL_METHOD* method = m_isBound ? SSLv23_server_method(): SSLv23_client_method();
+	const SSL_METHOD* method = server ? SSLv23_server_method(): SSLv23_client_method();
 	SSL_CTX* ctx = SSL_CTX_new(method);
 	if (ctx == NULL)
 		throwSslException();
-	return ctx;
-}
 
-void SocketIPv4::configureSslContext(SSL_CTX* ctx, bool server)
-{
 	if (!server)
-		return;
-	//create self-signed certificate and key
+		return ctx;
+
+	//#####################create self-signed certificate and key######################
 	//>openssl.exe req -newkey rsa:2048 -config cnf/openssl.cnf  -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
+	
 	SSL_CTX_set_ecdh_auto(ctx, 1);
-
-	if (SSL_CTX_use_certificate_file(ctx, "certificate.pem", SSL_FILETYPE_PEM) <= 0)
+	
+	StringStorage currentModuleFolderPath_;
+	Environment::getCurrentModuleFolderPath(&currentModuleFolderPath_);
+	char currentModuleFolderPath[2000];
+#ifdef UNICODE
+	//TCHAR == WCHAR
+	wcstombs(currentModuleFolderPath, currentModuleFolderPath_.getString(), sizeof(currentModuleFolderPath));
+#else
+	//TCHAR == char	
+	strcpy(currentModuleFolderPath, (char *)currentModuleFolderPath_.getString());
+#endif
+	char buffer[2000];
+	sprintf(buffer, "%s\\%s", currentModuleFolderPath, "certificate.pem");
+	if (SSL_CTX_use_certificate_file(ctx, buffer, SSL_FILETYPE_PEM) <= 0)
 		throwSslException();
 
-	if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0)
+	sprintf(buffer, "%s\\%s", currentModuleFolderPath, "key.pem");
+	if (SSL_CTX_use_PrivateKey_file(ctx, buffer, SSL_FILETYPE_PEM) <= 0)
 		throwSslException();
+
+	return ctx;
 }
 
 void SocketIPv4::connect(const TCHAR *host, unsigned short port)

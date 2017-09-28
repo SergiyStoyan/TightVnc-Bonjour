@@ -198,10 +198,9 @@ protected:
 	static bool sslInitialized;
 	static void shutdownSsl();
 	static int countOfSocketIPv4;
-	SSL_CTX* createSslContext();
-	void configureSslContext(SSL_CTX* ctx, bool server);
-	void getSslErrors(TCHAR* m, int size);
-	void throwSslException();
+	static SSL_CTX* createSslContext(bool server);
+	static void getSslErrors(TCHAR* m, int size);
+	static void throwSslException();
 };
 
 #endif
