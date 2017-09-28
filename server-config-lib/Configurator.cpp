@@ -544,6 +544,9 @@ bool Configurator::saveServerConfig(SettingsManager *sm)
   if (!sm->setUINT(_T("RfbPort"), m_serverConfig.getRfbPort())) {
     saveResult = false;
   }
+  if (!sm->setBoolean(_T("useRfbSsl"), m_serverConfig.useRfbSsl())) {
+	  saveResult = false;
+  }
   if (!sm->setUINT(_T("HttpPort"), m_serverConfig.getHttpPort())) {
     saveResult = false;
   }
@@ -664,6 +667,13 @@ bool Configurator::loadServerConfig(SettingsManager *sm, ServerConfig *config)
     loadResult = false;
   } else {
     m_serverConfig.setRfbPort(uintVal);
+  }
+  if (!sm->getBoolean(_T("useRfbSsl"), &boolVal)) {
+	  loadResult = false;
+  }
+  else {
+	  m_isConfigLoadedPartly = true;
+	  m_serverConfig.useRfbSsl(boolVal);
   }
   if (!sm->getUINT(_T("HttpPort"), &uintVal)) {
     loadResult = false;

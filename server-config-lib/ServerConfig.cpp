@@ -361,10 +361,10 @@ bool ServerConfig::useRfbSsl()
 	return m_useRfbSsl;
 }
 
-void ServerConfig::useRfbSsl(bool use_ssl)
+void ServerConfig::useRfbSsl(bool useSsl)
 {
 	AutoLock lock(&m_objectCS);
-	m_useRfbSsl = use_ssl;
+	m_useRfbSsl = useSsl;
 }
 
 void ServerConfig::setHttpPort(int port)

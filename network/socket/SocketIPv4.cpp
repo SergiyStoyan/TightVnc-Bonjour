@@ -223,6 +223,15 @@ void SocketIPv4::connect(const SocketAddressIPv4 &addr)
     throw SocketException();
   }
 
+ /* const char* ssl_request = "SSL=1";
+  int s = ::send(m_socket, ssl_request, strlen(ssl_request), 0);
+  if (s <= 0)
+	  throw IOException(_T("Failed to send data to socket."));
+  char buffer[100];
+  int r = ::recv(m_socket, buffer, sizeof(buffer), 0);
+  if (r <= 0)
+	  throw IOException(_T("Failed to recv data from socket."));*/
+
   if (m_useSsl)
 	  createSslSocket(false);
 
@@ -325,6 +334,17 @@ void SocketIPv4::set(SOCKET socket)
 	::close(m_socket);
 #endif
 	m_socket = socket;
+
+		//char buffer[100];
+		//int r = ::recv(m_socket, buffer, sizeof(buffer), 0);
+		//if (r <= 0)
+		//	throw IOException(_T("Failed to recv data from socket."));
+		////bool use_ssl;
+		////sscanf(buffer, "SSL=%d", &use_ssl);
+		//const char* ssl_request = "SSL=1";
+		//int s = ::send(m_socket, ssl_request, strlen(ssl_request), 0);
+		//if (s <= 0)
+		//	throw IOException(_T("Failed to send data to socket."));
 
 	if (m_useSsl)
 		createSslSocket(true);

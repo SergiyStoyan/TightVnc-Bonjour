@@ -104,7 +104,7 @@ public:
 	void setRfbPort(int port);
 	int getRfbPort();
 
-	void useRfbSsl(bool use_ssl);
+	void useRfbSsl(bool useSsl);
 	bool useRfbSsl();
 
 	void setHttpPort(int port);

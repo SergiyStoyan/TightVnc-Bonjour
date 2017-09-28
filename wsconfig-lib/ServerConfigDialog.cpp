@@ -70,6 +70,8 @@ BOOL ServerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 {
   if (notificationID == BN_CLICKED) {
     switch (controlID) {
+	case IDC_USE_RFB_SSL:
+		((ConfigDialog *)m_parentDialog)->updateApplyButtonState();
     case IDC_ACCEPT_RFB_CONNECTIONS:
       onAcceptRfbConnectionsClick();
       break;
@@ -204,6 +206,7 @@ bool ServerConfigDialog::validateInput()
 void ServerConfigDialog::updateUI()
 {
   m_rfbPort.setSignedInt(m_config->getRfbPort());
+  m_useRfbSsl.check(m_config->useRfbSsl());
   m_httpPort.setSignedInt(m_config->getHttpPort());
   m_pollingInterval.setUnsignedInt(m_config->getPollingInterval());
 

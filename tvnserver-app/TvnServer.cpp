@@ -379,12 +379,12 @@ void TvnServer::restartMainRfbServer()
 
   const TCHAR *bindHost = m_srvConfig->isOnlyLoopbackConnectionsAllowed() ? _T("localhost") : _T("0.0.0.0");
   unsigned short bindPort = m_srvConfig->getRfbPort();
-  bool ssl = m_srvConfig->useRfbSsl();
+  bool useSsl = m_srvConfig->useRfbSsl();
 
   m_log.message(_T("Starting main RFB server"));
 
   try {
-    m_rfbServer = new RfbServer(bindHost, bindPort, ssl, m_rfbClientManager, m_runAsService, &m_log);
+    m_rfbServer = new RfbServer(bindHost, bindPort, useSsl, m_rfbClientManager, m_runAsService, &m_log);
   } catch (Exception &ex) {
     m_log.error(_T("Failed to start main RFB server: \"%s\""), ex.getMessage());
   }
