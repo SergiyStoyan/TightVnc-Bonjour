@@ -51,6 +51,8 @@ ServerConfig::ServerConfig()
 	memset(m_readonlyPassword, 0, sizeof(m_readonlyPassword));
 	memset(m_controlPassword, 0, sizeof(m_controlPassword));
 
+	m_useRfbSsl = false;
+
 	m_enableBonjourService = true;
 	m_useWindowsUserAsBonjourServiceName = true;
 	m_BonjourServiceName = StringStorage(_T("-UNKNOWN-"));
@@ -81,6 +83,7 @@ void ServerConfig::serialize(DataOutputStream *output)
   AutoLock l(this);
 
   output->writeInt32(m_rfbPort);
+  output->writeInt8(m_useRfbSsl ? 1 : 0);  
   output->writeInt32(m_httpPort);
   output->writeInt8(m_enableFileTransfers ? 1 : 0);
   output->writeInt8(m_removeWallpaper ? 1 : 0);
@@ -172,6 +175,7 @@ void ServerConfig::deserialize(DataInputStream *input)
   AutoLock l(this);
 
   m_rfbPort = input->readInt32();
+  m_useRfbSsl = input->readInt8() == 1;
   m_httpPort = input->readInt32();
   m_enableFileTransfers = input->readInt8() == 1;
   m_removeWallpaper = input->readInt8() == 1;
@@ -354,14 +358,13 @@ int ServerConfig::getRfbPort()
 bool ServerConfig::useRfbSsl()
 {
 	AutoLock lock(&m_objectCS);
-	//return m_rfbSsl;
-	return true;
+	return m_useRfbSsl;
 }
 
-void ServerConfig::useRfbSsl(bool ssl)
+void ServerConfig::useRfbSsl(bool use_ssl)
 {
 	AutoLock lock(&m_objectCS);
-	m_rfbSsl = ssl;
+	m_useRfbSsl = use_ssl;
 }
 
 void ServerConfig::setHttpPort(int port)

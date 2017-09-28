@@ -101,6 +101,7 @@ protected:
   ServerConfig *m_config;
   // Controls
   TextBox m_rfbPort;
+  CheckBox m_useRfbSsl;
   TextBox m_httpPort;
   TextBox m_pollingInterval;
   CheckBox m_grabTransparentWindows;

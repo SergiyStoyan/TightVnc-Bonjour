@@ -58,8 +58,7 @@ HostPath::~HostPath()
   clear();
 }
 
-bool
-HostPath::set(const char *path)
+bool HostPath::set(const char *path)
 {
   // Forget previous path if one was set earlier.
   clear();

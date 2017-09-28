@@ -97,29 +97,29 @@ void ViewerInstance::stop()
 
 void ViewerInstance::start()
 {
-  Logger *logger = ViewerConfig::getInstance()->getLogger();
-  m_viewerWnd.setRemoteViewerCore(&m_viewerCore);
+	Logger *logger = ViewerConfig::getInstance()->getLogger();
+	m_viewerWnd.setRemoteViewerCore(&m_viewerCore);
 
 
-  m_viewerWnd.setFileTransfer(&m_fileTransfer);
+	m_viewerWnd.setFileTransfer(&m_fileTransfer);
 
-  m_vncAuthHandler.addAuthCapability(&m_viewerCore);
+	m_vncAuthHandler.addAuthCapability(&m_viewerCore);
 
-  m_fileTransfer.addCapabilities(&m_viewerCore);
+	m_fileTransfer.addCapabilities(&m_viewerCore);
 
-  if (m_condata.isSetDispatchId()) {
-    m_idHolder.setId(m_condata.getDispatchId());
-    m_viewerCore.enableDispatching(&m_idHolder);
-  }
+	if (m_condata.isSetDispatchId()) {
+		m_idHolder.setId(m_condata.getDispatchId());
+		m_viewerCore.enableDispatching(&m_idHolder);
+	}
 
-  if (m_socket) {
-    m_viewerCore.start(m_socket,
-                       &m_viewerWnd, m_conConf.getSharedFlag());
-  } else {
-    StringStorage strHost;
-    m_condata.getReducedHost(&strHost);
-    UINT16 portVal = m_condata.getPort();
-    m_viewerCore.start(strHost.getString(), portVal, m_condata.isSsl(),
-                       &m_viewerWnd, m_conConf.getSharedFlag());
-  }
+	if (m_socket) {
+		m_viewerCore.start(m_socket,
+			&m_viewerWnd, m_conConf.getSharedFlag());
+	}
+	else {
+		StringStorage strHost;
+		m_condata.getReducedHost(&strHost);
+		UINT16 portVal = m_condata.getPort();
+		m_viewerCore.start(strHost.getString(), portVal, m_condata.useSsl(), &m_viewerWnd, m_conConf.getSharedFlag());
+	}
 }

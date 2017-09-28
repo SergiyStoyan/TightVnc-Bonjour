@@ -252,6 +252,7 @@ void ServerConfigDialog::apply()
   StringStorage pollingIntervalText;
 
   m_rfbPort.getText(&rfbPortText);
+  m_config->useRfbSsl(m_useRfbSsl.isChecked());
   m_httpPort.getText(&httpPortText);
   m_pollingInterval.getText(&pollingIntervalText);
 
@@ -315,6 +316,7 @@ void ServerConfigDialog::initControls()
 {
   HWND hwnd = m_ctrlThis.getWindow();
   m_rfbPort.setWindow(GetDlgItem(hwnd, IDC_RFB_PORT));
+  m_useRfbSsl.setWindow(GetDlgItem(hwnd, IDC_USE_RFB_SSL));
   m_httpPort.setWindow(GetDlgItem(hwnd, IDC_HTTP_PORT));
   m_pollingInterval.setWindow(GetDlgItem(hwnd, IDC_POLLING_INTERVAL));
   m_grabTransparentWindows.setWindow(GetDlgItem(hwnd, IDC_GRAB_TRANSPARENT));
@@ -379,21 +381,12 @@ void ServerConfigDialog::initControls()
 
 void ServerConfigDialog::updateControlDependencies()
 {
-  if (m_acceptRfbConnections.isChecked()) {
-    m_rfbPort.setEnabled(true);
-    m_acceptHttpConnections.setEnabled(true);
-    m_useAuthentication.setEnabled(true);
-  } else {
-    m_rfbPort.setEnabled(false);
-    m_acceptHttpConnections.setEnabled(false);
-    m_useAuthentication.setEnabled(false);
-  }
+    m_rfbPort.setEnabled(m_acceptRfbConnections.isChecked());
+	m_useRfbSsl.setEnabled(m_acceptRfbConnections.isChecked());
+    m_acceptHttpConnections.setEnabled(m_acceptRfbConnections.isChecked());
+    m_useAuthentication.setEnabled(m_acceptRfbConnections.isChecked());
 
-  if ((m_acceptHttpConnections.isChecked()) && (m_acceptHttpConnections.isEnabled())) {
-    m_httpPort.setEnabled(true);
-  } else {
-    m_httpPort.setEnabled(false);
-  }
+    m_httpPort.setEnabled(m_acceptHttpConnections.isChecked() && m_acceptHttpConnections.isEnabled());
 
   bool passwordsAreEnabled = ((m_useAuthentication.isChecked()) && (m_useAuthentication.isEnabled()));
 

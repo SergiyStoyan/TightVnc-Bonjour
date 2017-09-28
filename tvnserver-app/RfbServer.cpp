@@ -25,12 +25,12 @@
 #include "RfbServer.h"
 #include "server-config-lib/Configurator.h"
 
-RfbServer::RfbServer(const TCHAR *bindHost, unsigned short bindPort, bool ssl,
+RfbServer::RfbServer(const TCHAR *bindHost, unsigned short bindPort, bool useSsl,
                      RfbClientManager *clientManager,
                      bool lockAddr,
                      LogWriter *log,
                      const Rect *viewPort)
-: TcpServer(bindHost, bindPort, ssl, lockAddr),
+: TcpServer(bindHost, bindPort, useSsl, lockAddr),
   m_clientManager(clientManager),
   m_log(log)
 {

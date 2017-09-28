@@ -191,11 +191,11 @@ void RemoteViewerCore::start(CoreEventsAdapter *adapter,
 
 void RemoteViewerCore::start(const TCHAR *host,
                              UINT16 port,
-							bool ssl,
+							bool useSsl,
                              CoreEventsAdapter *adapter,
                              bool sharedFlag)
 {
-  m_tcpConnection.bind(host, port, ssl);
+  m_tcpConnection.bind(host, port, useSsl);
   start(adapter, sharedFlag);
 }
 void RemoteViewerCore::start(SocketIPv4 *socket,

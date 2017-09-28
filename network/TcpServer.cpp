@@ -26,10 +26,10 @@
 
 #include "network/socket/SocketAddressIPv4.h"
 
-TcpServer::TcpServer(const TCHAR *bindHost, unsigned short bindPort, bool ssl,
+TcpServer::TcpServer(const TCHAR *bindHost, unsigned short bindPort, bool useSsl,
                      bool autoStart,
                      bool lockAddr)
-: m_bindHost(bindHost), m_bindPort(bindPort), m_listenSocket(ssl)
+: m_bindHost(bindHost), m_bindPort(bindPort), m_listenSocket(useSsl)
 {
   SocketAddressIPv4 bindAddr = SocketAddressIPv4::resolve(bindHost, bindPort);
 

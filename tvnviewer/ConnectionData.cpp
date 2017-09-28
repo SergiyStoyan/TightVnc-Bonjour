@@ -30,6 +30,10 @@
 #include "util/VncPassCrypt.h"
 #include "viewer-core/VncAuthentication.h"
 
+//#include "LoginDialog.h"
+//#include "NamingDefs.h"
+#include "OptionsDialog.h"
+
 ConnectionData::ConnectionData()
 : m_isEmpty(true),
   m_isSetPassword(false),
@@ -101,16 +105,51 @@ void ConnectionData::unsetDispatchId()
   m_isSetDispatchId = false;
 }
 
+char* stristr(const char* haystack, const char* needle) {
+	do {
+		const char* h = haystack;
+		const char* n = needle;
+		while (tolower((unsigned char)*h) == tolower((unsigned char)*n) && *n) {
+			h++;
+			n++;
+		}
+		if (*n == 0) {
+			return (char *)haystack;
+		}
+	} while (*haystack++);
+	return NULL;
+}
+
 void ConnectionData::setHost(const StringStorage *host)
 {
-  StringStorage chompedString = *host;
-  TCHAR spaceChar[] = _T(" \t\n\r");
-  chompedString.removeChars(spaceChar, sizeof(spaceChar)/sizeof(TCHAR));
+	StringStorage hostString = *host;
+	TCHAR spaceChar[] = _T(" \t\n\r");
+	hostString.removeChars(spaceChar, sizeof(spaceChar) / sizeof(TCHAR));
 
-  AnsiStringStorage ansiStr(&chompedString);
+	AnsiStringStorage ansiHostString(&hostString);
+	const char* path = ansiHostString.getString();
+	const char* ssl_protocol = "ssl://";
+	const char* p = stristr(path, ssl_protocol);
+	if (p != NULL)
+	{
+		if (p != path)
+		{
+			//MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_MODE_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+			//MessageBox(NULL, _T("The server path could not be parsed."), _T("Bad Input"), MB_ICONSTOP | MB_OK);
+			StringStorage message;
+			message.format(StringTable::getString(IDS_COULD_NOT_PARSE_SERVER_STRING), host->getString());
+			MessageBox(NULL, message.getString(), StringTable::getString(IDS_MBC_TVNVIEWER), MB_OK | MB_ICONERROR);
+			return;
+		}
 
-  m_hostPath.set(ansiStr.getString());
-  m_isEmpty = false;
+		m_useSsl = true;
+		path = p + strlen(ssl_protocol);
+	}
+	else
+		m_useSsl = false;
+
+	m_hostPath.set(path);
+	m_isEmpty = false;
 }
 
 StringStorage ConnectionData::getCryptedPassword() const
@@ -195,7 +234,7 @@ int ConnectionData::getPort() const
 	return m_hostPath.getVncPort();
 }
 
-bool ConnectionData::isSsl() const
+bool ConnectionData::useSsl() const
 {
-	return true;
+	return m_useSsl;
 }
