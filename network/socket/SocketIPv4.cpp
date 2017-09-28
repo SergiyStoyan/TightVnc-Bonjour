@@ -197,11 +197,11 @@ SSL_CTX* SocketIPv4::createSslContext(bool server)
 	strcpy(currentModuleFolderPath, (char *)currentModuleFolderPath_.getString());
 #endif
 	char buffer[2000];
-	sprintf(buffer, "%s\\%s", currentModuleFolderPath, "certificate.pem");
+	sprintf(buffer, "%s\\%s", currentModuleFolderPath, "server_certificate.pem");
 	if (SSL_CTX_use_certificate_file(ctx, buffer, SSL_FILETYPE_PEM) <= 0)
 		throwSslException();
 
-	sprintf(buffer, "%s\\%s", currentModuleFolderPath, "key.pem");
+	sprintf(buffer, "%s\\%s", currentModuleFolderPath, "server_key.pem");
 	if (SSL_CTX_use_PrivateKey_file(ctx, buffer, SSL_FILETYPE_PEM) <= 0)
 		throwSslException();
 
