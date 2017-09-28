@@ -46,12 +46,12 @@ SocketIPv4::SocketIPv4(bool useSsl)
 	}
 
 	m_useSsl = useSsl;
+	m_ssl = NULL;
 }
 
 bool SocketIPv4::sslInitialized = false;
 int SocketIPv4::countOfSocketIPv4 = 0;
 SSL_CTX* SocketIPv4::m_sslCtx = NULL;
-SSL* m_ssl = NULL;
 
 SocketIPv4::~SocketIPv4()
 {
@@ -80,7 +80,7 @@ void SocketIPv4::createSslSocket(bool server)
 		return;
 
 	countOfSocketIPv4++;
-	initializeSsl(m_isBound);
+	initializeSsl(server);
 
 	m_ssl = SSL_new(m_sslCtx);
 	if(m_ssl == NULL)
@@ -146,28 +146,29 @@ void SocketIPv4::shutdownSsl()
 	}
 }
 
-void SocketIPv4::getSslErrors(TCHAR* m)
+void SocketIPv4::getSslErrors(TCHAR* m, int size)
 {
 	BIO *bio = BIO_new(BIO_s_mem());
 	ERR_print_errors(bio);
 	//char buffer[2000];
 	char* buffer = NULL;
-	size_t len = BIO_get_mem_data(bio, &buffer);
-	if (m)
+	size_t bl = BIO_get_mem_data(bio, &buffer);
+	size_t string_length = bl < size - 1 ? bl : size - 1;
 #ifdef UNICODE
-		//TCHAR == WCHAR
-		mbstowcs(m, buffer, len > sizeof(m)? len : sizeof(m));
+	//TCHAR == WCHAR
+	mbstowcs(m, buffer, string_length);
 #else
-		//TCHAR == char	
-		memcpy(m, buffer, len > sizeof(m) ? len : sizeof(m));
+	//TCHAR == char	
+	memcpy(m, buffer, string_length);
 #endif
+	m[string_length] = '\0';
 	BIO_free(bio);
 }
 
 void SocketIPv4::throwSslException()
 {
 	TCHAR m[2000];
-	getSslErrors(m);
+	getSslErrors(m, sizeof(m));
 	throw SocketException(m);
 }
 
