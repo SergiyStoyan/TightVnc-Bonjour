@@ -194,10 +194,10 @@ protected:
 	void createSslSocket(bool server);
 	void destroySslSocket();
 	static SSL_CTX* m_sslCtx;
-	void initializeSsl(bool server);
+	static void initializeSsl(bool server);
 	static bool sslInitialized;
 	static void shutdownSsl();
-	static int countOfSocketIPv4;
+	static int sslSocketCount;
 	static SSL_CTX* createSslContext(bool server);
 	static void getSslErrors(TCHAR* m, int size);
 	static void throwSslException();

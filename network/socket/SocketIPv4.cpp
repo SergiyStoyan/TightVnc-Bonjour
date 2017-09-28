@@ -51,7 +51,7 @@ SocketIPv4::SocketIPv4(bool useSsl)
 }
 
 bool SocketIPv4::sslInitialized = false;
-int SocketIPv4::countOfSocketIPv4 = 0;
+int SocketIPv4::sslSocketCount = 0;
 SSL_CTX* SocketIPv4::m_sslCtx = NULL;
 
 SocketIPv4::~SocketIPv4()
@@ -80,8 +80,9 @@ void SocketIPv4::createSslSocket(bool server)
 	if (m_ssl != NULL)
 		return;
 
-	countOfSocketIPv4++;
-	initializeSsl(server);
+	sslSocketCount++;
+	if (sslSocketCount == 1)
+		initializeSsl(server);
 
 	m_ssl = SSL_new(m_sslCtx);
 	if(m_ssl == NULL)
@@ -101,14 +102,14 @@ void SocketIPv4::createSslSocket(bool server)
 
 void SocketIPv4::destroySslSocket()
 {
-	if (m_ssl != NULL)
-	{
-		SSL_free(m_ssl);
-		m_ssl = NULL;
-		countOfSocketIPv4--;
-		if (!countOfSocketIPv4)
-			shutdownSsl();
-	}
+	if (m_ssl == NULL)
+		return;
+
+	SSL_free(m_ssl);
+	m_ssl = NULL;
+	sslSocketCount--;
+	if (sslSocketCount == 0)
+		shutdownSsl();
 }
 
 void SocketIPv4::initializeSsl(bool server)
@@ -137,7 +138,7 @@ void SocketIPv4::shutdownSsl()
 	ERR_remove_state(0);
 	sslInitialized = false;
 
-	if (m_sslCtx)
+	if (m_sslCtx != NULL)
 	{
 		SSL_CTX_free(m_sslCtx);
 		m_sslCtx = NULL;
@@ -243,8 +244,6 @@ void SocketIPv4::close()
 
 void SocketIPv4::shutdown(int how)
 {
-	destroySslSocket();
-
 	if (::shutdown(m_socket, how) == SOCKET_ERROR) {
 		throw SocketException();
 	}
