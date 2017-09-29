@@ -53,7 +53,7 @@ public:
 	/**
 	 * Creates new socket.
 	 */
-	SocketIPv4(bool ssl);
+	SocketIPv4(bool useSsl);
 	/**
 	 * Deletes and closes socket.
 	 */

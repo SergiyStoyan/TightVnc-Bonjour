@@ -160,6 +160,9 @@ public:
   // Gets local cursor shape
   int getLocalCursorShape();
 
+  bool useSsl();
+  void useSsl(bool useSsl);
+
   //
   // Serialization / deserialization methods
   //
@@ -236,6 +239,8 @@ protected:
   bool m_ignoreShapeUpdates;
 
   int m_localCursor;
+
+  bool m_useSsl;
 
   // Critical section
   mutable LocalMutex m_cs;

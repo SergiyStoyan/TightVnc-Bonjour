@@ -50,7 +50,7 @@ public:
   //
   int getPort() const;
 
-  bool useSsl() const;
+  //bool useSsl() const;
 
   //
   // This method return true, if hostname isn't set.
@@ -93,7 +93,7 @@ protected:
   bool m_isSetDispatchId;
   UINT32 m_dispatchId;
 
-  bool m_useSsl;
+  //bool m_useSsl;
 };
 
 

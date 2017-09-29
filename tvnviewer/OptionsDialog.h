@@ -69,6 +69,7 @@ protected:
   CheckBox m_smalldot;
   CheckBox m_arrow;
   CheckBox m_nlocal;
+  CheckBox m_useSsl;
 
   void onMessageReceived(UINT uMsg, WPARAM wParam, LPARAM lParam);
   BOOL onCommand(UINT controlID, UINT notificationID);

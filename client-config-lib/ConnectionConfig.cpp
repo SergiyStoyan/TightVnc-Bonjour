@@ -38,7 +38,7 @@ ConnectionConfig::ConnectionConfig()
   m_customCompressionLevel(-1), m_jpegCompressionLevel(6),
   m_fitWindow(false), m_requestShapeUpdates(true),
   m_ignoreShapeUpdates(false), m_scaleNumerator(1), m_scaleDenominator(1),
-  m_localCursor(DOT_CURSOR), m_allowedCopyRect(true)
+  m_localCursor(DOT_CURSOR), m_allowedCopyRect(true), m_useSsl(true)
 {
 }
 
@@ -70,6 +70,7 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
   bool requestShapeUpdates;
   bool ignoreShapeUpdates;
   int localCursor;
+  bool useSsl;
 
   {
     AutoLock lockOther(&other.m_cs);
@@ -90,6 +91,7 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
     requestShapeUpdates = other.m_requestShapeUpdates;
     ignoreShapeUpdates = other.m_ignoreShapeUpdates;
     localCursor = other.m_localCursor;
+	useSsl = other.m_useSsl;
   }
 
   {
@@ -111,6 +113,7 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
     m_requestShapeUpdates = requestShapeUpdates;
     m_ignoreShapeUpdates = ignoreShapeUpdates;
     m_localCursor = localCursor;
+	m_useSsl = useSsl;
   }
   return *this;
 }
@@ -381,6 +384,18 @@ int ConnectionConfig::getLocalCursorShape()
   return m_localCursor;
 }
 
+bool ConnectionConfig::useSsl()
+{
+	AutoLock l(&m_cs);
+	return m_useSsl;
+}
+
+void ConnectionConfig::useSsl(bool useSsl)
+{
+	AutoLock l(&m_cs);
+	m_useSsl = useSsl;
+}
+
 bool ConnectionConfig::saveToStorage(SettingsManager *sm) const
 {
   AutoLock l(&m_cs);
@@ -399,7 +414,8 @@ bool ConnectionConfig::saveToStorage(SettingsManager *sm) const
   TEST_FAIL(sm->setBoolean(_T("swapmouse"),        m_swapMouse), saveAllOk);
   TEST_FAIL(sm->setBoolean(_T("fitwindow"),        m_fitWindow), saveAllOk);
   TEST_FAIL(sm->setBoolean(_T("cursorshape"),      m_requestShapeUpdates), saveAllOk);
-  TEST_FAIL(sm->setBoolean(_T("noremotecursor"),   m_ignoreShapeUpdates), saveAllOk);
+  TEST_FAIL(sm->setBoolean(_T("noremotecursor"), m_ignoreShapeUpdates), saveAllOk);
+  TEST_FAIL(sm->setBoolean(_T("useSsl"), m_useSsl), saveAllOk);
 
   TEST_FAIL(sm->setByte(_T("preferred_encoding"),  m_preferredEncoding), saveAllOk);
   TEST_FAIL(sm->setInt(_T("compresslevel"),        m_customCompressionLevel), saveAllOk);
@@ -438,7 +454,8 @@ bool ConnectionConfig::loadFromStorage(SettingsManager *sm)
   TEST_FAIL(sm->getBoolean(_T("swapmouse"),        &m_swapMouse), loadAllOk);
   TEST_FAIL(sm->getBoolean(_T("fitwindow"),        &m_fitWindow), loadAllOk);
   TEST_FAIL(sm->getBoolean(_T("cursorshape"),      &m_requestShapeUpdates), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("noremotecursor"),   &m_ignoreShapeUpdates), loadAllOk);
+  TEST_FAIL(sm->getBoolean(_T("noremotecursor"), &m_ignoreShapeUpdates), loadAllOk);
+  TEST_FAIL(sm->getBoolean(_T("useSsl"), &m_useSsl), loadAllOk);
 
   TEST_FAIL(sm->getByte(_T("preferred_encoding"),  (char *)&m_preferredEncoding), loadAllOk);
 

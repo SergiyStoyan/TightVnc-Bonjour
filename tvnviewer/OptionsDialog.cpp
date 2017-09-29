@@ -116,6 +116,7 @@ BOOL OptionsDialog::onInitDialog()
   setControlById(m_smalldot, IDC_RSMALLDOT);
   setControlById(m_arrow, IDC_RARROW);
   setControlById(m_nlocal, IDC_RNLOCAL);
+  setControlById(m_useSsl, IDC_RFB_SSL);
 
   m_useEnc.addItem(_T("Raw"), reinterpret_cast<void *>(EncodingDefs::RAW));
   m_useEnc.addItem(_T("Hextile"), reinterpret_cast<void *>(EncodingDefs::HEXTILE));
@@ -139,103 +140,106 @@ BOOL OptionsDialog::onInitDialog()
 
 void OptionsDialog::updateControlValues()
 {
-  // Preferred encoding
-  for (int i = 0; i < m_useEnc.getItemsCount(); i++) {
-    int enc = reinterpret_cast<int>(m_useEnc.getItemData(i));
-    if (enc == m_conConfig->getPreferredEncoding()) {
-      m_useEnc.setSelectedItem(i);
-      break;
-    } // if found
+	// Preferred encoding
+	for (int i = 0; i < m_useEnc.getItemsCount(); i++) {
+		int enc = reinterpret_cast<int>(m_useEnc.getItemData(i));
+		if (enc == m_conConfig->getPreferredEncoding()) {
+			m_useEnc.setSelectedItem(i);
+			break;
+		} // if found
 
-    // set default value, if preferred encoding not in list
-    if (enc == EncodingDefs::HEXTILE)
-      m_useEnc.setSelectedItem(i);
-  } // for i
+		// set default value, if preferred encoding not in list
+		if (enc == EncodingDefs::HEXTILE)
+			m_useEnc.setSelectedItem(i);
+	} // for i
 
-  m_eightBit.check(m_conConfig->isUsing8BitColor());
+	m_eightBit.check(m_conConfig->isUsing8BitColor());
 
-  m_compLvl.check(m_conConfig->isCustomCompressionEnabled());
-  m_jpeg.check(m_conConfig->isJpegCompressionEnabled());
+	m_compLvl.check(m_conConfig->isCustomCompressionEnabled());
+	m_jpeg.check(m_conConfig->isJpegCompressionEnabled());
 
-  m_copyrect.check(m_conConfig->isCopyRectAllowed());
-  m_viewonly.check(m_conConfig->isViewOnly());
-  m_disclip.check(!m_conConfig->isClipboardEnabled());
-  m_fullscr.check(m_conConfig->isFullscreenEnabled());
-  m_deiconfy.check(m_conConfig->isDeiconifyOnRemoteBellEnabled());
-  m_swapmouse.check(m_conConfig->isMouseSwapEnabled());
+	m_copyrect.check(m_conConfig->isCopyRectAllowed());
+	m_viewonly.check(m_conConfig->isViewOnly());
+	m_disclip.check(!m_conConfig->isClipboardEnabled());
+	m_fullscr.check(m_conConfig->isFullscreenEnabled());
+	m_deiconfy.check(m_conConfig->isDeiconifyOnRemoteBellEnabled());
+	m_swapmouse.check(m_conConfig->isMouseSwapEnabled());
 
-  m_sharedses.check(m_conConfig->getSharedFlag());
-  m_sharedses.setEnabled(!m_connected);
+	m_sharedses.check(m_conConfig->getSharedFlag());
+	m_sharedses.setEnabled(!m_connected);
 
-  if (m_conConfig->isFitWindowEnabled()) {
-    // FIXME: replace literal to named constant
-    m_scale.setSelectedItem(7);
-  } else {
-    int n = m_conConfig->getScaleNumerator();
-    int d = m_conConfig->getScaleDenominator();
+	if (m_conConfig->isFitWindowEnabled()) {
+		// FIXME: replace literal to named constant
+		m_scale.setSelectedItem(7);
+	}
+	else {
+		int n = m_conConfig->getScaleNumerator();
+		int d = m_conConfig->getScaleDenominator();
 
-    int percent = (n * 100) / d;
+		int percent = (n * 100) / d;
 
-    StringStorage text;
-    text.format(_T("%d"), percent);
+		StringStorage text;
+		text.format(_T("%d"), percent);
 
-    m_scale.setText(text.getString());
-  }
+		m_scale.setText(text.getString());
+	}
 
-  {
-    bool enableCursorUpdate = m_conConfig->isRequestingShapeUpdates();
-    bool ignoreCursorUpdate = m_conConfig->isIgnoringShapeUpdates();
-    m_track.check(enableCursorUpdate && !ignoreCursorUpdate);
-    m_cursor.check(!enableCursorUpdate && ignoreCursorUpdate);
-    m_ncursor.check(enableCursorUpdate && ignoreCursorUpdate);
-  }
+	{
+		bool enableCursorUpdate = m_conConfig->isRequestingShapeUpdates();
+		bool ignoreCursorUpdate = m_conConfig->isIgnoringShapeUpdates();
+		m_track.check(enableCursorUpdate && !ignoreCursorUpdate);
+		m_cursor.check(!enableCursorUpdate && ignoreCursorUpdate);
+		m_ncursor.check(enableCursorUpdate && ignoreCursorUpdate);
+	}
 
-  StringStorage labelText;
-  {
-    const int DEFAULT_COMPRESSION_LEVEL = 6;
-    int level = DEFAULT_COMPRESSION_LEVEL;
-    if (m_conConfig->isCustomCompressionEnabled())
-      level = m_conConfig->getCustomCompressionLevel();
-    m_tcompLvl.setPos(level);
-    labelText.format(_T("%d"), level);
-    m_quality.setText(labelText.getString());
-  }
+	StringStorage labelText;
+	{
+		const int DEFAULT_COMPRESSION_LEVEL = 6;
+		int level = DEFAULT_COMPRESSION_LEVEL;
+		if (m_conConfig->isCustomCompressionEnabled())
+			level = m_conConfig->getCustomCompressionLevel();
+		m_tcompLvl.setPos(level);
+		labelText.format(_T("%d"), level);
+		m_quality.setText(labelText.getString());
+	}
 
-  {
-  const int DEFAULT_JPEG_COMPRESSION_LEVEL = 6;
-    int level = DEFAULT_JPEG_COMPRESSION_LEVEL;
-    if (m_conConfig->isJpegCompressionEnabled())
-      level = m_conConfig->getJpegCompressionLevel();
-    m_tjpeg.setPos(level);
-    labelText.format(_T("%d"), level);
-    m_quality2.setText(labelText.getString());
-  }
+	{
+		const int DEFAULT_JPEG_COMPRESSION_LEVEL = 6;
+		int level = DEFAULT_JPEG_COMPRESSION_LEVEL;
+		if (m_conConfig->isJpegCompressionEnabled())
+			level = m_conConfig->getJpegCompressionLevel();
+		m_tjpeg.setPos(level);
+		labelText.format(_T("%d"), level);
+		m_quality2.setText(labelText.getString());
+	}
 
-  switch (m_conConfig->getLocalCursorShape()) {
-  case ConnectionConfig::SMALL_CURSOR:
-    m_smalldot.check(true);
-    break;
-  case ConnectionConfig::NORMAL_CURSOR:
-    m_arrow.check(true);
-    break;
-  case ConnectionConfig::NO_CURSOR:
-    m_nlocal.check(true);
-    break;
-  default:
-    m_dot.check(true);
-    break;
-  }
+	switch (m_conConfig->getLocalCursorShape()) {
+	case ConnectionConfig::SMALL_CURSOR:
+		m_smalldot.check(true);
+		break;
+	case ConnectionConfig::NORMAL_CURSOR:
+		m_arrow.check(true);
+		break;
+	case ConnectionConfig::NO_CURSOR:
+		m_nlocal.check(true);
+		break;
+	default:
+		m_dot.check(true);
+		break;
+	}
 
-  onViewOnlyClick();
+	onViewOnlyClick();
 
-  onAllowCustomCompressionClick();
-  onAllowJpegCompressionClick();
+	onAllowCustomCompressionClick();
+	onAllowJpegCompressionClick();
 
-  onCustomCompressionLevelScroll();
-  onJpegCompressionLevelScroll();
+	onCustomCompressionLevelScroll();
+	onJpegCompressionLevelScroll();
 
-  onPreferredEncodingSelectionChange();
-  on8BitColorClick();
+	onPreferredEncodingSelectionChange();
+	on8BitColorClick();
+
+	m_useSsl.check(m_conConfig->useSsl());
 }
 
 void OptionsDialog::onViewOnlyClick()
@@ -404,75 +408,83 @@ bool OptionsDialog::onOkPressed()
 
 void OptionsDialog::apply()
 {
-  // Preferred encoding
-  int pesii = m_useEnc.getSelectedItemIndex();
-  if (pesii >= 0) {
-    int preferredEncoding = reinterpret_cast<int>(m_useEnc.getItemData(pesii));
-    m_conConfig->setPreferredEncoding(preferredEncoding);
-  } else {
-    _ASSERT(pesii >= 0);
-    m_conConfig->setPreferredEncoding(EncodingDefs::TIGHT);
-  }
+	// Preferred encoding
+	int pesii = m_useEnc.getSelectedItemIndex();
+	if (pesii >= 0) {
+		int preferredEncoding = reinterpret_cast<int>(m_useEnc.getItemData(pesii));
+		m_conConfig->setPreferredEncoding(preferredEncoding);
+	}
+	else {
+		_ASSERT(pesii >= 0);
+		m_conConfig->setPreferredEncoding(EncodingDefs::TIGHT);
+	}
 
-  if (m_compLvl.isChecked()) {
-    int level = static_cast<int>(m_tcompLvl.getPos());
-    m_conConfig->setCustomCompressionLevel(level);
-  } else {
-    m_conConfig->disableCustomCompression();
-  }
+	if (m_compLvl.isChecked()) {
+		int level = static_cast<int>(m_tcompLvl.getPos());
+		m_conConfig->setCustomCompressionLevel(level);
+	}
+	else {
+		m_conConfig->disableCustomCompression();
+	}
 
-  if (m_jpeg.isChecked()) {
-    int level = static_cast<int>(m_tjpeg.getPos());
-    m_conConfig->setJpegCompressionLevel(level);
-  } else {
-    m_conConfig->disableJpegCompression();
-  }
+	if (m_jpeg.isChecked()) {
+		int level = static_cast<int>(m_tjpeg.getPos());
+		m_conConfig->setJpegCompressionLevel(level);
+	}
+	else {
+		m_conConfig->disableJpegCompression();
+	}
 
-  m_conConfig->use8BitColor(m_eightBit.isChecked());
-  m_conConfig->allowCopyRect(m_copyrect.isChecked());
-  m_conConfig->setViewOnly(m_viewonly.isChecked());
-  m_conConfig->enableClipboard(!m_disclip.isChecked());
-  m_conConfig->enableFullscreen(m_fullscr.isChecked());
-  m_conConfig->deiconifyOnRemoteBell(m_deiconfy.isChecked());
-  m_conConfig->swapMouse(m_swapmouse.isChecked());
-  m_conConfig->setSharedFlag(m_sharedses.isChecked());
+	m_conConfig->use8BitColor(m_eightBit.isChecked());
+	m_conConfig->allowCopyRect(m_copyrect.isChecked());
+	m_conConfig->setViewOnly(m_viewonly.isChecked());
+	m_conConfig->enableClipboard(!m_disclip.isChecked());
+	m_conConfig->enableFullscreen(m_fullscr.isChecked());
+	m_conConfig->deiconifyOnRemoteBell(m_deiconfy.isChecked());
+	m_conConfig->swapMouse(m_swapmouse.isChecked());
+	m_conConfig->setSharedFlag(m_sharedses.isChecked());
 
-  StringStorage scaleText;
+	StringStorage scaleText;
 
-  m_scale.getText(&scaleText);
+	m_scale.getText(&scaleText);
 
-  int scaleInt = 0;
+	int scaleInt = 0;
 
-  if (StringParser::parseInt(scaleText.getString(), &scaleInt)) {
-    m_conConfig->setScale(scaleInt, 100);
-    m_conConfig->fitWindow(false);
-  } else {
-    m_conConfig->fitWindow(true);
-  }
+	if (StringParser::parseInt(scaleText.getString(), &scaleInt)) {
+		m_conConfig->setScale(scaleInt, 100);
+		m_conConfig->fitWindow(false);
+	}
+	else {
+		m_conConfig->fitWindow(true);
+	}
 
-  if (m_track.isChecked()) {
-    m_conConfig->requestShapeUpdates(true);
-    m_conConfig->ignoreShapeUpdates(false);
-  }
+	if (m_track.isChecked()) {
+		m_conConfig->requestShapeUpdates(true);
+		m_conConfig->ignoreShapeUpdates(false);
+	}
 
-  if (m_cursor.isChecked()) {
-    m_conConfig->requestShapeUpdates(false);
-    m_conConfig->ignoreShapeUpdates(true);
-  }
+	if (m_cursor.isChecked()) {
+		m_conConfig->requestShapeUpdates(false);
+		m_conConfig->ignoreShapeUpdates(true);
+	}
 
-  if (m_ncursor.isChecked()) {
-    m_conConfig->requestShapeUpdates(true);
-    m_conConfig->ignoreShapeUpdates(true);
-  }
+	if (m_ncursor.isChecked()) {
+		m_conConfig->requestShapeUpdates(true);
+		m_conConfig->ignoreShapeUpdates(true);
+	}
 
-  int localCursorShape = ConnectionConfig::DOT_CURSOR;
-  if (m_smalldot.isChecked()) {
-    localCursorShape = ConnectionConfig::SMALL_CURSOR;
-  } else if (m_arrow.isChecked()) {
-    localCursorShape = ConnectionConfig::NORMAL_CURSOR;
-  } else if (m_nlocal.isChecked()) {
-    localCursorShape = ConnectionConfig::NO_CURSOR;
-  }
+	int localCursorShape = ConnectionConfig::DOT_CURSOR;
+	if (m_smalldot.isChecked()) {
+		localCursorShape = ConnectionConfig::SMALL_CURSOR;
+	}
+	else if (m_arrow.isChecked()) {
+		localCursorShape = ConnectionConfig::NORMAL_CURSOR;
+	}
+	else if (m_nlocal.isChecked()) {
+		localCursorShape = ConnectionConfig::NO_CURSOR;
+	}
 
-  m_conConfig->setLocalCursorShape(localCursorShape);
+	m_conConfig->setLocalCursorShape(localCursorShape);
+
+	m_conConfig->useSsl(m_useSsl.isChecked());
 }

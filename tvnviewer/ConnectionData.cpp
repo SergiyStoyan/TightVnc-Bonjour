@@ -105,20 +105,20 @@ void ConnectionData::unsetDispatchId()
   m_isSetDispatchId = false;
 }
 
-char* stristr(const char* haystack, const char* needle) {
-	do {
-		const char* h = haystack;
-		const char* n = needle;
-		while (tolower((unsigned char)*h) == tolower((unsigned char)*n) && *n) {
-			h++;
-			n++;
-		}
-		if (*n == 0) {
-			return (char *)haystack;
-		}
-	} while (*haystack++);
-	return NULL;
-}
+//char* stristr(const char* haystack, const char* needle) {
+//	do {
+//		const char* h = haystack;
+//		const char* n = needle;
+//		while (tolower((unsigned char)*h) == tolower((unsigned char)*n) && *n) {
+//			h++;
+//			n++;
+//		}
+//		if (*n == 0) {
+//			return (char *)haystack;
+//		}
+//	} while (*haystack++);
+//	return NULL;
+//}
 
 void ConnectionData::setHost(const StringStorage *host)
 {
@@ -128,25 +128,25 @@ void ConnectionData::setHost(const StringStorage *host)
 
 	AnsiStringStorage ansiHostString(&hostString);
 	const char* path = ansiHostString.getString();
-	const char* ssl_protocol = "ssl://";
-	const char* p = stristr(path, ssl_protocol);
-	if (p != NULL)
-	{
-		if (p != path)
-		{
-			//MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_MODE_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-			//MessageBox(NULL, _T("The server path could not be parsed."), _T("Bad Input"), MB_ICONSTOP | MB_OK);
-			StringStorage message;
-			message.format(StringTable::getString(IDS_COULD_NOT_PARSE_SERVER_STRING), host->getString());
-			MessageBox(NULL, message.getString(), StringTable::getString(IDS_MBC_TVNVIEWER), MB_OK | MB_ICONERROR);
-			return;
-		}
+	//const char* ssl_protocol = "ssl://";
+	//const char* p = stristr(path, ssl_protocol);
+	//if (p != NULL)
+	//{
+	//	if (p != path)
+	//	{
+	//		//MessageBox(m_ctrlThis.getWindow(), StringTable::getString(IDS_MPEG_STREAMER_NO_MODE_SELECTED), StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
+	//		//MessageBox(NULL, _T("The server path could not be parsed."), _T("Bad Input"), MB_ICONSTOP | MB_OK);
+	//		StringStorage message;
+	//		message.format(StringTable::getString(IDS_COULD_NOT_PARSE_SERVER_STRING), host->getString());
+	//		MessageBox(NULL, message.getString(), StringTable::getString(IDS_MBC_TVNVIEWER), MB_OK | MB_ICONERROR);
+	//		return;
+	//	}
 
-		m_useSsl = true;
-		path = p + strlen(ssl_protocol);
-	}
-	else
-		m_useSsl = false;
+	//	m_useSsl = true;
+	//	path = p + strlen(ssl_protocol);
+	//}
+	//else
+	//	m_useSsl = false;
 
 	m_hostPath.set(path);
 	m_isEmpty = false;
@@ -234,7 +234,7 @@ int ConnectionData::getPort() const
 	return m_hostPath.getVncPort();
 }
 
-bool ConnectionData::useSsl() const
-{
-	return m_useSsl;
-}
+//bool ConnectionData::useSsl() const
+//{
+//	return m_useSsl;
+//}
