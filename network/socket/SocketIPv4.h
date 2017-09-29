@@ -22,6 +22,13 @@
 //-------------------------------------------------------------------------
 //
 
+//********************************************************************************************
+//Modified by: Sergey Stoyan, CliverSoft.com
+//        http://cliversoft.com
+//        sergey.stoyan@gmail.com
+//        stoyan@cliversoft.com
+//********************************************************************************************
+
 #ifndef SOCKET_IPV4_H
 #define SOCKET_IPV4_H
 
@@ -135,6 +142,9 @@ public:
 	 */
 	int recv(char *buffer, int size, int flags = 0) throw(IOException);
 
+	int sendAll(const char *data, int size, int flags = 0) throw(IOException);
+	int recvAll(char *buffer, int size, int flags = 0) throw(IOException);
+
 	/**
 	 * Returns local address of socket (for listening socket).
 	 * @param addr output parameter that will contain socket address.
@@ -155,6 +165,8 @@ public:
 	/* Socket options */
 	void enableNaggleAlgorithm(bool enabled) throw(SocketException);
 	void setExclusiveAddrUse() throw(SocketException);
+
+	void startSslSession(bool server);
 
 private:
 	WsaStartup m_wsaStartup;

@@ -1,4 +1,4 @@
-// Copyright (C) 2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
@@ -22,51 +22,40 @@
 //-------------------------------------------------------------------------
 //
 
-#ifndef _TCP_CONNECTION_H_
-#define _TCP_CONNECTION_H_
+//********************************************************************************************
+//Author: Sergey Stoyan, CliverSoft.com
+//        http://cliversoft.com
+//        sergey.stoyan@gmail.com
+//        stoyan@cliversoft.com
+//********************************************************************************************
 
-#include "log-writer/LogWriter.h"
-#include "network/RfbInputGate.h"
-#include "network/RfbOutputGate.h"
+
+
+#ifndef __CISTERA_HANDSHAKE_H_INCLUDED__
+#define __CISTERA_HANDSHAKE_H_INCLUDED__
+
 #include "network/socket/SocketIPv4.h"
 #include "network/socket/SocketStream.h"
-#include "thread/LocalMutex.h"
 
-class TcpConnection
+class CisteraHandshake
 {
 public:
-  TcpConnection(LogWriter *logWriter);
-  virtual ~TcpConnection();
 
-  void bind(const TCHAR *host, UINT16 port, bool use_ssl);
-  void bind(SocketIPv4 *socket);
-  void bind(RfbInputGate *input, RfbOutputGate *output);
+	struct clientRequest
+	{
+		char clientVersion[4] = "1.0";
+		bool encrypt = true;
+		bool mpegStream = true;
+		bool rfbData = false;
+		UINT16 mpegStreamPort;// = 5720;
+	};
 
-  void connect();
-  void close();
-
-  SocketIPv4* getSocket();
-
-  RfbInputGate *getInput() const;
-  RfbOutputGate *getOutput() const;
-private:
-	bool m_useSsl;
-  StringStorage m_host;
-  UINT16 m_port;
-  SocketIPv4 *m_socket;
-  bool m_socketOwner;
-  SocketStream *m_socketStream;
-  RfbInputGate *m_input;
-  RfbOutputGate *m_output;
-  bool m_RfbGatesOwner;
-
-  bool m_wasBound;
-  bool m_wasConnected;
-  bool m_isEstablished;
-
-  LogWriter *m_logWriter;
-
-  mutable LocalMutex m_connectLock;
+	struct serverResponse
+	{
+		char clientVersion[4] = "1.0";
+		//bool ssl = true;
+		char mpegStreamAesKeySalt[41] = "1234567890123456789012345678901234567890";
+	};
 };
 
-#endif
+#endif // __CISTERA_HANDSHAKE_H_INCLUDED__

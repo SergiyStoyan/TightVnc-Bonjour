@@ -22,11 +22,19 @@
 //-------------------------------------------------------------------------
 //
 
+//********************************************************************************************
+//Modified by: Sergey Stoyan, CliverSoft.com
+//        http://cliversoft.com
+//        sergey.stoyan@gmail.com
+//        stoyan@cliversoft.com
+//********************************************************************************************
+
 #ifndef __RFBCLIENT_H__
 #define __RFBCLIENT_H__
 
 #include <list>
 #include "network/socket/SocketIPv4.h"
+#include "network/socket/SocketStream.h"
 #include "win-system/WindowsEvent.h"
 #include "thread/Thread.h"
 #include "network/RfbOutputGate.h"
@@ -97,6 +105,8 @@ public:
 protected:
   virtual void execute();
   virtual void onTerminate();
+
+  virtual void cisteraHandshake();
 
 private:
   // Calling this function makes the client manager enter (and leave) the

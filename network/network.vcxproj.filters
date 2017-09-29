@@ -28,6 +28,7 @@
     <ClInclude Include="RfbOutputGate.h" />
     <ClInclude Include="TcpClientThread.h" />
     <ClInclude Include="TcpServer.h" />
+    <ClInclude Include="CisteraHandshake.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="socket\SocketAddressIPv4.cpp">

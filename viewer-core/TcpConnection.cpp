@@ -137,6 +137,11 @@ void TcpConnection::close()
   }
 }
 
+SocketIPv4* TcpConnection::getSocket()
+{
+	return	m_socket;
+}
+
 RfbInputGate *TcpConnection::getInput() const
 {
   {

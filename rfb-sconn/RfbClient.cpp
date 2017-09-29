@@ -22,11 +22,19 @@
 //-------------------------------------------------------------------------
 //
 
+//********************************************************************************************
+//Modified by: Sergey Stoyan, CliverSoft.com
+//        http://cliversoft.com
+//        sergey.stoyan@gmail.com
+//        stoyan@cliversoft.com
+//********************************************************************************************
+
+#include "network/CisteraHandshake.h"
+
 #include "RfbClient.h"
 #include "thread/AutoLock.h"
 #include "RfbCodeRegistrator.h"
 #include "ft-server-lib/FileTransferRequestHandler.h"
-#include "network/socket/SocketStream.h"
 #include "RfbInitializer.h"
 #include "ClientAuthListener.h"
 #include "server-config-lib/Configurator.h"
@@ -164,6 +172,20 @@ void RfbClient::onTerminate()
   disconnect();
 }
 
+void RfbClient::cisteraHandshake()
+{
+	CisteraHandshake::clientRequest cr;
+	m_socket->recvAll((char*)&cr, sizeof(cr));
+
+	CisteraHandshake::serverResponse sr;
+	if (cr.encrypt)
+	{
+		m_socket->startSslSession(true);
+		strcpy(sr.mpegStreamAesKeySalt, "0987654321098765432109876543210987654321");
+	}
+	m_socket->sendAll((char*)&sr, sizeof(sr));
+}
+
 void RfbClient::execute()
 {
   // Initialized by default message that will be logged on normal way
@@ -189,7 +211,10 @@ void RfbClient::execute()
                                 !m_isOutgoing);
 
   try {
-    // First initialization phase
+	  m_log->info(_T("Protocol stage is \"CisteraHandshake\"."));
+	  cisteraHandshake();
+    
+	  // First initialization phase
     try {
       m_log->info(_T("Entering RFB initialization phase 1"));
       rfbInitializer.authPhase();

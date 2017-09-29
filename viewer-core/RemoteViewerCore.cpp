@@ -22,6 +22,15 @@
 //-------------------------------------------------------------------------
 //
 
+//********************************************************************************************
+//Modified by: Sergey Stoyan, CliverSoft.com
+//        http://cliversoft.com
+//        sergey.stoyan@gmail.com
+//        stoyan@cliversoft.com
+//********************************************************************************************
+
+#include "network/CisteraHandshake.h"
+
 #include "RemoteViewerCore.h"
 
 #include "ft-common/FTMessage.h"
@@ -825,6 +834,19 @@ StringStorage RemoteViewerCore::getRemoteDesktopName() const
   return m_remoteDesktopName;
 }
 
+void RemoteViewerCore::cisteraHandshake()
+{
+	SocketIPv4* s = m_tcpConnection.getSocket();
+	CisteraHandshake::clientRequest cr;
+	s->sendAll((char*)&cr, sizeof(cr));
+
+	if (cr.encrypt)
+		s->startSslSession(false);
+
+	CisteraHandshake::serverResponse sr;
+	s->recvAll((char*)&sr, sizeof(sr));
+}
+
 void RemoteViewerCore::execute()
 {
   try {
@@ -832,10 +854,13 @@ void RemoteViewerCore::execute()
     // if already connected, then function do nothing
     m_logWriter.info(_T("Protocol stage is \"Connection establishing\"."));
     connectToHost();
+		
+	m_logWriter.info(_T("Protocol stage is \"CisteraHandshake\"."));
+	cisteraHandshake();
 
-    // get server version and set client version
-    m_logWriter.info(_T("Protocol stage is \"Handshake\"."));
-    handshake();
+	// get server version and set client version
+	m_logWriter.info(_T("Protocol stage is \"Handshake\"."));
+	handshake();
 
     // negotiaty about security type and authenticate
     m_logWriter.info(_T("Protocol stage is \"Authentication\"."));

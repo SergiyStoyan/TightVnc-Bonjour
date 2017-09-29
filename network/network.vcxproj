@@ -299,6 +299,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CisteraHandshake.h" />
     <ClInclude Include="RfbInputGate.h" />
     <ClInclude Include="RfbOutputGate.h" />
     <ClInclude Include="socket\sockdefs.h" />

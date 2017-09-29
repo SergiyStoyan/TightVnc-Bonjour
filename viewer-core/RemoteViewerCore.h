@@ -517,6 +517,8 @@ private:
   void receiveSetColorMapEntries();
 
   void handleDispatcherProtocol(DispatchDataProvider *callback);
+  
+  void cisteraHandshake();
 
   bool isRfbProtocolString(const char protocol[12]) const;
   void connectToHost();

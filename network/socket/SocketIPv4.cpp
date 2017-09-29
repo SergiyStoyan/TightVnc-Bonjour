@@ -22,6 +22,13 @@
 //-------------------------------------------------------------------------
 //
 
+//********************************************************************************************
+//Modified by: Sergey Stoyan, CliverSoft.com
+//        http://cliversoft.com
+//        sergey.stoyan@gmail.com
+//        stoyan@cliversoft.com
+//********************************************************************************************
+
 //#include <winsock2.h>//added for WSASetSocketSecurity()
 //#include <mstcpip.h>//added for WSASetSocketSecurity()
 //#include <Ws2tcpip.h>//added for WSASetSocketSecurity()
@@ -46,7 +53,7 @@ SocketIPv4::SocketIPv4(bool useSsl)
 		throw SocketException();
 	}
 
-	m_useSsl = useSsl;
+	//m_useSsl = useSsl;
 	m_ssl = NULL;
 }
 
@@ -223,18 +230,6 @@ void SocketIPv4::connect(const SocketAddressIPv4 &addr)
     throw SocketException();
   }
 
- /* const char* ssl_request = "SSL=1";
-  int s = ::send(m_socket, ssl_request, strlen(ssl_request), 0);
-  if (s <= 0)
-	  throw IOException(_T("Failed to send data to socket."));
-  char buffer[100];
-  int r = ::recv(m_socket, buffer, sizeof(buffer), 0);
-  if (r <= 0)
-	  throw IOException(_T("Failed to recv data from socket."));*/
-
-  if (m_useSsl)
-	  createSslSocket(false);
-
   AutoLock l(&m_mutex);
 
   if (m_peerAddr) {
@@ -336,18 +331,50 @@ void SocketIPv4::set(SOCKET socket)
 	m_socket = socket;
 
 		//char buffer[100];
-		//int r = ::recv(m_socket, buffer, sizeof(buffer), 0);
+		//int r = ::recv(m_socket, buffer, sizeof(buffer), MSG_PEEK);
 		//if (r <= 0)
 		//	throw IOException(_T("Failed to recv data from socket."));
-		////bool use_ssl;
-		////sscanf(buffer, "SSL=%d", &use_ssl);
-		//const char* ssl_request = "SSL=1";
-		//int s = ::send(m_socket, ssl_request, strlen(ssl_request), 0);
-		//if (s <= 0)
-		//	throw IOException(_T("Failed to send data to socket."));
+		//LONG32 use_ssl;
+		//sscanf(buffer, "SSL=%d", &use_ssl);
 
-	if (m_useSsl)
-		createSslSocket(true);
+		//fd_set afd;
+		//FD_ZERO(&afd);
+		//FD_SET(m_socket, &afd);
+		//timeval timeout;
+		//timeout.tv_sec = 0;
+		//timeout.tv_usec = 200000;
+		//int r = select((int)m_socket + 1, &afd, NULL, NULL, &timeout);
+		//if (r < 0)
+		//{
+		//}
+		//else if (r == 0)
+		//{
+		//	// timeout, socket does not have anything to read
+		//}
+		//else
+		//{
+		//	r = recv(s, rx_tmp, bufSize, 0);
+		//	if (r <0)
+		//	{
+		//	}
+		//	else if (r == 0)
+		//	{
+		//		// peer disconnected...
+		//	}
+		//	else
+		//	{
+		//	}
+		//}
+		/*throw SocketException();
+		SSL buffer: \x16\x3\x1
+		TCP buffer: 
+		const char* ssl_request = "SSL=1";
+		int s = ::send(m_socket, ssl_request, strlen(ssl_request), 0);
+		if (s <= 0)
+			throw IOException(_T("Failed to send data to socket."));*/
+
+	/*if (m_useSsl)
+		createSslSocket(true);*/
 
 	// Set local and peer addresses for new socket
 	struct sockaddr_in addr;
@@ -402,7 +429,7 @@ int SocketIPv4::send(const char *data, int size, int flags)
 {
 	int result;
 
-	if (m_useSsl)
+	if (m_ssl != NULL)
 	{
 		result = SSL_write(m_ssl, data, size);
 		if (result == 0)
@@ -424,7 +451,7 @@ int SocketIPv4::recv(char *buffer, int size, int flags)
 {
 	int result;
 
-	if (m_useSsl)
+	if (m_ssl != NULL)
 	{
 		result = SSL_read(m_ssl, buffer, size);
 		if (result == 0)
@@ -441,6 +468,22 @@ int SocketIPv4::recv(char *buffer, int size, int flags)
 			throw IOException(_T("Failed to recv data from socket.")); 
 	}
 	return result;
+}
+
+int SocketIPv4::sendAll(const char *data, int size, int flags)
+{
+	int r = 0;
+	while (r < size)
+		r += send(&data[r], size - r, flags);
+	return r;
+}
+
+int SocketIPv4::recvAll(char *buffer, int size, int flags)
+{
+	int r = 0;
+	while (r < size)
+		r += recv(&buffer[r], size - r, flags);
+	return r;
 }
 
 bool SocketIPv4::getLocalAddr(SocketAddressIPv4 *addr)
@@ -493,7 +536,12 @@ void SocketIPv4::enableNaggleAlgorithm(bool enabled)
 
 void SocketIPv4::setExclusiveAddrUse()
 {
-  int val = 1;
+	int val = 1;
 
-  setSocketOptions(SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &val, sizeof(val));
+	setSocketOptions(SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &val, sizeof(val));
+}
+
+void SocketIPv4::startSslSession(bool server)
+{
+	createSslSocket(server);
 }
