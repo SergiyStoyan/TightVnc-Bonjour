@@ -25,6 +25,7 @@
 #ifndef _CONNECTION_CONFIG_H_
 #define _CONNECTION_CONFIG_H_
 
+#include "network/CisteraHandshake.h"
 #include "config-lib/SettingsManager.h"
 
 #include "thread/LocalMutex.h"
@@ -160,8 +161,10 @@ public:
   // Gets local cursor shape
   int getLocalCursorShape();
 
-  bool useSsl();
-  void useSsl(bool useSsl);
+  bool cisteraMode();
+  void cisteraMode(bool cisteraMode);
+  void getCisteraHandshakeClientRequest(CisteraHandshake::clientRequest* cr);
+  void setCisteraHandshakeClientRequest(CisteraHandshake::clientRequest* cr);
 
   //
   // Serialization / deserialization methods
@@ -240,7 +243,12 @@ protected:
 
   int m_localCursor;
 
-  bool m_useSsl;
+  bool m_cisteraMode;
+  bool m_notUseCisteraProtocol;
+  bool m_encrypt;
+  bool m_turnOnMpegStreamer;
+  bool m_turnOffRfbVideo;
+  UINT16 m_mpegDestinationPort;
 
   // Critical section
   mutable LocalMutex m_cs;

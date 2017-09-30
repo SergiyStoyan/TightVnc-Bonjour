@@ -104,8 +104,8 @@ public:
 	void setRfbPort(int port);
 	int getRfbPort();
 
-	void useRfbSsl(bool useSsl);
-	bool useRfbSsl();
+	void cisteraMode(bool cisteraMode);
+	bool cisteraMode();
 
 	void setHttpPort(int port);
 	int getHttpPort();
@@ -287,7 +287,7 @@ protected:
 	//
 
 	int m_rfbPort;
-	bool m_useRfbSsl;
+	bool m_cisteraMode;
 	int m_httpPort;
 
 	//

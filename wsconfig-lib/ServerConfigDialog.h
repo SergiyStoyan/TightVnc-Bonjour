@@ -101,7 +101,8 @@ protected:
   ServerConfig *m_config;
   // Controls
   TextBox m_rfbPort;
-  CheckBox m_useRfbSsl;
+  CheckBox m_cisteraMode;
+  CheckBox m_notUseCisteraProtocol; 
   TextBox m_httpPort;
   TextBox m_pollingInterval;
   CheckBox m_grabTransparentWindows;

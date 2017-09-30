@@ -31,7 +31,7 @@
 Transport *TransportFactory::createSocketClientTransport(const TCHAR *connectHost,
                                                          unsigned int connectPort)
 {
-  SocketIPv4 *socket = new SocketIPv4(false);
+  SocketIPv4 *socket = new SocketIPv4();
 
   try {
     socket->connect(connectHost, connectPort);
@@ -46,7 +46,7 @@ Transport *TransportFactory::createSocketClientTransport(const TCHAR *connectHos
 Transport *TransportFactory::createSocketServerTransport(const TCHAR *bindHost,
                                                          unsigned int bindPort)
 {
-  SocketIPv4 *socket = new SocketIPv4(false);
+  SocketIPv4 *socket = new SocketIPv4();
 
   try {
     socket->bind(bindHost, bindPort);

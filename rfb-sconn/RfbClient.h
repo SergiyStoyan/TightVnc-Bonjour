@@ -135,6 +135,7 @@ private:
   ClientTerminationListener *m_extTermListener;
 
   SocketIPv4 *m_socket;
+  bool m_cisteraMode;
 
   ClientAuthListener *m_extAuthListener;
 

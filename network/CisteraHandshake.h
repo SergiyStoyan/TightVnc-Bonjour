@@ -46,8 +46,8 @@ public:
 		char clientVersion[4] = "1.0";
 		bool encrypt = true;
 		bool mpegStream = true;
-		bool rfbData = false;
-		UINT16 mpegStreamPort;// = 5720;
+		bool rfbVideo = false;
+		UINT16 mpegStreamPort = 5720;
 	};
 
 	struct serverResponse

@@ -38,7 +38,7 @@ public:
   TcpConnection(LogWriter *logWriter);
   virtual ~TcpConnection();
 
-  void bind(const TCHAR *host, UINT16 port, bool use_ssl);
+  void bind(const TCHAR *host, UINT16 port);
   void bind(SocketIPv4 *socket);
   void bind(RfbInputGate *input, RfbOutputGate *output);
 
@@ -50,7 +50,6 @@ public:
   RfbInputGate *getInput() const;
   RfbOutputGate *getOutput() const;
 private:
-	bool m_useSsl;
   StringStorage m_host;
   UINT16 m_port;
   SocketIPv4 *m_socket;

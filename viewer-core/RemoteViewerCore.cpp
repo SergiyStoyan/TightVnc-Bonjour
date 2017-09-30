@@ -30,6 +30,7 @@
 //********************************************************************************************
 
 #include "network/CisteraHandshake.h"
+//#include "tvnviewer/ViewerInstance.h"
 
 #include "RemoteViewerCore.h"
 
@@ -70,16 +71,17 @@
 #include <algorithm>
 
 RemoteViewerCore::RemoteViewerCore(Logger *logger)
-: m_logWriter(logger),
-  m_tcpConnection(&m_logWriter),
-  m_fbUpdateNotifier(&m_frameBuffer, &m_fbLock, &m_logWriter, &m_watermarksController),
-  m_decoderStore(&m_logWriter),
-  m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)
+	: m_logWriter(logger),
+	m_tcpConnection(&m_logWriter),
+	m_fbUpdateNotifier(&m_frameBuffer, &m_fbLock, &m_logWriter, &m_watermarksController),
+	m_decoderStore(&m_logWriter),
+	m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)
 {
-  init();
+	//ViewerConfig::getInstance()->
+	init();
 }
 
-RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port, bool useSsl,
+RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port, //bool cisteraMode,
                                    CoreEventsAdapter *adapter,
                                    Logger *logger,
                                    bool sharedFlag)
@@ -87,11 +89,12 @@ RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port, bool useSsl,
   m_tcpConnection(&m_logWriter),
   m_fbUpdateNotifier(&m_frameBuffer, &m_fbLock, &m_logWriter, &m_watermarksController),
   m_decoderStore(&m_logWriter),
-  m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)
+  m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)//,
+	//m_cisteraMode(cisteraMode)
 {
   init();
 
-  start(host, port, useSsl, adapter, sharedFlag);
+  start(host, port, adapter, sharedFlag);
 }
 
 RemoteViewerCore::RemoteViewerCore(SocketIPv4 *socket,
@@ -201,11 +204,10 @@ void RemoteViewerCore::start(CoreEventsAdapter *adapter,
 void RemoteViewerCore::start(
 	const TCHAR *host,
 	UINT16 port,
-	bool useSsl,
 	CoreEventsAdapter *adapter,
 	bool sharedFlag)
 {
-	m_tcpConnection.bind(host, port, useSsl);
+	m_tcpConnection.bind(host, port);
 	start(adapter, sharedFlag);
 }
 
@@ -836,8 +838,14 @@ StringStorage RemoteViewerCore::getRemoteDesktopName() const
 
 void RemoteViewerCore::cisteraHandshake()
 {
+	m_logWriter.info(_T("Protocol stage is \"CisteraHandshake\"."));
+
 	SocketIPv4* s = m_tcpConnection.getSocket();
 	CisteraHandshake::clientRequest cr;
+	cr.mpegStreamPort = 1112;
+
+	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cr.encrypt, cr.mpegStream, cr.mpegStreamPort, cr.rfbVideo);
+
 	s->sendAll((char*)&cr, sizeof(cr));
 
 	if (cr.encrypt)
@@ -845,6 +853,26 @@ void RemoteViewerCore::cisteraHandshake()
 
 	CisteraHandshake::serverResponse sr;
 	s->recvAll((char*)&sr, sizeof(sr));
+
+	if (cr.mpegStream)
+	{
+		if(cr.encrypt)
+			mpegStreamerCommandLine.format(_T("ffplay.exe -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params %s srtp://127.0.0.1:%d"), sr.mpegStreamAesKeySalt, cr.mpegStreamPort);
+		else
+			mpegStreamerCommandLine.format(_T("ffplay.exe udp://127.0.0.1:%d"), cr.mpegStreamPort);
+		DWORD dwCreationFlags = 0;
+		STARTUPINFO si;
+		ZeroMemory(&si, sizeof(si));
+		si.cb = sizeof(si);
+		ZeroMemory(&mpegStreamerProcessInformation, sizeof(mpegStreamerProcessInformation));
+		if (!CreateProcess(NULL, (LPTSTR)mpegStreamerCommandLine.getString(), NULL, NULL, TRUE, dwCreationFlags, NULL, NULL, &si, &mpegStreamerProcessInformation))
+		{
+			StringStorage errorString;
+			errorString.format(_T("Could not start process: %s"), mpegStreamerCommandLine.getString());
+			m_logWriter.error(errorString.getString());
+			throw Exception(errorString.getString());
+		}
+	}
 }
 
 void RemoteViewerCore::execute()
@@ -854,9 +882,14 @@ void RemoteViewerCore::execute()
     // if already connected, then function do nothing
     m_logWriter.info(_T("Protocol stage is \"Connection establishing\"."));
     connectToHost();
-		
-	m_logWriter.info(_T("Protocol stage is \"CisteraHandshake\"."));
-	cisteraHandshake();
+
+	if (m_cisteraMode)
+	{
+		m_logWriter.info(_T("Mode: CisteraVNC"));
+		cisteraHandshake();
+	}
+	else
+		m_logWriter.info(_T("Mode: TightVNC"));
 
 	// get server version and set client version
 	m_logWriter.info(_T("Protocol stage is \"Handshake\"."));

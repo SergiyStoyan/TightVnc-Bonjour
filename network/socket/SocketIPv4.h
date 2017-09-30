@@ -60,7 +60,7 @@ public:
 	/**
 	 * Creates new socket.
 	 */
-	SocketIPv4(bool useSsl);
+	SocketIPv4();
 	/**
 	 * Deletes and closes socket.
 	 */
@@ -198,10 +198,6 @@ protected:
 	*/
 	bool m_isBound;
 
-	/**
-	* Flag determinating if socket is using SSL.
-	*/
-	bool m_useSsl;
 	SSL* m_ssl;
 	void createSslSocket(bool server);
 	void destroySslSocket();

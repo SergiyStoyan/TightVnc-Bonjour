@@ -92,8 +92,6 @@ protected:
 
   bool m_isSetDispatchId;
   UINT32 m_dispatchId;
-
-  //bool m_useSsl;
 };
 
 

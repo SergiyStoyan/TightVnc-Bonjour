@@ -70,7 +70,8 @@ BOOL ServerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 {
   if (notificationID == BN_CLICKED) {
     switch (controlID) {
-	case IDC_USE_RFB_SSL:
+	case IDC_USE_CISTERA_PROTOCOL:
+	case IDC_NOT_USE_CISTERA_PROTOCOL:
 		((ConfigDialog *)m_parentDialog)->updateApplyButtonState();
     case IDC_ACCEPT_RFB_CONNECTIONS:
       onAcceptRfbConnectionsClick();
@@ -206,7 +207,8 @@ bool ServerConfigDialog::validateInput()
 void ServerConfigDialog::updateUI()
 {
   m_rfbPort.setSignedInt(m_config->getRfbPort());
-  m_useRfbSsl.check(m_config->useRfbSsl());
+  m_cisteraMode.check(m_config->cisteraMode());
+  m_notUseCisteraProtocol.check(!m_config->cisteraMode());
   m_httpPort.setSignedInt(m_config->getHttpPort());
   m_pollingInterval.setUnsignedInt(m_config->getPollingInterval());
 
@@ -255,7 +257,6 @@ void ServerConfigDialog::apply()
   StringStorage pollingIntervalText;
 
   m_rfbPort.getText(&rfbPortText);
-  m_config->useRfbSsl(m_useRfbSsl.isChecked());
   m_httpPort.getText(&httpPortText);
   m_pollingInterval.getText(&pollingIntervalText);
 
@@ -263,6 +264,8 @@ void ServerConfigDialog::apply()
 
   StringParser::parseInt(rfbPortText.getString(), &intVal);
   m_config->setRfbPort(intVal);
+
+  m_config->cisteraMode(m_cisteraMode.isChecked());
   
   StringParser::parseInt(httpPortText.getString(), &intVal);
   m_config->setHttpPort(intVal);
@@ -319,7 +322,8 @@ void ServerConfigDialog::initControls()
 {
   HWND hwnd = m_ctrlThis.getWindow();
   m_rfbPort.setWindow(GetDlgItem(hwnd, IDC_RFB_PORT));
-  m_useRfbSsl.setWindow(GetDlgItem(hwnd, IDC_USE_RFB_SSL));
+  m_cisteraMode.setWindow(GetDlgItem(hwnd, IDC_USE_CISTERA_PROTOCOL));
+  m_notUseCisteraProtocol.setWindow(GetDlgItem(hwnd, IDC_NOT_USE_CISTERA_PROTOCOL));
   m_httpPort.setWindow(GetDlgItem(hwnd, IDC_HTTP_PORT));
   m_pollingInterval.setWindow(GetDlgItem(hwnd, IDC_POLLING_INTERVAL));
   m_grabTransparentWindows.setWindow(GetDlgItem(hwnd, IDC_GRAB_TRANSPARENT));
@@ -385,7 +389,7 @@ void ServerConfigDialog::initControls()
 void ServerConfigDialog::updateControlDependencies()
 {
     m_rfbPort.setEnabled(m_acceptRfbConnections.isChecked());
-	m_useRfbSsl.setEnabled(m_acceptRfbConnections.isChecked());
+	m_cisteraMode.setEnabled(m_acceptRfbConnections.isChecked());
     m_acceptHttpConnections.setEnabled(m_acceptRfbConnections.isChecked());
     m_useAuthentication.setEnabled(m_acceptRfbConnections.isChecked());
 

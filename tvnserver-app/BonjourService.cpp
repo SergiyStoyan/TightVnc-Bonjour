@@ -186,7 +186,7 @@ DWORD WINAPI BonjourService::bogusWindowRun(void* Param)
 	return 0;
 }
 
-void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator *configurator)
+void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer)
 {
 	BonjourService::log = log;
 	if (initialized)
@@ -210,6 +210,7 @@ void BonjourService::Initialize(LogWriter *log, TvnServer *tvnServer, Configurat
 	}*/
 
 	tvnServer->addListener(&bonjourServiceConfigReloadListener);
+	Configurator *configurator = Configurator::getInstance();
 	configurator->addListener(&bonjourServiceConfigReloadListener);
 	initialized = true;
 	bonjourServiceConfigReloadListener.onConfigReload(configurator->getServerConfig());

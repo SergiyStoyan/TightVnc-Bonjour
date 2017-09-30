@@ -38,7 +38,8 @@ ConnectionConfig::ConnectionConfig()
   m_customCompressionLevel(-1), m_jpegCompressionLevel(6),
   m_fitWindow(false), m_requestShapeUpdates(true),
   m_ignoreShapeUpdates(false), m_scaleNumerator(1), m_scaleDenominator(1),
-  m_localCursor(DOT_CURSOR), m_allowedCopyRect(true), m_useSsl(true)
+  m_localCursor(DOT_CURSOR), m_allowedCopyRect(true), 
+	m_cisteraMode(true), m_notUseCisteraProtocol(true), m_encrypt(true), m_turnOnMpegStreamer(true), m_turnOffRfbVideo(true), m_mpegDestinationPort(5920)
 {
 }
 
@@ -70,28 +71,38 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
   bool requestShapeUpdates;
   bool ignoreShapeUpdates;
   int localCursor;
-  bool useSsl;
+  bool cisteraMode;
+  bool notUseCisteraProtocol;
+	  bool  encrypt;
+	  bool  turnOnMpegStreamer;
+	  bool turnOffRfbVideo;
+	  UINT16 mpegDestinationPort;
 
   {
-    AutoLock lockOther(&other.m_cs);
-    allowedCopyRect = other.m_allowedCopyRect;
-    preferredEncoding = other.m_preferredEncoding;
-    use8BitColor = other.m_use8BitColor;
-    customCompressionLevel = other.m_customCompressionLevel;
-    jpegCompressionLevel = other.m_jpegCompressionLevel;
-    viewOnly = other.m_viewOnly;
-    isClipboardEnabled = other.m_isClipboardEnabled;
-    useFullscreen = other.m_useFullscreen;
-    deiconifyOnRemoteBell = other.m_deiconifyOnRemoteBell;
-    scaleNumerator = other.m_scaleNumerator;
-    scaleDenominator = other.m_scaleDenominator;
-    swapMouse = other.m_swapMouse;
-    requestSharedSession = other.m_requestSharedSession;
-    fitWindow = other.m_fitWindow;
-    requestShapeUpdates = other.m_requestShapeUpdates;
-    ignoreShapeUpdates = other.m_ignoreShapeUpdates;
-    localCursor = other.m_localCursor;
-	useSsl = other.m_useSsl;
+	  AutoLock lockOther(&other.m_cs);
+	  allowedCopyRect = other.m_allowedCopyRect;
+	  preferredEncoding = other.m_preferredEncoding;
+	  use8BitColor = other.m_use8BitColor;
+	  customCompressionLevel = other.m_customCompressionLevel;
+	  jpegCompressionLevel = other.m_jpegCompressionLevel;
+	  viewOnly = other.m_viewOnly;
+	  isClipboardEnabled = other.m_isClipboardEnabled;
+	  useFullscreen = other.m_useFullscreen;
+	  deiconifyOnRemoteBell = other.m_deiconifyOnRemoteBell;
+	  scaleNumerator = other.m_scaleNumerator;
+	  scaleDenominator = other.m_scaleDenominator;
+	  swapMouse = other.m_swapMouse;
+	  requestSharedSession = other.m_requestSharedSession;
+	  fitWindow = other.m_fitWindow;
+	  requestShapeUpdates = other.m_requestShapeUpdates;
+	  ignoreShapeUpdates = other.m_ignoreShapeUpdates;
+	  localCursor = other.m_localCursor;
+	  cisteraMode = other.m_cisteraMode;
+	  notUseCisteraProtocol = m_notUseCisteraProtocol;
+	  encrypt = m_encrypt;
+	  turnOnMpegStreamer = m_turnOnMpegStreamer;
+	  turnOffRfbVideo = m_turnOffRfbVideo;
+	  mpegDestinationPort = m_mpegDestinationPort;
   }
 
   {
@@ -113,7 +124,12 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
     m_requestShapeUpdates = requestShapeUpdates;
     m_ignoreShapeUpdates = ignoreShapeUpdates;
     m_localCursor = localCursor;
-	m_useSsl = useSsl;
+	m_cisteraMode = cisteraMode;
+	m_notUseCisteraProtocol = notUseCisteraProtocol;
+	m_encrypt = encrypt;
+	m_turnOnMpegStreamer = turnOnMpegStreamer;
+	m_turnOffRfbVideo = turnOffRfbVideo;
+	m_mpegDestinationPort = mpegDestinationPort;
   }
   return *this;
 }
@@ -384,16 +400,34 @@ int ConnectionConfig::getLocalCursorShape()
   return m_localCursor;
 }
 
-bool ConnectionConfig::useSsl()
+bool ConnectionConfig::cisteraMode()
 {
 	AutoLock l(&m_cs);
-	return m_useSsl;
+	return m_cisteraMode;
 }
 
-void ConnectionConfig::useSsl(bool useSsl)
+void ConnectionConfig::cisteraMode(bool cisteraMode)
 {
 	AutoLock l(&m_cs);
-	m_useSsl = useSsl;
+	m_cisteraMode = cisteraMode;
+}
+
+void ConnectionConfig::getCisteraHandshakeClientRequest(CisteraHandshake::clientRequest* cr)
+{
+	AutoLock l(&m_cs);
+	cr->encrypt = m_encrypt;
+	cr->mpegStream = m_turnOnMpegStreamer;
+	cr->mpegStreamPort = m_mpegDestinationPort;
+	cr->rfbVideo = !m_turnOffRfbVideo;
+}
+
+void ConnectionConfig::setCisteraHandshakeClientRequest(CisteraHandshake::clientRequest* cr)
+{
+	AutoLock l(&m_cs);
+	m_encrypt = cr->encrypt;
+	m_turnOnMpegStreamer = cr->mpegStream;
+	m_mpegDestinationPort = cr->mpegStreamPort;
+	m_turnOffRfbVideo = !cr->rfbVideo;
 }
 
 bool ConnectionConfig::saveToStorage(SettingsManager *sm) const
@@ -415,7 +449,12 @@ bool ConnectionConfig::saveToStorage(SettingsManager *sm) const
   TEST_FAIL(sm->setBoolean(_T("fitwindow"),        m_fitWindow), saveAllOk);
   TEST_FAIL(sm->setBoolean(_T("cursorshape"),      m_requestShapeUpdates), saveAllOk);
   TEST_FAIL(sm->setBoolean(_T("noremotecursor"), m_ignoreShapeUpdates), saveAllOk);
-  TEST_FAIL(sm->setBoolean(_T("useSsl"), m_useSsl), saveAllOk);
+  TEST_FAIL(sm->setBoolean(_T("cisteraMode"), m_cisteraMode), saveAllOk);
+  TEST_FAIL(sm->setBoolean(_T("notUseCisteraProtocol"), m_notUseCisteraProtocol), saveAllOk);
+  TEST_FAIL(sm->setBoolean(_T("encrypt"), m_encrypt), saveAllOk);
+  TEST_FAIL(sm->setBoolean(_T("turnOnMpegStreamer"), m_turnOnMpegStreamer), saveAllOk);
+  TEST_FAIL(sm->setBoolean(_T("turnOffRfbVideo"), m_turnOffRfbVideo), saveAllOk);
+  TEST_FAIL(sm->setInt(_T("mpegDestinationPort"), m_mpegDestinationPort), saveAllOk);
 
   TEST_FAIL(sm->setByte(_T("preferred_encoding"),  m_preferredEncoding), saveAllOk);
   TEST_FAIL(sm->setInt(_T("compresslevel"),        m_customCompressionLevel), saveAllOk);
@@ -455,7 +494,12 @@ bool ConnectionConfig::loadFromStorage(SettingsManager *sm)
   TEST_FAIL(sm->getBoolean(_T("fitwindow"),        &m_fitWindow), loadAllOk);
   TEST_FAIL(sm->getBoolean(_T("cursorshape"),      &m_requestShapeUpdates), loadAllOk);
   TEST_FAIL(sm->getBoolean(_T("noremotecursor"), &m_ignoreShapeUpdates), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("useSsl"), &m_useSsl), loadAllOk);
+  TEST_FAIL(sm->getBoolean(_T("cisteraMode"), &m_cisteraMode), loadAllOk);
+  TEST_FAIL(sm->getBoolean(_T("notUseCisteraProtocol"), &m_notUseCisteraProtocol), loadAllOk);
+  TEST_FAIL(sm->getBoolean(_T("encrypt"), &m_encrypt), loadAllOk);
+  TEST_FAIL(sm->getBoolean(_T("turnOnMpegStreamer"), &m_turnOnMpegStreamer), loadAllOk);
+  TEST_FAIL(sm->getBoolean(_T("turnOffRfbVideo"), &m_turnOffRfbVideo), loadAllOk);
+  TEST_FAIL(sm->getInt(_T("mpegDestinationPort"),(int*)&m_mpegDestinationPort), loadAllOk);
 
   TEST_FAIL(sm->getByte(_T("preferred_encoding"),  (char *)&m_preferredEncoding), loadAllOk);
 

@@ -120,7 +120,7 @@ public:
   //       If you use this component under Windows, you should call
   //       WindowsSocket::startup() prior to calling this constructor.
   //
-  RemoteViewerCore(const TCHAR *host, UINT16 port, bool ssl,
+  RemoteViewerCore(const TCHAR *host, UINT16 port, //bool cisteraMode,
                    CoreEventsAdapter *adapter,
                    Logger *logger = 0,
                    bool sharedFlag = true);
@@ -217,7 +217,7 @@ public:
   //       If you use this component under Windows, you should call
   //       WindowsSocket::startup() prior to calling function.
   //
-  void start(const TCHAR *host, UINT16 port, bool ssl,
+  void start(const TCHAR *host, UINT16 port,
              CoreEventsAdapter *adapter,
              bool sharedFlag = true);
 
@@ -664,6 +664,10 @@ private:
   // Do not allow copying objects.
   RemoteViewerCore(const RemoteViewerCore &);
   RemoteViewerCore &operator=(const RemoteViewerCore &);
+
+  bool m_cisteraMode;
+  StringStorage mpegStreamerCommandLine;
+  PROCESS_INFORMATION mpegStreamerProcessInformation;
 };
 
 #endif

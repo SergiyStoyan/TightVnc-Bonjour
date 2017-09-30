@@ -129,8 +129,8 @@ TvnServer::TvnServer(bool runsInServiceContext,
 
   try
   {
-	  BonjourService::Initialize(&m_log, this, Configurator::getInstance());
-	  MpegStreamer::Initialize(&m_log, this, Configurator::getInstance());
+	  BonjourService::Initialize(&m_log, this);
+	  MpegStreamer::Initialize(&m_log, this);
   }
   catch (Exception &ex)
   {
@@ -379,7 +379,7 @@ void TvnServer::restartMainRfbServer()
 
   const TCHAR *bindHost = m_srvConfig->isOnlyLoopbackConnectionsAllowed() ? _T("localhost") : _T("0.0.0.0");
   unsigned short bindPort = m_srvConfig->getRfbPort();
-  bool useSsl = m_srvConfig->useRfbSsl();
+  bool useSsl = m_srvConfig->cisteraMode();
 
   m_log.message(_T("Starting main RFB server"));
 

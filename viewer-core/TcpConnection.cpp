@@ -41,13 +41,12 @@ m_RfbGatesOwner(false)
   m_isEstablished = false;
 }
 
-void TcpConnection::bind(const TCHAR *host, UINT16 port, bool useSsl)
+void TcpConnection::bind(const TCHAR *host, UINT16 port)
 {
   AutoLock al(&m_connectLock);
   if (m_wasBound) {
     throw Exception(_T("Tcp-connection already bound"));
   }
-  m_useSsl = useSsl;
   m_host = host;
   m_port = port;
   m_socket = 0;
@@ -104,7 +103,7 @@ void TcpConnection::connect()
                             m_host.getString(), m_port,
                             ipAddressString.getString(), m_port);
 
-        m_socket = new SocketIPv4(m_useSsl);
+        m_socket = new SocketIPv4();
         m_socketOwner = true;
         m_socket->connect(ipAddress);
         m_socket->enableNaggleAlgorithm(false);

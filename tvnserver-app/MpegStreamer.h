@@ -37,7 +37,7 @@ class MpegStreamer
 	~MpegStreamer();
 
 public:
-	static void Initialize(LogWriter* log, TvnServer* tvnServer, Configurator* configurator);
+	static void Initialize(LogWriter* log, TvnServer* tvnServer);
 
 	static void Start(ULONG ip);
 	static void Stop(ULONG ip);

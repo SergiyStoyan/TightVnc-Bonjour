@@ -50,7 +50,6 @@ public:
    */
   TcpServer(const TCHAR *bindHost,
 	  unsigned short bindPort, 
-	  bool ssl,
 	  bool autoStart = false,
 	  bool lockAddr = false) throw(Exception);
   /**

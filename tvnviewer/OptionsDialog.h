@@ -69,7 +69,12 @@ protected:
   CheckBox m_smalldot;
   CheckBox m_arrow;
   CheckBox m_nlocal;
-  CheckBox m_useSsl;
+  CheckBox m_cisteraMode;
+  CheckBox m_notUseCisteraProtocol;
+  CheckBox m_encrypt;
+  CheckBox m_turnOnMpegStreamer;
+  CheckBox m_turnOffRfbVideo;
+  TextBox m_mpegDestinationPort;
 
   void onMessageReceived(UINT uMsg, WPARAM wParam, LPARAM lParam);
   BOOL onCommand(UINT controlID, UINT notificationID);
@@ -80,6 +85,7 @@ protected:
 
 private:
   void updateControlValues();
+  void onUseCisteraProtocolClick();
   void onViewOnlyClick();
   void on8BitColorClick();
   void enableJpegCompression(bool enable);

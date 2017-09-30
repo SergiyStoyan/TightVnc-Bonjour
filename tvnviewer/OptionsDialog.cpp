@@ -22,7 +22,9 @@
 //-------------------------------------------------------------------------
 //
 
+#include "network/CisteraHandshake.h"
 #include "OptionsDialog.h"
+#include "wsconfig-lib/CommonInputValidation.h"
 
 OptionsDialog::OptionsDialog()
 : BaseDialog(IDD_OPTIONS),
@@ -42,53 +44,65 @@ void OptionsDialog::setConnected()
 
 BOOL OptionsDialog::onCommand(UINT controlID, UINT notificationID)
 {
-  if (controlID == IDOK) {
-    if (onOkPressed()) {
-      kill(1);
-    }
-    return TRUE;
-  }
-  if (controlID == IDCANCEL) {
-    kill(0);
-    return TRUE;
-  }
-  if (controlID == IDC_CVIEWONLY) {
-    if (notificationID == BN_CLICKED) {
-      onViewOnlyClick();
-      return TRUE;
-    }
-  }
-  if (controlID == IDC_CEIGHTBIT) {
-    if (notificationID == BN_CLICKED) {
-      on8BitColorClick();
-      return TRUE;
-    }
-  }
-  if (controlID == IDC_CJPEG) {
-    if (notificationID == BN_CLICKED) {
-      onAllowJpegCompressionClick();
-      return TRUE;
-    }
-  }
-  if (controlID == IDC_CCOMPRLVL) {
-    if (notificationID == BN_CLICKED) {
-      onAllowCustomCompressionClick();
-      return TRUE;
-    }
-  }
-  if (controlID == IDC_CUSEENC) {
-    if (notificationID == CBN_SELCHANGE) {
-      onPreferredEncodingSelectionChange();
-      return TRUE;
-    }
-  }
-  if (controlID == IDC_CSCALE) {
-    if (notificationID == CBN_KILLFOCUS) {
-      onScaleKillFocus();
-      return TRUE;
-    }
-  }
-  return FALSE;
+	if (controlID == IDOK) {
+		if (onOkPressed()) {
+			kill(1);
+		}
+		return TRUE;
+	}
+	if (controlID == IDCANCEL) {
+		kill(0);
+		return TRUE;
+	}
+	if (controlID == IDC_CVIEWONLY) {
+		if (notificationID == BN_CLICKED) {
+			onViewOnlyClick();
+			return TRUE;
+		}
+	}
+	if (controlID == IDC_CEIGHTBIT) {
+		if (notificationID == BN_CLICKED) {
+			on8BitColorClick();
+			return TRUE;
+		}
+	}
+	if (controlID == IDC_CJPEG) {
+		if (notificationID == BN_CLICKED) {
+			onAllowJpegCompressionClick();
+			return TRUE;
+		}
+	}
+	if (controlID == IDC_CCOMPRLVL) {
+		if (notificationID == BN_CLICKED) {
+			onAllowCustomCompressionClick();
+			return TRUE;
+		}
+	}
+	if (controlID == IDC_CUSEENC) {
+		if (notificationID == CBN_SELCHANGE) {
+			onPreferredEncodingSelectionChange();
+			return TRUE;
+		}
+	}
+	if (controlID == IDC_CSCALE) {
+		if (notificationID == CBN_KILLFOCUS) {
+			onScaleKillFocus();
+			return TRUE;
+		}
+	}
+	if (controlID == IDC_USE_CISTERA_PROTOCOL || controlID == IDC_NOT_USE_CISTERA_PROTOCOL) {
+		if (notificationID == BN_CLICKED) {
+			onUseCisteraProtocolClick();
+			return TRUE;
+		}
+	}
+	if (controlID == IDC_TURN_ON_MPEG_STREAMER) {
+		if (notificationID == BN_CLICKED) {
+			onUseCisteraProtocolClick();
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 BOOL OptionsDialog::onInitDialog()
@@ -116,7 +130,12 @@ BOOL OptionsDialog::onInitDialog()
   setControlById(m_smalldot, IDC_RSMALLDOT);
   setControlById(m_arrow, IDC_RARROW);
   setControlById(m_nlocal, IDC_RNLOCAL);
-  setControlById(m_useSsl, IDC_RFB_SSL);
+  setControlById(m_cisteraMode, IDC_USE_CISTERA_PROTOCOL);
+  setControlById(m_notUseCisteraProtocol, IDC_NOT_USE_CISTERA_PROTOCOL);
+  setControlById(m_encrypt, IDC_ENCRYPT);
+  setControlById(m_turnOnMpegStreamer, IDC_TURN_ON_MPEG_STREAMER);
+  setControlById(m_turnOffRfbVideo, IDC_TURN_OFF_RFB_VIDEO);
+  setControlById(m_mpegDestinationPort, IDC_MPEG_DESTINATION_PORT);
 
   m_useEnc.addItem(_T("Raw"), reinterpret_cast<void *>(EncodingDefs::RAW));
   m_useEnc.addItem(_T("Hextile"), reinterpret_cast<void *>(EncodingDefs::HEXTILE));
@@ -239,16 +258,33 @@ void OptionsDialog::updateControlValues()
 	onPreferredEncodingSelectionChange();
 	on8BitColorClick();
 
-	m_useSsl.check(m_conConfig->useSsl());
+	m_cisteraMode.check(m_conConfig->cisteraMode());
+	m_notUseCisteraProtocol.check(!m_conConfig->cisteraMode());
+	CisteraHandshake::clientRequest cr;
+	m_conConfig->getCisteraHandshakeClientRequest(&cr);
+	m_encrypt.check(cr.encrypt);
+	m_turnOnMpegStreamer.check(cr.mpegStream);
+	m_turnOffRfbVideo.check(!cr.rfbVideo);
+	m_mpegDestinationPort.setUnsignedInt(cr.mpegStreamPort);
+	onUseCisteraProtocolClick();
+}
+
+void OptionsDialog::onUseCisteraProtocolClick()
+{
+	m_encrypt.setEnabled(m_cisteraMode.isChecked());
+	m_turnOnMpegStreamer.setEnabled(m_cisteraMode.isChecked());
+	m_turnOffRfbVideo.setEnabled(m_cisteraMode.isChecked() && m_turnOnMpegStreamer.isChecked());
+	m_mpegDestinationPort.setEnabled(m_cisteraMode.isChecked() && m_turnOnMpegStreamer.isChecked());
 }
 
 void OptionsDialog::onViewOnlyClick()
 {
-  if (m_viewonly.isChecked()) {
-    m_swapmouse.setEnabled(false);
-  } else {
-    m_swapmouse.setEnabled(true);
-  }
+	if (m_viewonly.isChecked()) {
+		m_swapmouse.setEnabled(false);
+	}
+	else {
+		m_swapmouse.setEnabled(true);
+	}
 }
 
 void OptionsDialog::on8BitColorClick()
@@ -395,6 +431,13 @@ bool OptionsDialog::isInputValid()
     return false;
   }
 
+ /* if (!CommonInputValidation::validatePort(&m_mpegDestinationPort)) {
+	  MessageBox(m_ctrlThis.getWindow(),
+		  StringTable::getString(IDS_PORT_ERROR),
+		  StringTable::getString(IDS_OPTIONS_CAPTION), MB_ICONSTOP | MB_OK);
+	  return false;
+  }*/
+
   return true;
 }
 
@@ -486,5 +529,15 @@ void OptionsDialog::apply()
 
 	m_conConfig->setLocalCursorShape(localCursorShape);
 
-	m_conConfig->useSsl(m_useSsl.isChecked());
+	m_conConfig->cisteraMode(m_cisteraMode.isChecked());
+	CisteraHandshake::clientRequest cr;
+	cr.encrypt = m_encrypt.isChecked();
+	cr.mpegStream = m_turnOnMpegStreamer.isChecked();
+	cr.rfbVideo = !m_turnOffRfbVideo.isChecked();
+	StringStorage port_;
+	m_mpegDestinationPort.getText(&port_);
+	int port;
+	StringParser::parseInt(port_.getString(), &port);
+	cr.mpegStreamPort = port;
+	m_conConfig->setCisteraHandshakeClientRequest(&cr);
 }

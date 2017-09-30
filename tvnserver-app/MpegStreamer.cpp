@@ -28,7 +28,7 @@ LocalMutex MpegStreamer::lock;
 //ServerConfig* MpegStreamer::serverConfig;
 HANDLE MpegStreamer::anti_zombie_job;
 
-void MpegStreamer::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator *configurator)
+void MpegStreamer::Initialize(LogWriter *log, TvnServer *tvnServer)
 {
 	AutoLock l(&lock);
 
@@ -40,6 +40,7 @@ void MpegStreamer::Initialize(LogWriter *log, TvnServer *tvnServer, Configurator
 	}
 
 	tvnServer->addListener(&mpegStreamerConfigReloadListener);
+	Configurator *configurator = Configurator::getInstance();
 	configurator->addListener(&mpegStreamerConfigReloadListener);
 	mpegStreamerConfigReloadListener.onConfigReload(configurator->getServerConfig());
 

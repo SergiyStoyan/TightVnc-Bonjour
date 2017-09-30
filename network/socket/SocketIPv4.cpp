@@ -43,7 +43,7 @@
 
 #include <crtdbg.h>
 
-SocketIPv4::SocketIPv4(bool useSsl)
+SocketIPv4::SocketIPv4()
 	: m_localAddr(NULL), m_peerAddr(NULL), m_isBound(false), m_wsaStartup(1, 2)
 {
 	m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -53,7 +53,6 @@ SocketIPv4::SocketIPv4(bool useSsl)
 		throw SocketException();
 	}
 
-	//m_useSsl = useSsl;
 	m_ssl = NULL;
 }
 
@@ -302,7 +301,7 @@ SocketIPv4 *SocketIPv4::accept()
   SocketIPv4 *accepted;
 
   try {
-    accepted = new SocketIPv4(m_useSsl); 
+    accepted = new SocketIPv4(); 
     accepted->close();
   } catch(...) {
     // Cleanup and throw further
@@ -329,52 +328,6 @@ void SocketIPv4::set(SOCKET socket)
 	::close(m_socket);
 #endif
 	m_socket = socket;
-
-		//char buffer[100];
-		//int r = ::recv(m_socket, buffer, sizeof(buffer), MSG_PEEK);
-		//if (r <= 0)
-		//	throw IOException(_T("Failed to recv data from socket."));
-		//LONG32 use_ssl;
-		//sscanf(buffer, "SSL=%d", &use_ssl);
-
-		//fd_set afd;
-		//FD_ZERO(&afd);
-		//FD_SET(m_socket, &afd);
-		//timeval timeout;
-		//timeout.tv_sec = 0;
-		//timeout.tv_usec = 200000;
-		//int r = select((int)m_socket + 1, &afd, NULL, NULL, &timeout);
-		//if (r < 0)
-		//{
-		//}
-		//else if (r == 0)
-		//{
-		//	// timeout, socket does not have anything to read
-		//}
-		//else
-		//{
-		//	r = recv(s, rx_tmp, bufSize, 0);
-		//	if (r <0)
-		//	{
-		//	}
-		//	else if (r == 0)
-		//	{
-		//		// peer disconnected...
-		//	}
-		//	else
-		//	{
-		//	}
-		//}
-		/*throw SocketException();
-		SSL buffer: \x16\x3\x1
-		TCP buffer: 
-		const char* ssl_request = "SSL=1";
-		int s = ::send(m_socket, ssl_request, strlen(ssl_request), 0);
-		if (s <= 0)
-			throw IOException(_T("Failed to send data to socket."));*/
-
-	/*if (m_useSsl)
-		createSslSocket(true);*/
 
 	// Set local and peer addresses for new socket
 	struct sockaddr_in addr;

@@ -41,35 +41,36 @@
 #include "tvnserver-app/MpegStreamer.h"
 
 RfbClient::RfbClient(NewConnectionEvents *newConnectionEvents,
-                     SocketIPv4 *socket,
-                     ClientTerminationListener *extTermListener,
-                     ClientAuthListener *extAuthListener, bool viewOnly,
-                     bool isOutgoing, unsigned int id,
-                     const ViewPortState *constViewPort,
-                     const ViewPortState *dynViewPort,
-                     int idleTimeout,
-                     LogWriter *log)
-: m_socket(socket), // now we own the socket
-  m_newConnectionEvents(newConnectionEvents),
-  m_viewOnly(viewOnly),
-  m_isOutgoing(isOutgoing),
-  m_shared(false),
-  m_viewOnlyAuth(true),
-  m_clientState(IN_NONAUTH),
-  m_isMarkedOk(false),
-  m_extTermListener(extTermListener),
-  m_extAuthListener(extAuthListener),
-  m_updateSender(0),
-  m_clipboardExchange(0),
-  m_clientInputHandler(0),
-  m_id(id),
-  m_desktop(0),
-  m_constViewPort(constViewPort, log),
-  m_dynamicViewPort(dynViewPort, log),
-  m_idleTimer(idleTimeout), m_idleTimeout(idleTimeout),
-  m_log(log)
+	SocketIPv4 *socket, 
+	ClientTerminationListener *extTermListener,
+	ClientAuthListener *extAuthListener, bool viewOnly,
+	bool isOutgoing, unsigned int id,
+	const ViewPortState *constViewPort,
+	const ViewPortState *dynViewPort,
+	int idleTimeout,
+	LogWriter *log)
+	: m_socket(socket), // now we own the socket
+	m_newConnectionEvents(newConnectionEvents),
+	m_viewOnly(viewOnly),
+	m_isOutgoing(isOutgoing),
+	m_shared(false),
+	m_viewOnlyAuth(true),
+	m_clientState(IN_NONAUTH),
+	m_isMarkedOk(false),
+	m_extTermListener(extTermListener),
+	m_extAuthListener(extAuthListener),
+	m_updateSender(0),
+	m_clipboardExchange(0),
+	m_clientInputHandler(0),
+	m_id(id),
+	m_desktop(0),
+	m_constViewPort(constViewPort, log),
+	m_dynamicViewPort(dynViewPort, log),
+	m_idleTimer(idleTimeout), m_idleTimeout(idleTimeout),
+	m_log(log)
 {
-  resume();
+	m_cisteraMode = Configurator::getInstance()->getServerConfig()->cisteraMode();
+	resume();
 }
 
 RfbClient::~RfbClient()
@@ -174,8 +175,12 @@ void RfbClient::onTerminate()
 
 void RfbClient::cisteraHandshake()
 {
+	m_log->info(_T("Protocol stage is \"CisteraHandshake\"."));
+
 	CisteraHandshake::clientRequest cr;
 	m_socket->recvAll((char*)&cr, sizeof(cr));
+
+	m_log->info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cr.encrypt, cr.mpegStream, cr.mpegStreamPort, cr.rfbVideo);
 
 	CisteraHandshake::serverResponse sr;
 	if (cr.encrypt)
@@ -211,8 +216,13 @@ void RfbClient::execute()
                                 !m_isOutgoing);
 
   try {
-	  m_log->info(_T("Protocol stage is \"CisteraHandshake\"."));
-	  cisteraHandshake();
+	  if (m_cisteraMode)
+	  {
+		  m_log->info(_T("Mode: CisteraVNC"));
+		  cisteraHandshake();
+	  }
+	  else
+		  m_log->info(_T("Mode: TightVNC"));
     
 	  // First initialization phase
     try {
