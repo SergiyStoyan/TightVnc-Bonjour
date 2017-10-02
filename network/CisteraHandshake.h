@@ -52,9 +52,8 @@ public:
 
 	struct serverResponse
 	{
-		char clientVersion[4] = "1.0";
-		//bool ssl = true;
-		char mpegStreamAesKeySalt[41] = "1234567890123456789012345678901234567890";
+		char serverVersion[4] = "1.0";
+		byte mpegStreamAesKeySalt[30];
 	};
 };
 

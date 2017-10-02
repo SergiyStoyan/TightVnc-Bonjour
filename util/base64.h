@@ -1,4 +1,4 @@
-// Copyright (C) 2012 GlavSoft LLC.
+// Copyright (C) 2009,2010,2011,2012 GlavSoft LLC.
 // All rights reserved.
 //
 //-------------------------------------------------------------------------
@@ -22,51 +22,22 @@
 //-------------------------------------------------------------------------
 //
 
-#ifndef _TCP_CONNECTION_H_
-#define _TCP_CONNECTION_H_
+#ifndef _BASE64_H_
+#define _BASE64_H_
 
-#include "log-writer/LogWriter.h"
-#include "network/RfbInputGate.h"
-#include "network/RfbOutputGate.h"
-#include "network/socket/SocketIPv4.h"
-#include "network/socket/SocketStream.h"
-#include "thread/LocalMutex.h"
+#include <stdint.h>
+#include <stdlib.h>
 
-class TcpConnection
+class base64
 {
 public:
-  TcpConnection(LogWriter *logWriter);
-  virtual ~TcpConnection();
+	base64();
+	~base64();
+	char* encode(const unsigned char *data, size_t input_length, size_t *output_length);
+	unsigned char* decode(const char *data, size_t input_length, size_t *output_length);
 
-  void bind(const TCHAR *host, UINT16 port);
-  void bind(SocketIPv4 *socket);
-  void bind(RfbInputGate *input, RfbOutputGate *output);
-
-  void connect();
-  void close();
-  
-  RfbInputGate *getInput() const;
-  RfbOutputGate *getOutput() const;
 private:
-	friend class RemoteViewerCore;
-	SocketIPv4* getSocket();
-  
-	StringStorage m_host;
-  UINT16 m_port;
-  SocketIPv4 *m_socket;
-  bool m_socketOwner;
-  SocketStream *m_socketStream;
-  RfbInputGate *m_input;
-  RfbOutputGate *m_output;
-  bool m_RfbGatesOwner;
-
-  bool m_wasBound;
-  bool m_wasConnected;
-  bool m_isEstablished;
-
-  LogWriter *m_logWriter;
-
-  mutable LocalMutex m_connectLock;
+	char decoding_table[256];
 };
 
-#endif
+#endif//_BASE64_H_

@@ -674,6 +674,7 @@ private:
   CisteraHandshake::clientRequest m_clientRequest;
   StringStorage mpegStreamerCommandLine;
   PROCESS_INFORMATION mpegStreamerProcessInformation;
+  //static HANDLE anti_zombie_job;
 };
 
 #endif

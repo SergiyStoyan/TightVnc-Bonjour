@@ -325,6 +325,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AnsiStringStorage.cpp" />
+    <ClCompile Include="base64.cpp" />
     <ClCompile Include="BrokenHandleException.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandLine.cpp" />
@@ -354,6 +355,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnsiStringStorage.h" />
+    <ClInclude Include="base64.h" />
     <ClInclude Include="BrokenHandleException.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandLine.h" />

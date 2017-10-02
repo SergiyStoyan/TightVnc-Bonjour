@@ -185,8 +185,21 @@ void RfbClient::cisteraHandshake()
 	CisteraHandshake::serverResponse sr;
 	if (cr.encrypt)
 	{
+		HCRYPTPROV hProvider = 0;
+		bool filled = false;
+		if (!CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+			m_log->interror(_T("Could not CryptAcquireContext"));
+		else
+		{
+			if (!CryptGenRandom(hProvider, sizeof(sr.mpegStreamAesKeySalt), sr.mpegStreamAesKeySalt))
+				m_log->interror(_T("Could not CryptGenRandom"));			
+			CryptReleaseContext(hProvider, 0);
+			filled = true;
+		}
+		if(!filled)
+			memcpy(sr.mpegStreamAesKeySalt, (void*)memcpy, sizeof(sr.mpegStreamAesKeySalt));
+
 		m_socket->startSslSession(true);
-		strcpy(sr.mpegStreamAesKeySalt, "0987654321098765432109876543210987654321");
 	}
 	m_socket->sendAll((char*)&sr, sizeof(sr));
 }

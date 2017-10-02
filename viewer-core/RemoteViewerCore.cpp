@@ -65,6 +65,8 @@
 #include "PointerPosDecoder.h"
 #include "RichCursorDecoder.h"
 
+#include "util/base64.h"
+
 #include <algorithm>
 
 
@@ -154,24 +156,44 @@ void RemoteViewerCore::init()
   m_updateTimeout = 0;
 
   m_cisteraMode = false;
+  ZeroMemory(&mpegStreamerProcessInformation, sizeof(mpegStreamerProcessInformation));
 }
 
 RemoteViewerCore::~RemoteViewerCore()
 {
-  try {
-    // Stop all threads.
-    stop();
+	try {
+		// Stop all threads.
+		stop();
 
-    // If core isn't started, then this thread isn't execute,
-    // wait only thead of FbUpdateNotifier.
-    if (wasStarted()) {
-      waitTermination();
-    } else {
-      m_fbUpdateNotifier.wait();
-	  m_updateRequestSender.wait();
-    }
-  } catch (...) {
-  }
+		// If core isn't started, then this thread isn't execute,
+		// wait only thead of FbUpdateNotifier.
+		if (wasStarted()) {
+			waitTermination();
+		}
+		else {
+			m_fbUpdateNotifier.wait();
+			m_updateRequestSender.wait();
+		}
+
+		if (mpegStreamerProcessInformation.hProcess)
+		{
+			DWORD ec;
+			if (GetExitCodeProcess(mpegStreamerProcessInformation.hProcess, &ec) && ec == STILL_ACTIVE)
+			{
+				if (!TerminateProcess(mpegStreamerProcessInformation.hProcess, 0))
+				{
+					DWORD state = WaitForSingleObject(mpegStreamerProcessInformation.hProcess, 1000);
+					if (state != WAIT_OBJECT_0)
+						m_logWriter.interror(_T("Could not terminate process for %s"), mpegStreamerCommandLine.getString());
+				}
+			}
+			CloseHandle(mpegStreamerProcessInformation.hProcess);
+			CloseHandle(mpegStreamerProcessInformation.hThread);
+		}
+	}
+	catch (...) 
+	{
+	}
 }
 
 void RemoteViewerCore::start(CoreEventsAdapter *adapter,
@@ -846,30 +868,37 @@ void RemoteViewerCore::cisteraHandshake()
 	m_logWriter.info(_T("Protocol stage is \"CisteraHandshake\"."));
 
 	SocketIPv4* s = m_tcpConnection.getSocket();
-	CisteraHandshake::clientRequest cr;
-	cr.mpegStreamPort = 1112;
 
-	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cr.encrypt, cr.mpegStream, cr.mpegStreamPort, cr.rfbVideo);
+	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), m_clientRequest.encrypt, m_clientRequest.mpegStream, m_clientRequest.mpegStreamPort, m_clientRequest.rfbVideo);
 
-	s->sendAll((char*)&cr, sizeof(cr));
+	s->sendAll((char*)&m_clientRequest, sizeof(m_clientRequest));
 
-	if (cr.encrypt)
+	if (m_clientRequest.encrypt)
 		s->startSslSession(false);
 
 	CisteraHandshake::serverResponse sr;
 	s->recvAll((char*)&sr, sizeof(sr));
 
-	if (cr.mpegStream)
+	if (m_clientRequest.mpegStream)
 	{
-		if(cr.encrypt)
-			mpegStreamerCommandLine.format(_T("ffplay.exe -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params %s srtp://127.0.0.1:%d"), sr.mpegStreamAesKeySalt, cr.mpegStreamPort);
+		if (m_clientRequest.encrypt)
+		{
+			base64 b;
+			size_t ks_length;
+			char* ks = b.encode((unsigned char*)sr.mpegStreamAesKeySalt, sizeof(sr.mpegStreamAesKeySalt), &ks_length);
+			char mpegStreamAesKeySalt[41];
+			memcpy(mpegStreamAesKeySalt, ks, sizeof(mpegStreamAesKeySalt) - 1);
+			mpegStreamAesKeySalt[sizeof(mpegStreamAesKeySalt) - 1] = '\0';
+			AnsiStringStorage ass;
+			ass.format("ffplay.exe -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params %s srtp://127.0.0.1:%d", mpegStreamAesKeySalt, m_clientRequest.mpegStreamPort);
+			ass.toStringStorage(&mpegStreamerCommandLine);
+		}
 		else
-			mpegStreamerCommandLine.format(_T("ffplay.exe udp://127.0.0.1:%d"), cr.mpegStreamPort);
+			mpegStreamerCommandLine.format(_T("ffplay.exe udp://127.0.0.1:%d"), m_clientRequest.mpegStreamPort);
 		DWORD dwCreationFlags = 0;
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
-		ZeroMemory(&mpegStreamerProcessInformation, sizeof(mpegStreamerProcessInformation));
 		if (!CreateProcess(NULL, (LPTSTR)mpegStreamerCommandLine.getString(), NULL, NULL, TRUE, dwCreationFlags, NULL, NULL, &si, &mpegStreamerProcessInformation))
 		{
 			StringStorage errorString;
