@@ -25,6 +25,8 @@
 #ifndef _REMOTE_VIEWER_CORE_H_
 #define _REMOTE_VIEWER_CORE_H_
 
+#include "network/CisteraHandshake.h"
+
 #include "log-writer/LogWriter.h"
 #include "network/RfbInputGate.h"
 #include "network/RfbOutputGate.h"
@@ -46,6 +48,7 @@
 
 #include <map>
 #include "UpdateRequestSender.h"
+//#include "client-config-lib/ConnectionConfig.h"
 
 //
 // RemoteViewerCore implements a local representation of a live remote screen
@@ -86,7 +89,7 @@ public:
   // To allow logging, pass a pointer to an object which implements the Logger
   // interface (see log-writer/Logger.h). Logging is disabled by default.
   //
-  RemoteViewerCore(Logger *logger = 0);
+  RemoteViewerCore(/*ConnectionConfig* conConf,*/ Logger *logger = 0);
 
   //
   // Active constructors.
@@ -119,11 +122,11 @@ public:
   // NOTE: RemoteViewerCore will not initialize Windows sockets for you.
   //       If you use this component under Windows, you should call
   //       WindowsSocket::startup() prior to calling this constructor.
-  //
-  RemoteViewerCore(const TCHAR *host, UINT16 port, //bool cisteraMode,
+  // //bool cisteraMode,
+ /* RemoteViewerCore(const TCHAR *host, UINT16 port,
                    CoreEventsAdapter *adapter,
                    Logger *logger = 0,
-                   bool sharedFlag = true);
+                   bool sharedFlag = true);*/
 
   // FIX DOCUMENTATION: Clarify differents between the constructor with sockets and gates.
   //
@@ -218,8 +221,9 @@ public:
   //       WindowsSocket::startup() prior to calling function.
   //
   void start(const TCHAR *host, UINT16 port,
-             CoreEventsAdapter *adapter,
-             bool sharedFlag = true);
+	  bool cisteraMode, CisteraHandshake::clientRequest* clientRequest,
+	  CoreEventsAdapter *adapter,
+	  bool sharedFlag = true);
 
   //
   // This version expects a connected TCP socket. For example, it can be used
@@ -665,7 +669,9 @@ private:
   RemoteViewerCore(const RemoteViewerCore &);
   RemoteViewerCore &operator=(const RemoteViewerCore &);
 
+  //ConnectionConfig* m_conConf;
   bool m_cisteraMode;
+  CisteraHandshake::clientRequest m_clientRequest;
   StringStorage mpegStreamerCommandLine;
   PROCESS_INFORMATION mpegStreamerProcessInformation;
 };

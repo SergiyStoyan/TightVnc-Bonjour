@@ -29,9 +29,6 @@
 //        stoyan@cliversoft.com
 //********************************************************************************************
 
-#include "network/CisteraHandshake.h"
-//#include "tvnviewer/ViewerInstance.h"
-
 #include "RemoteViewerCore.h"
 
 #include "ft-common/FTMessage.h"
@@ -70,32 +67,35 @@
 
 #include <algorithm>
 
-RemoteViewerCore::RemoteViewerCore(Logger *logger)
+
+RemoteViewerCore::RemoteViewerCore(/*ConnectionConfig* conConf, */Logger *logger)
 	: m_logWriter(logger),
 	m_tcpConnection(&m_logWriter),
 	m_fbUpdateNotifier(&m_frameBuffer, &m_fbLock, &m_logWriter, &m_watermarksController),
 	m_decoderStore(&m_logWriter),
-	m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)
+	m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)//,
+	//m_conConf(conConf)
 {
-	//ViewerConfig::getInstance()->
+	/*m_cisteraMode = m_conConf->cisteraMode();
+	if (m_cisteraMode)
+		m_conConf->getCisteraHandshakeClientRequest(&m_clientRequest);*/
 	init();
 }
 
-RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port, //bool cisteraMode,
-                                   CoreEventsAdapter *adapter,
-                                   Logger *logger,
-                                   bool sharedFlag)
-: m_logWriter(logger),
-  m_tcpConnection(&m_logWriter),
-  m_fbUpdateNotifier(&m_frameBuffer, &m_fbLock, &m_logWriter, &m_watermarksController),
-  m_decoderStore(&m_logWriter),
-  m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)//,
-	//m_cisteraMode(cisteraMode)
-{
-  init();
-
-  start(host, port, adapter, sharedFlag);
-}
+//RemoteViewerCore::RemoteViewerCore(const TCHAR *host, UINT16 port,
+//                                   CoreEventsAdapter *adapter,
+//                                   Logger *logger,
+//                                   bool sharedFlag)
+//: m_logWriter(logger),
+//  m_tcpConnection(&m_logWriter),
+//  m_fbUpdateNotifier(&m_frameBuffer, &m_fbLock, &m_logWriter, &m_watermarksController),
+//  m_decoderStore(&m_logWriter),
+//  m_updateRequestSender(&m_fbLock, &m_frameBuffer, &m_logWriter)
+//{
+//  init();
+//
+//  start(host, port, false, NULL, adapter, sharedFlag);
+//}
 
 RemoteViewerCore::RemoteViewerCore(SocketIPv4 *socket,
                                    CoreEventsAdapter *adapter,
@@ -152,6 +152,8 @@ void RemoteViewerCore::init()
   m_forceFullUpdate = false;
 
   m_updateTimeout = 0;
+
+  m_cisteraMode = false;
 }
 
 RemoteViewerCore::~RemoteViewerCore()
@@ -202,12 +204,15 @@ void RemoteViewerCore::start(CoreEventsAdapter *adapter,
 }
 
 void RemoteViewerCore::start(
-	const TCHAR *host,
-	UINT16 port,
+	const TCHAR *host,	UINT16 port,
+	bool cisteraMode, CisteraHandshake::clientRequest* clientRequest,
 	CoreEventsAdapter *adapter,
 	bool sharedFlag)
 {
 	m_tcpConnection.bind(host, port);
+	m_cisteraMode = cisteraMode;
+	if(cisteraMode)
+		memcpy(&m_clientRequest, clientRequest, sizeof(m_clientRequest));
 	start(adapter, sharedFlag);
 }
 

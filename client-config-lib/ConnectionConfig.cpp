@@ -98,11 +98,11 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
 	  ignoreShapeUpdates = other.m_ignoreShapeUpdates;
 	  localCursor = other.m_localCursor;
 	  cisteraMode = other.m_cisteraMode;
-	  notUseCisteraProtocol = m_notUseCisteraProtocol;
-	  encrypt = m_encrypt;
-	  turnOnMpegStreamer = m_turnOnMpegStreamer;
-	  turnOffRfbVideo = m_turnOffRfbVideo;
-	  mpegDestinationPort = m_mpegDestinationPort;
+	  notUseCisteraProtocol = other.m_notUseCisteraProtocol;
+	  encrypt = other.m_encrypt;
+	  turnOnMpegStreamer = other.m_turnOnMpegStreamer;
+	  turnOffRfbVideo = other.m_turnOffRfbVideo;
+	  mpegDestinationPort = other.m_mpegDestinationPort;
   }
 
   {
@@ -470,48 +470,49 @@ bool ConnectionConfig::saveToStorage(SettingsManager *sm) const
 
 bool ConnectionConfig::loadFromStorage(SettingsManager *sm)
 {
-  AutoLock l(&m_cs);
+	AutoLock l(&m_cs);
 
-  bool loadAllOk = true;
+	bool loadAllOk = true;
 
 
-  // option "use_encoding_1" have need for compatible with old-vnc files
-  TEST_FAIL(sm->getBoolean(_T("use_encoding_1"),   &m_allowedCopyRect), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("copyrect"),         &m_allowedCopyRect), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("viewonly"),         &m_viewOnly), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("fullscreen"),       &m_useFullscreen), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("8bit"),             &m_use8BitColor), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("shared"),           &m_requestSharedSession), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("belldeiconify"),    &m_deiconifyOnRemoteBell), loadAllOk);
+	// option "use_encoding_1" have need for compatible with old-vnc files
+	TEST_FAIL(sm->getBoolean(_T("use_encoding_1"), &m_allowedCopyRect), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("copyrect"), &m_allowedCopyRect), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("viewonly"), &m_viewOnly), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("fullscreen"), &m_useFullscreen), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("8bit"), &m_use8BitColor), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("shared"), &m_requestSharedSession), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("belldeiconify"), &m_deiconifyOnRemoteBell), loadAllOk);
 
-  if (sm->getBoolean(_T("disableclipboard"), &m_isClipboardEnabled)) {
-    m_isClipboardEnabled = !m_isClipboardEnabled;
-  } else {
-    loadAllOk = false;
-  }
+	if (sm->getBoolean(_T("disableclipboard"), &m_isClipboardEnabled)) {
+		m_isClipboardEnabled = !m_isClipboardEnabled;
+	}
+	else {
+		loadAllOk = false;
+	}
 
-  TEST_FAIL(sm->getBoolean(_T("swapmouse"),        &m_swapMouse), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("fitwindow"),        &m_fitWindow), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("cursorshape"),      &m_requestShapeUpdates), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("noremotecursor"), &m_ignoreShapeUpdates), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("cisteraMode"), &m_cisteraMode), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("notUseCisteraProtocol"), &m_notUseCisteraProtocol), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("encrypt"), &m_encrypt), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("turnOnMpegStreamer"), &m_turnOnMpegStreamer), loadAllOk);
-  TEST_FAIL(sm->getBoolean(_T("turnOffRfbVideo"), &m_turnOffRfbVideo), loadAllOk);
-  TEST_FAIL(sm->getInt(_T("mpegDestinationPort"),(int*)&m_mpegDestinationPort), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("swapmouse"), &m_swapMouse), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("fitwindow"), &m_fitWindow), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("cursorshape"), &m_requestShapeUpdates), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("noremotecursor"), &m_ignoreShapeUpdates), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("cisteraMode"), &m_cisteraMode), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("notUseCisteraProtocol"), &m_notUseCisteraProtocol), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("encrypt"), &m_encrypt), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("turnOnMpegStreamer"), &m_turnOnMpegStreamer), loadAllOk);
+	TEST_FAIL(sm->getBoolean(_T("turnOffRfbVideo"), &m_turnOffRfbVideo), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("mpegDestinationPort"), &m_mpegDestinationPort), loadAllOk);
 
-  TEST_FAIL(sm->getByte(_T("preferred_encoding"),  (char *)&m_preferredEncoding), loadAllOk);
+	TEST_FAIL(sm->getByte(_T("preferred_encoding"), (char *)&m_preferredEncoding), loadAllOk);
 
-  TEST_FAIL(sm->getInt(_T("compresslevel"),        &m_customCompressionLevel), loadAllOk);
-  TEST_FAIL(sm->getInt(_T("quality"),              &m_jpegCompressionLevel), loadAllOk);
-  TEST_FAIL(sm->getInt(_T("localcursor"),          &m_localCursor), loadAllOk);
-  TEST_FAIL(sm->getInt(_T("scale_den"),            &m_scaleDenominator), loadAllOk);
-  TEST_FAIL(sm->getInt(_T("scale_num"),            &m_scaleNumerator), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("compresslevel"), &m_customCompressionLevel), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("quality"), &m_jpegCompressionLevel), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("localcursor"), &m_localCursor), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("scale_den"), &m_scaleDenominator), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("scale_num"), &m_scaleNumerator), loadAllOk);
 
-  TEST_FAIL(sm->getInt(_T("local_cursor_shape"),   &m_localCursor), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("local_cursor_shape"), &m_localCursor), loadAllOk);
 
-  return loadAllOk;
+	return loadAllOk;
 }
 
 // Greatest common denominator, by Euclid

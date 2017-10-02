@@ -28,17 +28,17 @@
 #include "viewer-core/FileTransferCapability.h"
 
 ViewerInstance::ViewerInstance(WindowsApplication *application,
-                               ConnectionData *condata,
-                               const ConnectionConfig *conConf)
-: m_conConf(*conConf),
-  m_condata(*condata),
-  m_socket(0),
-  m_viewerWnd(application,
-              &m_condata,
-              &m_conConf,
-              ViewerConfig::getInstance()->getLogger()),
-  m_vncAuthHandler(&m_condata),
-  m_viewerCore(ViewerConfig::getInstance()->getLogger())
+	ConnectionData *condata,
+	const ConnectionConfig *conConf)
+	: m_conConf(*conConf),
+	m_condata(*condata),
+	m_socket(0),
+	m_viewerWnd(application,
+		&m_condata,
+		&m_conConf,
+		ViewerConfig::getInstance()->getLogger()),
+	m_vncAuthHandler(&m_condata),
+	m_viewerCore(/**conConf,*/ ViewerConfig::getInstance()->getLogger())
 {
 }
 
@@ -54,7 +54,7 @@ ViewerInstance::ViewerInstance(WindowsApplication *application,
               &m_conConf,
               ViewerConfig::getInstance()->getLogger()),
   m_vncAuthHandler(&m_condata),
-  m_viewerCore(ViewerConfig::getInstance()->getLogger())
+  m_viewerCore(/**conConf,*/ ViewerConfig::getInstance()->getLogger())
 {
 }
 
@@ -100,7 +100,6 @@ void ViewerInstance::start()
 	Logger *logger = ViewerConfig::getInstance()->getLogger();
 	m_viewerWnd.setRemoteViewerCore(&m_viewerCore);
 
-
 	m_viewerWnd.setFileTransfer(&m_fileTransfer);
 
 	m_vncAuthHandler.addAuthCapability(&m_viewerCore);
@@ -113,13 +112,15 @@ void ViewerInstance::start()
 	}
 
 	if (m_socket) {
-		m_viewerCore.start(m_socket,
-			&m_viewerWnd, m_conConf.getSharedFlag());
+		m_viewerCore.start(m_socket, &m_viewerWnd, m_conConf.getSharedFlag());
 	}
 	else {
 		StringStorage strHost;
 		m_condata.getReducedHost(&strHost);
 		UINT16 portVal = m_condata.getPort();
-		m_viewerCore.start(strHost.getString(), portVal, &m_viewerWnd, m_conConf.getSharedFlag());
+
+		CisteraHandshake::clientRequest cr;
+		m_conConf.getCisteraHandshakeClientRequest(&cr);
+		m_viewerCore.start(strHost.getString(), portVal, m_conConf.cisteraMode(), &cr, &m_viewerWnd, m_conConf.getSharedFlag());
 	}
 }

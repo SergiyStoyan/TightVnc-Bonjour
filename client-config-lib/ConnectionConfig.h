@@ -248,7 +248,7 @@ protected:
   bool m_encrypt;
   bool m_turnOnMpegStreamer;
   bool m_turnOffRfbVideo;
-  UINT16 m_mpegDestinationPort;
+  int m_mpegDestinationPort;
 
   // Critical section
   mutable LocalMutex m_cs;
