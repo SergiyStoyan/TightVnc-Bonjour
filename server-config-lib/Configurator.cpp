@@ -929,36 +929,11 @@ bool Configurator::saveMpegStreamerConfig(SettingsManager *sm)
 {
 	//AutoLock l(&m_serverConfig);
 	bool saveResult = true;
-
-	if (!sm->setBoolean(_T("EnableMpegStreamer"), m_serverConfig.isMpegStreamerEnabled()))
-		saveResult = false;
-
-	if (!sm->setUINT(_T("MpegStreamerDestinationUdpPort"), m_serverConfig.getMpegStreamerDestinationUdpPort()))
-		saveResult = false;
-
-	if (!sm->setUINT(_T("MpegStreamerDestinationSrtpPort"), m_serverConfig.getMpegStreamerDestinationSrtpPort()))
-		saveResult = false;
-
-	StringStorage ss;
-	m_serverConfig.getMpegStreamerEncryptionKey(&ss);
-	if (!sm->setString(_T("MpegStreamerEncryptionKey"), ss.getString()))
-		saveResult = false;
-
-	if (!sm->setBoolean(_T("useMpegStreamerUdp"), m_serverConfig.useMpegStreamerUdp()))
-		saveResult = false;
-	
+		
 	if (!sm->setUINT(_T("MpegStreamerFramerate"), m_serverConfig.getMpegStreamerFramerate()))
 		saveResult = false;
 
-	if (!sm->setUINT(_T("MpegStreamerDelayMss"), m_serverConfig.getMpegStreamerDelayMss()))
-		saveResult = false;
-
-	if (!sm->setBoolean(_T("MpegStreamerRfbVideoTunedOff"), m_serverConfig.isMpegStreamerRfbVideoTunedOff()))
-		saveResult = false;
-
-	if (!sm->setBoolean(_T("MpegStreamerWindowHidden"), m_serverConfig.isMpegStreamerWindowHidden()))
-		saveResult = false;
-	
+	StringStorage ss;
 	m_serverConfig.getMpegStreamerCapturedDisplayDeviceName(&ss);
 	if (!sm->setString(_T("MpegStreamerCapturedDisplayDeviceName"), ss.getString()))
 		saveResult = false;
@@ -978,6 +953,9 @@ bool Configurator::saveMpegStreamerConfig(SettingsManager *sm)
 	if (!sm->setBoolean(_T("logMpegStreamerProcessOutput"), m_serverConfig.logMpegStreamerProcessOutput()))
 		saveResult = false;
 
+	if (!sm->setBoolean(_T("hideMpegStreamerProcessWidnow"), m_serverConfig.hideMpegStreamerProcessWidnow()))
+		saveResult = false;
+
 	return saveResult;
 }
 
@@ -985,43 +963,7 @@ bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *con
 {
 	bool loadResult = true;
 
-	bool b;
-	if (!sm->getBoolean(_T("EnableMpegStreamer"), &b))
-		loadResult = false;
-	else {
-		m_isConfigLoadedPartly = true;
-		m_serverConfig.enableMpegStreamer(b);
-	}
-
 	UINT ui;
-	if (!sm->getUINT(_T("MpegStreamerDestinationUdpPort"), &ui))
-		loadResult = false;
-	else {
-		m_isConfigLoadedPartly = true;
-		m_serverConfig.setMpegStreamerDestinationUdpPort(ui);
-	}
-
-	if (!sm->getUINT(_T("MpegStreamerDestinationSrtpPort"), &ui))
-		loadResult = false;
-	else {
-		m_isConfigLoadedPartly = true;
-		m_serverConfig.setMpegStreamerDestinationSrtpPort(ui);
-	}
-
-	StringStorage ss;
-	if (!sm->getString(_T("MpegStreamerEncryptionKey"), &ss))
-		loadResult = false;
-	else {
-		m_isConfigLoadedPartly = true;
-		m_serverConfig.setMpegStreamerEncryptionKey(ss.getString());
-	}
-
-	if (!sm->getBoolean(_T("useMpegStreamerUdp"), &b))
-		loadResult = false;
-	else {
-		m_serverConfig.useMpegStreamerUdp(b);
-	}
-
 	if (!sm->getUINT(_T("MpegStreamerFramerate"), &ui))
 		loadResult = false;
 	else {
@@ -1029,27 +971,7 @@ bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *con
 		m_serverConfig.setMpegStreamerFramerate(ui);
 	}
 
-	if (!sm->getUINT(_T("MpegStreamerDelayMss"), &ui))
-		loadResult = false;
-	else {
-		m_isConfigLoadedPartly = true;
-		m_serverConfig.setMpegStreamerDelayMss(ui);
-	}
-
-	if (!sm->getBoolean(_T("MpegStreamerRfbVideoTunedOff"), &b))
-		loadResult = false;
-	else {
-		m_isConfigLoadedPartly = true;
-		m_serverConfig.turnOffMpegStreamerRfbVideo(b);
-	}
-
-	if (!sm->getBoolean(_T("MpegStreamerWindowHidden"), &b))
-		loadResult = false;
-	else {
-		m_isConfigLoadedPartly = true;
-		m_serverConfig.hideMpegStreamerWindow(b);
-	}
-
+	StringStorage ss;
 	if (!sm->getString(_T("MpegStreamerCapturedDisplayDeviceName"), &ss))
 		loadResult = false;
 	else {
@@ -1079,11 +1001,19 @@ bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *con
 		m_serverConfig.setMpegStreamerCaptureMode(ui);
 	}
 
+	bool b;
 	if (!sm->getBoolean(_T("logMpegStreamerProcessOutput"), &b))
 		loadResult = false;
 	else {
 		m_isConfigLoadedPartly = true;
 		m_serverConfig.logMpegStreamerProcessOutput(b);
+	}
+
+	if (!sm->getBoolean(_T("hideMpegStreamerProcessWidnow"), &b))
+		loadResult = false;
+	else {
+		m_isConfigLoadedPartly = true;
+		m_serverConfig.hideMpegStreamerProcessWidnow(b);
 	}
 
 	return loadResult;

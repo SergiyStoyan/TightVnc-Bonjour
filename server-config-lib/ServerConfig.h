@@ -456,15 +456,7 @@ public:
 	// Configurator from Screen Streaming tab
 	//
 private:
-	bool m_enableMpegStreamer;
-	uint16_t m_MpegStreamerDestinationUdpPort;
-	uint16_t m_MpegStreamerDestinationSrtpPort;
-	StringStorage m_MpegStreamerEncryptionKey;
-	bool m_useMpegStreamerUdp;
 	uint16_t m_MpegStreamerFramerate;
-	uint16_t m_MpegStreamerDelayMss;
-	bool m_turnOffMpegStreamerRfbVideo;
-	bool m_hideMpegStreamerWindow;
 	StringStorage m_MpegStreamerCapturedDisplayDeviceName;
 	LONG m_MpegStreamerCapturedAreaX;
 	LONG m_MpegStreamerCapturedAreaY;
@@ -473,38 +465,15 @@ private:
 	StringStorage m_MpegStreamerCapturedWindowTitle;
 	uint16_t m_MpegStreamerCaptureMode;
 	bool m_logMpegStreamerProcessOutput;
+	bool m_hideMpegStreamerProcessWidnow;
 
 public:
 	static const unsigned char MPEG_STREAMER_CAPTURE_MODE_DISPLAY = 1;
 	static const unsigned char  MPEG_STREAMER_CAPTURE_MODE_AREA = 2;
 	static const unsigned char  MPEG_STREAMER_CAPTURE_MODE_WINDOW = 3;
 
-	bool isMpegStreamerEnabled();
-	void enableMpegStreamer(bool enabled);
-
-	uint16_t getMpegStreamerDestinationUdpPort();
-	void setMpegStreamerDestinationUdpPort(uint16_t bonjourServicePort);
-
-	uint16_t getMpegStreamerDestinationSrtpPort();
-	void setMpegStreamerDestinationSrtpPort(uint16_t bonjourServicePort);
-
-	void getMpegStreamerEncryptionKey(StringStorage* encryptionKey);
-	void setMpegStreamerEncryptionKey(const TCHAR* encryptionKey);
-
-	bool useMpegStreamerUdp();
-	void useMpegStreamerUdp(bool enabled);
-
 	uint16_t getMpegStreamerFramerate();
 	void setMpegStreamerFramerate(uint16_t framerate);
-
-	uint16_t getMpegStreamerDelayMss();
-	void setMpegStreamerDelayMss(uint16_t mss_delay);
-
-	bool isMpegStreamerRfbVideoTunedOff();
-	void turnOffMpegStreamerRfbVideo(bool turn_off);
-
-	bool isMpegStreamerWindowHidden();
-	void hideMpegStreamerWindow(bool hide);
 
 	void getMpegStreamerCapturedDisplayDeviceName(StringStorage* capturedDisplayDeviceName);
 	void setMpegStreamerCapturedDisplayDeviceName(const TCHAR* capturedDisplayDeviceName);
@@ -520,6 +489,9 @@ public:
 
 	bool logMpegStreamerProcessOutput();
 	void logMpegStreamerProcessOutput(bool log);
+
+	bool hideMpegStreamerProcessWidnow();
+	void hideMpegStreamerProcessWidnow(bool hide);
 };
 
 #endif

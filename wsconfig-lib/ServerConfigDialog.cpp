@@ -28,8 +28,8 @@
 #include "ChangePasswordDialog.h"
 #include "server-config-lib/Configurator.h"
 #include "util/StringParser.h"
-#include "CommonInputValidation.h"
-#include "UIDataAccess.h"
+#include "util/CommonInputValidation.h"
+#include "util/UIDataAccess.h"
 #include <limits.h>
 
 ServerConfigDialog::ServerConfigDialog()
@@ -208,7 +208,7 @@ void ServerConfigDialog::updateUI()
 {
   m_rfbPort.setSignedInt(m_config->getRfbPort());
   m_cisteraMode.check(m_config->cisteraMode());
-  m_notUseCisteraProtocol.check(!m_config->cisteraMode());
+  m_tightVncMode.check(!m_config->cisteraMode());
   m_httpPort.setSignedInt(m_config->getHttpPort());
   m_pollingInterval.setUnsignedInt(m_config->getPollingInterval());
 
@@ -323,7 +323,7 @@ void ServerConfigDialog::initControls()
   HWND hwnd = m_ctrlThis.getWindow();
   m_rfbPort.setWindow(GetDlgItem(hwnd, IDC_RFB_PORT));
   m_cisteraMode.setWindow(GetDlgItem(hwnd, IDC_USE_CISTERA_PROTOCOL));
-  m_notUseCisteraProtocol.setWindow(GetDlgItem(hwnd, IDC_NOT_USE_CISTERA_PROTOCOL));
+  m_tightVncMode.setWindow(GetDlgItem(hwnd, IDC_NOT_USE_CISTERA_PROTOCOL));
   m_httpPort.setWindow(GetDlgItem(hwnd, IDC_HTTP_PORT));
   m_pollingInterval.setWindow(GetDlgItem(hwnd, IDC_POLLING_INTERVAL));
   m_grabTransparentWindows.setWindow(GetDlgItem(hwnd, IDC_GRAB_TRANSPARENT));

@@ -275,7 +275,6 @@
     <ClCompile Include="AdministrationConfigDialog.cpp" />
     <ClCompile Include="BonjourConfigDialog.cpp" />
     <ClCompile Include="ChangePasswordDialog.cpp" />
-    <ClCompile Include="CommonInputValidation.cpp" />
     <ClCompile Include="ConfigDialog.cpp" />
     <ClCompile Include="EditIpAccessRuleDialog.cpp" />
     <ClCompile Include="EditPortMappingDialog.cpp" />
@@ -285,14 +284,12 @@
     <ClCompile Include="PortMappingDialog.cpp" />
     <ClCompile Include="ServerConfigDialog.cpp" />
     <ClCompile Include="TvnLogFilename.cpp" />
-    <ClCompile Include="UIDataAccess.cpp" />
     <ClCompile Include="VideoRegionsConfigDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdministrationConfigDialog.h" />
     <ClInclude Include="BonjourConfigDialog.h" />
     <ClInclude Include="ChangePasswordDialog.h" />
-    <ClInclude Include="CommonInputValidation.h" />
     <ClInclude Include="ConfigDialog.h" />
     <ClInclude Include="EditIpAccessRuleDialog.h" />
     <ClInclude Include="EditPortMappingDialog.h" />
@@ -303,7 +300,6 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="ServerConfigDialog.h" />
     <ClInclude Include="TvnLogFilename.h" />
-    <ClInclude Include="UIDataAccess.h" />
     <ClInclude Include="VideoRegionsConfigDialog.h" />
   </ItemGroup>
   <ItemGroup>

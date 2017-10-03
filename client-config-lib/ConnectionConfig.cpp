@@ -39,7 +39,7 @@ ConnectionConfig::ConnectionConfig()
   m_fitWindow(false), m_requestShapeUpdates(true),
   m_ignoreShapeUpdates(false), m_scaleNumerator(1), m_scaleDenominator(1),
   m_localCursor(DOT_CURSOR), m_allowedCopyRect(true), 
-	m_cisteraMode(true), m_notUseCisteraProtocol(true), m_encrypt(true), m_turnOnMpegStreamer(true), m_turnOffRfbVideo(true), m_mpegDestinationPort(5920)
+	m_cisteraMode(true), m_notUseCisteraProtocol(true), m_encrypt(true), m_turnOnMpegStreamer(true), m_turnOffRfbVideo(true), m_mpegDestinationPort(5920), m_mpegFramerate(10)
 {
 }
 
@@ -77,7 +77,7 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
 	  bool  turnOnMpegStreamer;
 	  bool turnOffRfbVideo;
 	  UINT16 mpegDestinationPort;
-
+	  BYTE mpegFramerate;
   {
 	  AutoLock lockOther(&other.m_cs);
 	  allowedCopyRect = other.m_allowedCopyRect;
@@ -103,6 +103,7 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
 	  turnOnMpegStreamer = other.m_turnOnMpegStreamer;
 	  turnOffRfbVideo = other.m_turnOffRfbVideo;
 	  mpegDestinationPort = other.m_mpegDestinationPort;
+	  mpegFramerate = other.m_mpegFramerate;
   }
 
   {
@@ -130,6 +131,7 @@ ConnectionConfig& ConnectionConfig::operator=(const ConnectionConfig& other)
 	m_turnOnMpegStreamer = turnOnMpegStreamer;
 	m_turnOffRfbVideo = turnOffRfbVideo;
 	m_mpegDestinationPort = mpegDestinationPort;
+	m_mpegFramerate = mpegFramerate;
   }
   return *this;
 }
@@ -417,7 +419,8 @@ void ConnectionConfig::getCisteraHandshakeClientRequest(CisteraHandshake::client
 	AutoLock l(&m_cs);
 	cr->encrypt = m_encrypt;
 	cr->mpegStream = m_turnOnMpegStreamer;
-	cr->mpegStreamPort = m_mpegDestinationPort;
+	cr->mpegStreamPort = (UINT16)m_mpegDestinationPort;
+	cr->mpegFramerate = (BYTE)m_mpegFramerate;
 	cr->rfbVideo = !m_turnOffRfbVideo;
 }
 
@@ -427,6 +430,7 @@ void ConnectionConfig::setCisteraHandshakeClientRequest(CisteraHandshake::client
 	m_encrypt = cr->encrypt;
 	m_turnOnMpegStreamer = cr->mpegStream;
 	m_mpegDestinationPort = cr->mpegStreamPort;
+	m_mpegFramerate = cr->mpegFramerate;
 	m_turnOffRfbVideo = !cr->rfbVideo;
 }
 
@@ -455,6 +459,7 @@ bool ConnectionConfig::saveToStorage(SettingsManager *sm) const
   TEST_FAIL(sm->setBoolean(_T("turnOnMpegStreamer"), m_turnOnMpegStreamer), saveAllOk);
   TEST_FAIL(sm->setBoolean(_T("turnOffRfbVideo"), m_turnOffRfbVideo), saveAllOk);
   TEST_FAIL(sm->setInt(_T("mpegDestinationPort"), m_mpegDestinationPort), saveAllOk);
+  TEST_FAIL(sm->setInt(_T("mpegFramerate"), m_mpegFramerate), saveAllOk);
 
   TEST_FAIL(sm->setByte(_T("preferred_encoding"),  m_preferredEncoding), saveAllOk);
   TEST_FAIL(sm->setInt(_T("compresslevel"),        m_customCompressionLevel), saveAllOk);
@@ -501,6 +506,7 @@ bool ConnectionConfig::loadFromStorage(SettingsManager *sm)
 	TEST_FAIL(sm->getBoolean(_T("turnOnMpegStreamer"), &m_turnOnMpegStreamer), loadAllOk);
 	TEST_FAIL(sm->getBoolean(_T("turnOffRfbVideo"), &m_turnOffRfbVideo), loadAllOk);
 	TEST_FAIL(sm->getInt(_T("mpegDestinationPort"), &m_mpegDestinationPort), loadAllOk);
+	TEST_FAIL(sm->getInt(_T("mpegFramerate"), &m_mpegFramerate), loadAllOk);
 
 	TEST_FAIL(sm->getByte(_T("preferred_encoding"), (char *)&m_preferredEncoding), loadAllOk);
 

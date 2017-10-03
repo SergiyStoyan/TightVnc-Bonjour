@@ -75,15 +75,7 @@ private:
 	// Configuration
 	ServerConfig *m_config;
 	// Controls
-	CheckBox m_enableMpegStreamer;
-	TextBox m_destinationUdpPort;
-	TextBox m_destinationSrtpPort;
-	TextBox m_encryptionKey;
-	CheckBox m_useSrtp;
-	TextBox m_framerate;
-	TextBox m_delayMss;
-	CheckBox m_turnOffRfbVideo;
-	CheckBox m_hideStreamerWindow;
+	CheckBox m_hideProcessWindow;
 	CheckBox m_logProcessOutput;
 	ComboBox m_displays;
 	TextBox m_capturedAreaLeft;

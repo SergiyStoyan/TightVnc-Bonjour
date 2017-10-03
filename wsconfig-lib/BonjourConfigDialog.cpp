@@ -9,7 +9,7 @@
 #include "ConfigDialog.h"
 #include "tvnserver/resource.h"
 #include "tvnserver-app/BonjourService.h"
-#include "CommonInputValidation.h"
+#include "util/CommonInputValidation.h"
 
 BonjourConfigDialog::BonjourConfigDialog()
 : BaseDialog(IDD_CONFIG_BONJOUR_PAGE), m_parent(NULL)

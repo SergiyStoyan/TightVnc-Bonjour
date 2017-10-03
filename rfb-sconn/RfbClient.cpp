@@ -65,9 +65,9 @@ RfbClient::RfbClient(NewConnectionEvents *newConnectionEvents,
 	m_constViewPort(constViewPort, log),
 	m_dynamicViewPort(dynViewPort, log),
 	m_idleTimer(idleTimeout), m_idleTimeout(idleTimeout),
-	m_log(log)
+	m_log(log),
+	m_cisteraMode(Configurator::getInstance()->getServerConfig()->cisteraMode())
 {
-	m_cisteraMode = Configurator::getInstance()->getServerConfig()->cisteraMode();
 	resume();
 }
 
@@ -177,7 +177,7 @@ void RfbClient::cisteraHandshake()
 
 	m_socket->recvAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
-	m_log->info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.rfbVideo);
+	m_log->info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
 
 	if (cisteraClientRequest.encrypt)
 	{
@@ -313,7 +313,7 @@ void RfbClient::execute()
     dispatcher.resume();
 
 	if (m_cisteraMode && cisteraClientRequest.mpegStream)
-		MpegStreamer::Start(MpegStreamer::GetIp(m_socket), cisteraClientRequest.mpegStreamPort, cisteraServerResponse.mpegStreamAesKeySalt);
+		MpegStreamer::Start(MpegStreamer::GetIp(m_socket), cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.encrypt ? cisteraServerResponse.mpegStreamAesKeySalt : NULL);
 
     connClosingEvent.waitForEvent();
   } catch (Exception &e) {

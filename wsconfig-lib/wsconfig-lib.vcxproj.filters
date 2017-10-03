@@ -17,9 +17,6 @@
     <ClCompile Include="ChangePasswordDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CommonInputValidation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ConfigDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -44,9 +41,6 @@
     <ClCompile Include="TvnLogFilename.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UIDataAccess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VideoRegionsConfigDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -62,9 +56,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ChangePasswordDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommonInputValidation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConfigDialog.h">
@@ -89,9 +80,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TvnLogFilename.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UIDataAccess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VideoRegionsConfigDialog.h">

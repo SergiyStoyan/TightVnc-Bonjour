@@ -70,11 +70,12 @@ protected:
   CheckBox m_arrow;
   CheckBox m_nlocal;
   CheckBox m_cisteraMode;
-  CheckBox m_notUseCisteraProtocol;
+  CheckBox m_tightVncMode;
   CheckBox m_encrypt;
   CheckBox m_turnOnMpegStreamer;
   CheckBox m_turnOffRfbVideo;
   TextBox m_mpegDestinationPort;
+  TextBox m_mpegFramerate;
 
   void onMessageReceived(UINT uMsg, WPARAM wParam, LPARAM lParam);
   BOOL onCommand(UINT controlID, UINT notificationID);

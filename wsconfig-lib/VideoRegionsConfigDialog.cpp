@@ -25,8 +25,8 @@
 #include "tvnserver/resource.h"
 #include "VideoRegionsConfigDialog.h"
 #include "ConfigDialog.h"
-#include "UIDataAccess.h"
-#include "CommonInputValidation.h"
+#include "util/UIDataAccess.h"
+#include "util/CommonInputValidation.h"
 #include "util/StringParser.h"
 
 VideoRegionsConfigDialog::VideoRegionsConfigDialog()

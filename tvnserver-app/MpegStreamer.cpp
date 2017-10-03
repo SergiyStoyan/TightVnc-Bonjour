@@ -7,7 +7,6 @@
 
 #include "util/base64.h"
 #include "util/AnsiStringStorage.h"
-#include "network/CisteraHandshake.h"
 
 #include "MpegStreamer.h"
 #include <tchar.h>
@@ -129,7 +128,7 @@ MpegStreamer::~MpegStreamer()
 	log->message(_T("MpegStreamer: Stopped for address: %s"), ss.getString());
 }
 
-void MpegStreamer::Start(ULONG ip, USHORT port, BYTE aesKeySalt[30])
+void MpegStreamer::Start(ULONG ip, USHORT port, BYTE framerate, BYTE* aesKeySalt)
 {
 	if (!initialized)
 	{
@@ -152,7 +151,7 @@ void MpegStreamer::Start(ULONG ip, USHORT port, BYTE aesKeySalt[30])
 	StringStorage ip_ss; 
 	ms->address.toString2(&ip_ss);
 	StringStorage command_line1;
-	command_line1.format(_T("ffmpeg.exe -f gdigrab -framerate %d"), config->getMpegStreamerFramerate());
+	command_line1.format(_T("ffmpeg.exe -f gdigrab -framerate %d"), framerate);
 	StringStorage command_line2;
 	if (aesKeySalt == NULL)
 		command_line2.format(_T("-f mpegts udp://%s"), ip_ss.getString());
@@ -160,7 +159,7 @@ void MpegStreamer::Start(ULONG ip, USHORT port, BYTE aesKeySalt[30])
 	{
 		base64 b;
 		size_t aes_key_salt_l;
-		char* aes_key_salt_ = b.encode(aesKeySalt, CisteraHandshake_AesKeySalt_SIZE, &aes_key_salt_l);
+		char* aes_key_salt_ = b.encode(aesKeySalt, CisteraHandshake::AesKeySalt_SIZE, &aes_key_salt_l);
 		char mpegStreamAesKeySalt[41];
 		memcpy(mpegStreamAesKeySalt, aes_key_salt_, sizeof(mpegStreamAesKeySalt) - 1);
 		mpegStreamAesKeySalt[sizeof(mpegStreamAesKeySalt) - 1] = '\0';
@@ -251,7 +250,7 @@ void MpegStreamer::Start(ULONG ip, USHORT port, BYTE aesKeySalt[30])
 		}
 		log->message(_T("MpegStreamer: Launching:\r\n%s"), ms->commandLine.getString());
 		DWORD dwCreationFlags = 0;
-		if(config->isMpegStreamerWindowHidden())
+		if(config->hideMpegStreamerProcessWidnow())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;
 		if (!CreateProcess(NULL, (LPTSTR)ms->commandLine.getString(), NULL, NULL, TRUE, dwCreationFlags, NULL, NULL, &si, &ms->processInformation))
 			throw SystemException();

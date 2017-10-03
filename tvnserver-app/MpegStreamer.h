@@ -8,6 +8,7 @@
 #ifndef _MPEG_STREAMER_H_
 #define _MPEG_STREAMER_H_
 
+#include "network/CisteraHandshake.h"
 #include "server-config-lib/Configurator.h"
 #include "TvnServer.h"
 #include "win-system/Process.h"
@@ -31,7 +32,7 @@ class MpegStreamer
 public:
 	static void Initialize(LogWriter* log, TvnServer* tvnServer);
 
-	static void Start(ULONG ip, USHORT port, BYTE aesKeySalt[30] = NULL);
+	static void Start(ULONG ip, USHORT port, BYTE framerate, BYTE* aesKeySalt = NULL);
 	static void Stop(ULONG ip);
 	static void StopAll();
 

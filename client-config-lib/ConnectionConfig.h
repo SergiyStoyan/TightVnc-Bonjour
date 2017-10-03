@@ -249,6 +249,7 @@ protected:
   bool m_turnOnMpegStreamer;
   bool m_turnOffRfbVideo;
   int m_mpegDestinationPort;
+  int m_mpegFramerate;
 
   // Critical section
   mutable LocalMutex m_cs;

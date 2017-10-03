@@ -59,18 +59,13 @@ ServerConfig::ServerConfig()
 	m_BonjourServicePort = 5353;
 	m_BonjourServiceType = StringStorage(_T("_rfb._tcp"));
 
-	m_enableMpegStreamer = false;
-	m_MpegStreamerDestinationUdpPort = 5920;
-	m_MpegStreamerDestinationSrtpPort = 5921;
-	m_MpegStreamerEncryptionKey = StringStorage(_T("123456789012345678901234567890"));
-	m_useMpegStreamerUdp = true;
 	m_MpegStreamerFramerate = 10;
-	m_MpegStreamerDelayMss = 500;
 	m_MpegStreamerCapturedAreaX = 0;
 	m_MpegStreamerCapturedAreaY = 0;
 	m_MpegStreamerCapturedAreaWidth = 0;
 	m_MpegStreamerCapturedAreaHeight = 0;
 	m_logMpegStreamerProcessOutput = false;
+	m_hideMpegStreamerProcessWidnow = true;
 	m_MpegStreamerCaptureMode = MPEG_STREAMER_CAPTURE_MODE_DISPLAY;
 }
 
@@ -149,15 +144,7 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeInt16(m_BonjourServicePort);
   output->writeUTF8(m_BonjourServiceType.getString());
 
-  output->writeInt8(m_enableMpegStreamer ? 1 : 0);
-  output->writeInt16(m_MpegStreamerDestinationUdpPort);
-  output->writeInt16(m_MpegStreamerDestinationSrtpPort);
-  output->writeUTF8(m_MpegStreamerEncryptionKey.getString());
-  output->writeInt8(m_useMpegStreamerUdp ? 1 : 0);
   output->writeInt16(m_MpegStreamerFramerate);
-  output->writeInt16(m_MpegStreamerDelayMss);
-  output->writeInt8(m_turnOffMpegStreamerRfbVideo ? 1 : 0);
-  output->writeInt8(m_hideMpegStreamerWindow ? 1 : 0);
   output->writeUTF8(m_MpegStreamerCapturedDisplayDeviceName.getString());
   output->writeInt32(m_MpegStreamerCapturedAreaX);
   output->writeInt32(m_MpegStreamerCapturedAreaY);
@@ -166,6 +153,7 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeUTF8(m_MpegStreamerCapturedWindowTitle.getString());
   output->writeInt16(m_MpegStreamerCaptureMode);
   output->writeInt8(m_logMpegStreamerProcessOutput ? 1 : 0);
+  output->writeInt8(m_hideMpegStreamerProcessWidnow ? 1 : 0);
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -242,15 +230,7 @@ void ServerConfig::deserialize(DataInputStream *input)
   m_BonjourServicePort = input->readInt16();
   input->readUTF8(&m_BonjourServiceType);
 
-  m_enableMpegStreamer = input->readInt8() == 1;
-  m_MpegStreamerDestinationUdpPort = input->readInt16();
-  m_MpegStreamerDestinationSrtpPort = input->readInt16();
-  input->readUTF8(&m_MpegStreamerEncryptionKey);
-  m_useMpegStreamerUdp = input->readInt8() == 1;
   m_MpegStreamerFramerate = input->readInt16();
-  m_MpegStreamerDelayMss = input->readInt16();
-  m_turnOffMpegStreamerRfbVideo = input->readInt8() == 1;
-  m_hideMpegStreamerWindow = input->readInt8() == 1;
   input->readUTF8(&m_MpegStreamerCapturedDisplayDeviceName);
   m_MpegStreamerCapturedAreaX = input->readInt32();
   m_MpegStreamerCapturedAreaY = input->readInt32();
@@ -259,6 +239,7 @@ void ServerConfig::deserialize(DataInputStream *input)
   input->readUTF8(&m_MpegStreamerCapturedWindowTitle);
   m_MpegStreamerCaptureMode = input->readInt16();
   m_logMpegStreamerProcessOutput = input->readInt8() == 1;
+  m_hideMpegStreamerProcessWidnow = input->readInt8() == 1;
 
   input->readUTF8(&m_logFilePath);
 }
@@ -883,66 +864,6 @@ bool ServerConfig::isWindowsUserAsBonjourServiceNameUsed()
 	return m_useWindowsUserAsBonjourServiceName;
 }
 
-bool ServerConfig::isMpegStreamerEnabled()
-{
-	AutoLock lock(&m_objectCS);
-	return m_enableMpegStreamer;
-}
-
-void ServerConfig::enableMpegStreamer(bool enabled)
-{
-	AutoLock lock(&m_objectCS);
-	m_enableMpegStreamer = enabled;
-}
-
-uint16_t ServerConfig::getMpegStreamerDestinationUdpPort()
-{
-	AutoLock lock(&m_objectCS);
-	return m_MpegStreamerDestinationUdpPort;
-}
-
-void ServerConfig::setMpegStreamerDestinationUdpPort(uint16_t mpegStreamerDestinationUdpPort)
-{
-	AutoLock lock(&m_objectCS);
-	m_MpegStreamerDestinationUdpPort = mpegStreamerDestinationUdpPort;
-}
-
-uint16_t ServerConfig::getMpegStreamerDestinationSrtpPort()
-{
-	AutoLock lock(&m_objectCS);
-	return m_MpegStreamerDestinationSrtpPort;
-}
-
-void ServerConfig::setMpegStreamerDestinationSrtpPort(uint16_t mpegStreamerDestinationSrtpPort)
-{
-	AutoLock lock(&m_objectCS);
-	m_MpegStreamerDestinationSrtpPort = mpegStreamerDestinationSrtpPort;
-}
-
-void ServerConfig::getMpegStreamerEncryptionKey(StringStorage* encryptionKey)
-{
-	AutoLock lock(&m_objectCS);
-	*encryptionKey = m_MpegStreamerEncryptionKey;
-}
-
-void ServerConfig::setMpegStreamerEncryptionKey(const TCHAR* encryptionKey)
-{
-	AutoLock lock(&m_objectCS);
-	m_MpegStreamerEncryptionKey.setString(encryptionKey);
-}
-
-bool ServerConfig::useMpegStreamerUdp()
-{
-	AutoLock lock(&m_objectCS);
-	return m_useMpegStreamerUdp;
-}
-
-void ServerConfig::useMpegStreamerUdp(bool use)
-{
-	AutoLock lock(&m_objectCS);
-	m_useMpegStreamerUdp = use;
-}
-
 uint16_t ServerConfig::getMpegStreamerFramerate()
 {
 	AutoLock lock(&m_objectCS);
@@ -953,42 +874,6 @@ void ServerConfig::setMpegStreamerFramerate(uint16_t mpegStreamerFramerate)
 {
 	AutoLock lock(&m_objectCS);
 	m_MpegStreamerFramerate = mpegStreamerFramerate;
-}
-
-uint16_t ServerConfig::getMpegStreamerDelayMss()
-{
-	AutoLock lock(&m_objectCS);
-	return m_MpegStreamerDelayMss;
-}
-
-void ServerConfig::setMpegStreamerDelayMss(uint16_t mpegStreamerMssDelay)
-{
-	AutoLock lock(&m_objectCS);
-	m_MpegStreamerDelayMss = mpegStreamerMssDelay;
-}
-
-bool ServerConfig::isMpegStreamerRfbVideoTunedOff()
-{
-	AutoLock lock(&m_objectCS);
-	return m_turnOffMpegStreamerRfbVideo;
-}
-
-void ServerConfig::turnOffMpegStreamerRfbVideo(bool turn_off)
-{
-	AutoLock lock(&m_objectCS);
-	m_turnOffMpegStreamerRfbVideo = turn_off;
-}
-
-bool ServerConfig::isMpegStreamerWindowHidden()
-{
-	AutoLock lock(&m_objectCS);
-	return m_hideMpegStreamerWindow;
-}
-
-void ServerConfig::hideMpegStreamerWindow(bool hide)
-{
-	AutoLock lock(&m_objectCS);
-	m_hideMpegStreamerWindow = hide;
 }
 
 void ServerConfig::getMpegStreamerCapturedDisplayDeviceName(StringStorage* capturedDisplayDeviceName)
@@ -1055,4 +940,16 @@ void ServerConfig::logMpegStreamerProcessOutput(bool log)
 {
 	AutoLock lock(&m_objectCS);
 	m_logMpegStreamerProcessOutput = log;
+}
+
+bool ServerConfig::hideMpegStreamerProcessWidnow()
+{
+	AutoLock lock(&m_objectCS);
+	return m_hideMpegStreamerProcessWidnow;
+}
+
+void ServerConfig::hideMpegStreamerProcessWidnow(bool hide)
+{
+	AutoLock lock(&m_objectCS);
+	m_hideMpegStreamerProcessWidnow = hide;
 }

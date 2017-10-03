@@ -102,7 +102,7 @@ protected:
   // Controls
   TextBox m_rfbPort;
   CheckBox m_cisteraMode;
-  CheckBox m_notUseCisteraProtocol; 
+  CheckBox m_tightVncMode; 
   TextBox m_httpPort;
   TextBox m_pollingInterval;
   CheckBox m_grabTransparentWindows;

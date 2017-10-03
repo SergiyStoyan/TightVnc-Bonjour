@@ -46,16 +46,17 @@ public:
 		char clientVersion[4] = "1.0";
 		bool encrypt = true;
 		bool mpegStream = true;
+		byte mpegFramerate = 10;
 		bool rfbVideo = false;
 		UINT16 mpegStreamPort = 5720;
 	};
 
-	#define CisteraHandshake_AesKeySalt_SIZE 30
+	static const int AesKeySalt_SIZE = 30;
 
 	struct serverResponse
 	{
 		char serverVersion[4] = "1.0";
-		byte mpegStreamAesKeySalt[CisteraHandshake_AesKeySalt_SIZE];
+		byte mpegStreamAesKeySalt[AesKeySalt_SIZE];
 	};
 };
 

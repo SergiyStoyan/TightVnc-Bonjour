@@ -8,7 +8,7 @@
 #include "MpegStreamerConfigDialog.h"
 #include "ConfigDialog.h"
 #include "tvnserver/resource.h"
-#include "CommonInputValidation.h"
+#include "util/CommonInputValidation.h"
 #include "tvnserver-app/NamingDefs.h"
 #include "win-system/Process.h"
 
@@ -31,15 +31,6 @@ void MpegStreamerConfigDialog::initControls()
 {
 	HWND dialogHwnd = m_ctrlThis.getWindow();
 
-	m_enableMpegStreamer.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_ENABLED));
-	m_destinationUdpPort.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_UDP_DESTINATION_PORT));
-	m_destinationSrtpPort.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_SRTP_DESTINATION_PORT));
-	m_encryptionKey.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_ENCRYPTION_KEY));
-	m_useSrtp.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_USE_SRTP));
-	m_framerate.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_FRAMERATE));
-	m_delayMss.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_START_DELAY));
-	m_turnOffRfbVideo.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO));
-	m_hideStreamerWindow.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_HIDE_WINDOW));
 	m_displays.setWindow(GetDlgItem(dialogHwnd, IDC_COMBO_MPEG_STREAMER_MONOTORS));
 	m_capturedAreaLeft.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_AREA_LEFT));
 	m_capturedAreaTop.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_AREA_TOP));
@@ -50,6 +41,7 @@ void MpegStreamerConfigDialog::initControls()
 	m_captureArea.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_AREA));
 	m_captureWindow.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_WINDOW));
 	m_logProcessOutput.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE));
+	m_hideProcessWindow.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_HIDE_WINDOW));
 
 	m_openLogDir.setWindow(GetDlgItem(dialogHwnd, IDC_IDC_MPEG_STREAMER_OPEN_LOG_DIR_BUTTON));
 }
@@ -58,22 +50,15 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 {
 	switch (controlID)
 	{
-	case IDC_MPEG_STREAMER_ENABLED:
-	case IDC_MPEG_STREAMER_TURN_OFF_RFB_VIDEO:
-	case IDC_MPEG_STREAMER_HIDE_WINDOW:
 	case IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE:
+	case IDC_MPEG_STREAMER_HIDE_WINDOW:
 	case IDC_RADIO_MPEG_STREAMER_MONITOR:
 	case IDC_RADIO_MPEG_STREAMER_AREA:
 	case IDC_RADIO_MPEG_STREAMER_WINDOW:
-	case IDC_MPEG_STREAMER_USE_SRTP:
 		if (notificationID == BN_CLICKED)
 			onMpegStreamerEnabled();
 		break;
-	case IDC_MPEG_STREAMER_UDP_DESTINATION_PORT:
-	case IDC_MPEG_STREAMER_SRTP_DESTINATION_PORT:
-	case IDC_MPEG_STREAMER_ENCRYPTION_KEY:
 	case IDC_MPEG_STREAMER_FRAMERATE:
-	case IDC_MPEG_STREAMER_START_DELAY:
 	case IDC_MPEG_STREAMER_AREA_LEFT:
 	case IDC_MPEG_STREAMER_AREA_TOP:
 	case IDC_MPEG_STREAMER_AREA_WIDTH:
@@ -111,27 +96,14 @@ BOOL MpegStreamerConfigDialog::onInitDialog()
 
 void MpegStreamerConfigDialog::onMpegStreamerEnabled()
 {
-	m_destinationUdpPort.setEnabled(m_enableMpegStreamer.isChecked() && !m_useSrtp.isChecked());
-	m_destinationSrtpPort.setEnabled(m_enableMpegStreamer.isChecked() && m_useSrtp.isChecked());
-	m_encryptionKey.setEnabled(m_enableMpegStreamer.isChecked() && m_useSrtp.isChecked());
-	m_useSrtp.setEnabled(m_enableMpegStreamer.isChecked());
-	m_framerate.setEnabled(m_enableMpegStreamer.isChecked());
-	m_delayMss.setEnabled(m_enableMpegStreamer.isChecked());
-	m_turnOffRfbVideo.setEnabled(m_enableMpegStreamer.isChecked());
-	m_hideStreamerWindow.setEnabled(m_enableMpegStreamer.isChecked());
-	m_logProcessOutput.setEnabled(m_enableMpegStreamer.isChecked());
+	m_displays.setEnabled(m_captureDisplay.isChecked());
 
-	m_captureDisplay.setEnabled(m_enableMpegStreamer.isChecked());
-	m_displays.setEnabled(m_enableMpegStreamer.isChecked() && m_captureDisplay.isChecked());
+	m_capturedAreaLeft.setEnabled(m_captureArea.isChecked());
+	m_capturedAreaTop.setEnabled(m_captureArea.isChecked());
+	m_capturedAreaWidth.setEnabled(m_captureArea.isChecked());
+	m_capturedAreaHeight.setEnabled(m_captureArea.isChecked());
 
-	m_captureArea.setEnabled(m_enableMpegStreamer.isChecked());
-	m_capturedAreaLeft.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
-	m_capturedAreaTop.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
-	m_capturedAreaWidth.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
-	m_capturedAreaHeight.setEnabled(m_enableMpegStreamer.isChecked() && m_captureArea.isChecked());
-
-	m_captureWindow.setEnabled(m_enableMpegStreamer.isChecked());
-	m_windows.setEnabled(m_enableMpegStreamer.isChecked() && m_captureWindow.isChecked());
+	m_windows.setEnabled(m_captureWindow.isChecked());
 
 	((ConfigDialog *)m_parent)->updateApplyButtonState();
 }
@@ -162,57 +134,9 @@ void MpegStreamerConfigDialog::onOpenLogDir()
 
 bool MpegStreamerConfigDialog::validateInput()
 {
-	if (!m_enableMpegStreamer.isChecked())
-		return true;
-
 	StringStorage ss;
 	long i;
-	m_destinationUdpPort.getText(&ss);
-	if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
-		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_MPEG_STREAMER_PORT_ERROR),
-			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-		return false;
-	}
-	if (!CommonInputValidation::validatePort(&m_destinationUdpPort))
-		return false;
-
-	m_destinationSrtpPort.getText(&ss);
-	if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
-		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_MPEG_STREAMER_PORT_ERROR),
-			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-		return false;
-	}
-	if (!CommonInputValidation::validatePort(&m_destinationSrtpPort))
-		return false;
-
-	m_encryptionKey.getText(&ss);
-	if (ss.getLength() < 40)
-	{
-		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_MPEG_STREAMER_ENCRYPTION_KEY_ERROR),
-			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-		return false;
-	}
-
-	m_framerate.getText(&ss);
-	if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
-		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_MPEG_STREAMER_FRAMERATE_ERROR),
-			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-		return false;
-	}
-
-	m_delayMss.getText(&ss);
-	if (!CommonInputValidation::parseNumber(&ss, &i))
-	{
-		MessageBox(m_ctrlThis.getWindow(),
-			StringTable::getString(IDS_SET_MPEG_STREAMER_START_DELAY_ERROR),
-			StringTable::getString(IDS_CAPTION_BAD_INPUT), MB_ICONSTOP | MB_OK);
-		return false;
-	}
-	
+		
 	if (m_captureDisplay.isChecked())
 	{
 		if (m_displays.getSelectedItemIndex() < 0)
@@ -267,29 +191,9 @@ bool MpegStreamerConfigDialog::validateInput()
 }
 
 void MpegStreamerConfigDialog::updateUI()
-{
-	m_enableMpegStreamer.check(m_config->isMpegStreamerEnabled());
-
-	TCHAR ts[255];
-	m_destinationUdpPort.setText(_itot(m_config->getMpegStreamerDestinationUdpPort(), ts, 10));
-
-	m_destinationSrtpPort.setText(_itot(m_config->getMpegStreamerDestinationSrtpPort(), ts, 10));
-
-	StringStorage ss;
-	m_config->getMpegStreamerEncryptionKey(&ss);
-	m_encryptionKey.setText(ss.getString());
-	
-	m_useSrtp.check(!m_config->useMpegStreamerUdp());
-
-	m_framerate.setText(_itot(m_config->getMpegStreamerFramerate(), ts, 10));
-
-	m_delayMss.setText(_itot(m_config->getMpegStreamerDelayMss(), ts, 10));
-
-	m_turnOffRfbVideo.check(m_config->isMpegStreamerRfbVideoTunedOff());
-
-	m_hideStreamerWindow.check(m_config->isMpegStreamerWindowHidden());
-
+{	
 	m_logProcessOutput.check(m_config->logMpegStreamerProcessOutput());
+	m_hideProcessWindow.check(m_config->hideMpegStreamerProcessWidnow());
 
 	set_monitors();
 
@@ -457,32 +361,10 @@ void MpegStreamerConfigDialog::apply()
 {
 	AutoLock al(m_config);
 
-	m_config->enableMpegStreamer(m_enableMpegStreamer.isChecked());
+	m_config->logMpegStreamerProcessOutput(m_logProcessOutput.isChecked());
+	m_config->hideMpegStreamerProcessWidnow(m_hideProcessWindow.isChecked());
 
 	StringStorage ss;
-	m_destinationUdpPort.getText(&ss);
-	m_config->setMpegStreamerDestinationUdpPort(_ttoi(ss.getString()));
-
-	m_destinationSrtpPort.getText(&ss);
-	m_config->setMpegStreamerDestinationSrtpPort(_ttoi(ss.getString()));
-
-	m_encryptionKey.getText(&ss);
-	m_config->setMpegStreamerEncryptionKey(ss.getString());
-
-	m_config->useMpegStreamerUdp(!m_useSrtp.isChecked());
-
-	m_framerate.getText(&ss);
-	m_config->setMpegStreamerFramerate(_ttoi(ss.getString()));
-
-	m_delayMss.getText(&ss);
-	m_config->setMpegStreamerDelayMss(_ttoi(ss.getString()));
-
-	m_config->turnOffMpegStreamerRfbVideo(m_turnOffRfbVideo.isChecked());
-
-	m_config->hideMpegStreamerWindow(m_hideStreamerWindow.isChecked());
-
-	m_config->logMpegStreamerProcessOutput(m_logProcessOutput.isChecked());
-
 	if (m_captureDisplay.isChecked())
 	{
 		m_config->setMpegStreamerCaptureMode(ServerConfig::MPEG_STREAMER_CAPTURE_MODE_DISPLAY);

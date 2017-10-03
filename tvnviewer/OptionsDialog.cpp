@@ -24,7 +24,7 @@
 
 #include "network/CisteraHandshake.h"
 #include "OptionsDialog.h"
-#include "wsconfig-lib/CommonInputValidation.h"
+#include "util/CommonInputValidation.h"
 
 OptionsDialog::OptionsDialog()
 : BaseDialog(IDD_OPTIONS),
@@ -131,11 +131,12 @@ BOOL OptionsDialog::onInitDialog()
   setControlById(m_arrow, IDC_RARROW);
   setControlById(m_nlocal, IDC_RNLOCAL);
   setControlById(m_cisteraMode, IDC_USE_CISTERA_PROTOCOL);
-  setControlById(m_notUseCisteraProtocol, IDC_NOT_USE_CISTERA_PROTOCOL);
+  setControlById(m_tightVncMode, IDC_NOT_USE_CISTERA_PROTOCOL);
   setControlById(m_encrypt, IDC_ENCRYPT);
   setControlById(m_turnOnMpegStreamer, IDC_TURN_ON_MPEG_STREAMER);
   setControlById(m_turnOffRfbVideo, IDC_TURN_OFF_RFB_VIDEO);
   setControlById(m_mpegDestinationPort, IDC_MPEG_DESTINATION_PORT);
+  setControlById(m_mpegFramerate, IDC_MPEG_STREAMER_FRAMERATE);
 
   m_useEnc.addItem(_T("Raw"), reinterpret_cast<void *>(EncodingDefs::RAW));
   m_useEnc.addItem(_T("Hextile"), reinterpret_cast<void *>(EncodingDefs::HEXTILE));
@@ -259,13 +260,14 @@ void OptionsDialog::updateControlValues()
 	on8BitColorClick();
 
 	m_cisteraMode.check(m_conConfig->cisteraMode());
-	m_notUseCisteraProtocol.check(!m_conConfig->cisteraMode());
+	m_tightVncMode.check(!m_conConfig->cisteraMode());
 	CisteraHandshake::clientRequest cr;
 	m_conConfig->getCisteraHandshakeClientRequest(&cr);
 	m_encrypt.check(cr.encrypt);
 	m_turnOnMpegStreamer.check(cr.mpegStream);
 	m_turnOffRfbVideo.check(!cr.rfbVideo);
 	m_mpegDestinationPort.setUnsignedInt(cr.mpegStreamPort);
+	m_mpegFramerate.setUnsignedInt(cr.mpegFramerate);
 	onUseCisteraProtocolClick();
 }
 
@@ -275,6 +277,7 @@ void OptionsDialog::onUseCisteraProtocolClick()
 	m_turnOnMpegStreamer.setEnabled(m_cisteraMode.isChecked());
 	m_turnOffRfbVideo.setEnabled(m_cisteraMode.isChecked() && m_turnOnMpegStreamer.isChecked());
 	m_mpegDestinationPort.setEnabled(m_cisteraMode.isChecked() && m_turnOnMpegStreamer.isChecked());
+	m_mpegFramerate.setEnabled(m_cisteraMode.isChecked() && m_turnOnMpegStreamer.isChecked());
 }
 
 void OptionsDialog::onViewOnlyClick()
@@ -431,12 +434,22 @@ bool OptionsDialog::isInputValid()
     return false;
   }
 
- /* if (!CommonInputValidation::validatePort(&m_mpegDestinationPort)) {
+  if (!CommonInputValidation::validatePort(&m_mpegDestinationPort)) {
 	  MessageBox(m_ctrlThis.getWindow(),
 		  StringTable::getString(IDS_PORT_ERROR),
 		  StringTable::getString(IDS_OPTIONS_CAPTION), MB_ICONSTOP | MB_OK);
 	  return false;
-  }*/
+  }
+
+  StringStorage ss;
+  long i;
+  m_mpegFramerate.getText(&ss);
+  if (!CommonInputValidation::parseNumber(&ss, &i) || i < 1) {
+	  MessageBox(m_ctrlThis.getWindow(),
+		  StringTable::getString(IDS_SET_MPEG_STREAMER_FRAMERATE_ERROR),
+		  StringTable::getString(IDS_OPTIONS_CAPTION), MB_ICONSTOP | MB_OK);
+	  return false;
+  }
 
   return true;
 }
@@ -534,10 +547,14 @@ void OptionsDialog::apply()
 	cr.encrypt = m_encrypt.isChecked();
 	cr.mpegStream = m_turnOnMpegStreamer.isChecked();
 	cr.rfbVideo = !m_turnOffRfbVideo.isChecked();
-	StringStorage port_;
-	m_mpegDestinationPort.getText(&port_);
+	StringStorage ss;
+	m_mpegDestinationPort.getText(&ss);
 	int port;
-	StringParser::parseInt(port_.getString(), &port);
+	StringParser::parseInt(ss.getString(), &port);
 	cr.mpegStreamPort = port;
+	m_mpegFramerate.getText(&ss);
+	byte framerate;
+	StringParser::parseByte(ss.getString(), &framerate);
+	cr.mpegFramerate = framerate;
 	m_conConfig->setCisteraHandshakeClientRequest(&cr);
 }

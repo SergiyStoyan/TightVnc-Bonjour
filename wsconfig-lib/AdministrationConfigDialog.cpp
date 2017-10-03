@@ -24,8 +24,8 @@
 
 #include "tvnserver/resource.h"
 #include "AdministrationConfigDialog.h"
-#include "CommonInputValidation.h"
-#include "UIDataAccess.h"
+#include "util/CommonInputValidation.h"
+#include "util/UIDataAccess.h"
 #include "ConfigDialog.h"
 #include "file-lib/File.h"
 #include "server-config-lib/ServerConfig.h"

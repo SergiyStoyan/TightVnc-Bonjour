@@ -78,7 +78,7 @@ public:
   }
 
 private:
-	bool m_turnOffRfbVideo;
+	bool m_turnOffRfbVideo = false;
 };
 
 #endif // __DESKTOP_H__

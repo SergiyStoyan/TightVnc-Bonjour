@@ -869,7 +869,7 @@ void RemoteViewerCore::cisteraHandshake()
 
 	SocketIPv4* s = m_tcpConnection.getSocket();
 
-	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.rfbVideo);
+	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
 
 	s->sendAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
