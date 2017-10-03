@@ -24,14 +24,16 @@
 
 #include "base64.h"
 
-static char encoding_table[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-'w', 'x', 'y', 'z', '0', '1', '2', '3',
-'4', '5', '6', '7', '8', '9', '+', '/' };
+static char encoding_table[] = {
+	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+	'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+	'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+	'w', 'x', 'y', 'z', '0', '1', '2', '3',
+	'4', '5', '6', '7', '8', '9', '+', '/' 
+};
 static int mod_table[] = { 0, 2, 1 };
 
 char* base64::encode(const unsigned char *data, size_t input_length, size_t *output_length)
@@ -40,6 +42,7 @@ char* base64::encode(const unsigned char *data, size_t input_length, size_t *out
 
 	char* encoded_data = new char[(int)output_length];
 	if (encoded_data == NULL) return NULL;
+	buffers.push_back(encoded_data);
 
 	for (int i = 0, j = 0; i < input_length;) {
 
@@ -71,6 +74,7 @@ unsigned char* base64::decode(const char *data, size_t input_length, size_t *out
 
 	unsigned char* decoded_data = new unsigned char[(int)output_length];
 	if (decoded_data == NULL) return NULL;
+	buffers.push_back(decoded_data);
 
 	for (int i = 0, j = 0; i < input_length;) {
 
@@ -99,5 +103,10 @@ base64::base64()
 }
 
 base64::~base64()
-{
+{	
+	for (Buffers::iterator i = buffers.begin(); i != buffers.end(); i++)
+	{
+		char* b = (char*)(*i);
+		delete[] b;
+	}
 }

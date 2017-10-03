@@ -32,6 +32,8 @@
 #ifndef __RFBCLIENT_H__
 #define __RFBCLIENT_H__
 
+#include "network/CisteraHandshake.h"
+
 #include <list>
 #include "network/socket/SocketIPv4.h"
 #include "network/socket/SocketStream.h"
@@ -63,106 +65,109 @@ enum ClientState
 };
 
 // FIXME: Document it, i understand nothing from such kind of description.
-class RfbClient: public Thread, ClientInputEventListener, private SenderControlInformationInterface
+class RfbClient : public Thread, ClientInputEventListener, private SenderControlInformationInterface
 {
 public:
-  RfbClient(NewConnectionEvents *newConnectionEvents, SocketIPv4 *socket,
-            ClientTerminationListener *extTermListener,
-            ClientAuthListener *extAuthListener, bool viewOnly,
-            bool isOutgoing, unsigned int id,
-            const ViewPortState *constViewPort,
-            const ViewPortState *dynViewPort,
-            int idleTimeout,
-            LogWriter *log);
-  virtual ~RfbClient();
+	RfbClient(NewConnectionEvents *newConnectionEvents, SocketIPv4 *socket,
+		ClientTerminationListener *extTermListener,
+		ClientAuthListener *extAuthListener, bool viewOnly,
+		bool isOutgoing, unsigned int id,
+		const ViewPortState *constViewPort,
+		const ViewPortState *dynViewPort,
+		int idleTimeout,
+		LogWriter *log);
+	virtual ~RfbClient();
 
-  void disconnect();
+	void disconnect();
 
-  ClientState getClientState();
+	ClientState getClientState();
 
-  unsigned int getId() const;
-  void getPeerHost(StringStorage *address);
-  void getLocalIpAddress(StringStorage *address);
-  void getSocketAddr(SocketAddressIPv4 *addr) const;
+	unsigned int getId() const;
+	void getPeerHost(StringStorage *address);
+	void getLocalIpAddress(StringStorage *address);
+	void getSocketAddr(SocketAddressIPv4 *addr) const;
 
-  // Return true if connection has been initialised from the server to a client
-  // else return false.
-  bool isOutgoing() const;
+	// Return true if connection has been initialised from the server to a client
+	// else return false.
+	bool isOutgoing() const;
 
-  bool getSharedFlag() const { return m_shared; }
-  bool getViewOnlyAuth() const { return m_viewOnlyAuth; }
+	bool getSharedFlag() const { return m_shared; }
+	bool getViewOnlyAuth() const { return m_viewOnlyAuth; }
 
-  void setViewOnlyFlag(bool value);
+	void setViewOnlyFlag(bool value);
 
-  // Changes current dynViewPort value by new.
-  void changeDynViewPort(const ViewPortState *dynViewPort);
+	// Changes current dynViewPort value by new.
+	void changeDynViewPort(const ViewPortState *dynViewPort);
 
-  bool clientIsReady() const { return m_updateSender->clientIsReady(); }
-  void sendUpdate(const UpdateContainer *updateContainer,
-                  const CursorShape *cursorShape);
-  void sendClipboard(const StringStorage *newClipboard);
-
+	bool clientIsReady() const { return m_updateSender->clientIsReady(); }
+	void sendUpdate(const UpdateContainer *updateContainer,
+		const CursorShape *cursorShape);
+	void sendClipboard(const StringStorage *newClipboard);
+	
 protected:
-  virtual void execute();
-  virtual void onTerminate();
+	virtual void execute();
+	virtual void onTerminate();
 
-  virtual void cisteraHandshake();
+	virtual void cisteraHandshake();
 
 private:
-  // Calling this function makes the client manager enter (and leave) the
-  // mutex associated with the client list, so it will have to wait until
-  // other threads stop working with our object (such operations should be
-  // protected with the same mutex as well). If we call this function to
-  // change the state to IN_PENDING_TO_REMOVE or IN_READY_TO_REMOVE, we can
-  // guarantee that our object will not be used by the client manager after
-  // this call.
-  void notifyAbStateChanging(ClientState state);
+	// Calling this function makes the client manager enter (and leave) the
+	// mutex associated with the client list, so it will have to wait until
+	// other threads stop working with our object (such operations should be
+	// protected with the same mutex as well). If we call this function to
+	// change the state to IN_PENDING_TO_REMOVE or IN_READY_TO_REMOVE, we can
+	// guarantee that our object will not be used by the client manager after
+	// this call.
+	void notifyAbStateChanging(ClientState state);
 
-  // This class is layer between WinDesktop and ClientInputHandler.
-  virtual void onKeyboardEvent(UINT32 keySym, bool down);
-  virtual void onMouseEvent(UINT16 x, UINT16 y, UINT8 buttonMask);
+	// This class is layer between WinDesktop and ClientInputHandler.
+	virtual void onKeyboardEvent(UINT32 keySym, bool down);
+	virtual void onMouseEvent(UINT16 x, UINT16 y, UINT8 buttonMask);
 
-  void setClientState(ClientState newState);
+	void setClientState(ClientState newState);
 
-  Rect getViewPortRect(const Dimension *fbDimension);
-  virtual void onGetViewPort(Rect *viewRect, bool *shareApp, Region *shareAppRegion);
-  void getViewPortInfo(const Dimension *fbDimension, Rect *resultRect,
-                       bool *shareApp, Region *shareAppRegion);
+	Rect getViewPortRect(const Dimension *fbDimension);
+	virtual void onGetViewPort(Rect *viewRect, bool *shareApp, Region *shareAppRegion);
+	void getViewPortInfo(const Dimension *fbDimension, Rect *resultRect,
+		bool *shareApp, Region *shareAppRegion);
 
-  ClientState m_clientState;
-  bool m_isMarkedOk;
-  LocalMutex m_clientStateMut;
-  ClientTerminationListener *m_extTermListener;
+	ClientState m_clientState;
+	bool m_isMarkedOk;
+	LocalMutex m_clientStateMut;
+	ClientTerminationListener *m_extTermListener;
 
-  SocketIPv4 *m_socket;
-  bool m_cisteraMode;
+	SocketIPv4 *m_socket;
+	bool m_cisteraMode;
 
-  ClientAuthListener *m_extAuthListener;
+	ClientAuthListener *m_extAuthListener;
 
-  ViewPort m_constViewPort;
-  ViewPort m_dynamicViewPort;
-  LocalMutex m_viewPortMutex;
+	ViewPort m_constViewPort;
+	ViewPort m_dynamicViewPort;
+	LocalMutex m_viewPortMutex;
 
-  UpdateSender *m_updateSender;
-  ClipboardExchange *m_clipboardExchange;
-  ClientInputHandler *m_clientInputHandler;
-  Desktop *m_desktop;
+	UpdateSender *m_updateSender;
+	ClipboardExchange *m_clipboardExchange;
+	ClientInputHandler *m_clientInputHandler;
+	Desktop *m_desktop;
 
-  bool m_viewOnly;
-  bool m_isOutgoing;
-  bool m_viewOnlyAuth;
-  bool m_shared;
+	bool m_viewOnly;
+	bool m_isOutgoing;
+	bool m_viewOnlyAuth;
+	bool m_shared;
 
-  LogWriter *m_log;
+	LogWriter *m_log;
 
-  // Information
-  unsigned int m_id;
+	// Information
+	unsigned int m_id;
 
-  NewConnectionEvents *m_newConnectionEvents;
-  // This timer sets by IdleTimeout value from server config 
-  // and resets on mouse or keyboard event
-  DemandTimer m_idleTimer;
-  int m_idleTimeout;
+	NewConnectionEvents *m_newConnectionEvents;
+	// This timer sets by IdleTimeout value from server config 
+	// and resets on mouse or keyboard event
+	DemandTimer m_idleTimer;
+	int m_idleTimeout;
+
+	CisteraHandshake::clientRequest cisteraClientRequest;
+	CisteraHandshake::serverResponse cisteraServerResponse;
 };
 
 #endif // __RFBCLIENT_H__

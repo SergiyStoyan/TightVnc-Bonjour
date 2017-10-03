@@ -55,68 +55,71 @@ void RfbClientManager::onClientTerminate()
 
 Desktop *RfbClientManager::onClientAuth(RfbClient *client)
 {
-  // The client is now authenticated, so remove its IP from the ban list.
-  StringStorage ip;
-  client->getPeerHost(&ip);
-  updateIpInBan(&ip, true);
+	// The client is now authenticated, so remove its IP from the ban list.
+	StringStorage ip;
+	client->getPeerHost(&ip);
+	updateIpInBan(&ip, true);
 
-  m_newConnectionEvents->onSuccAuth(&ip);
+	m_newConnectionEvents->onSuccAuth(&ip);
 
-  AutoLock al(&m_clientListLocker);
+	AutoLock al(&m_clientListLocker);
 
-  // Checking if this client is allowed to connect, depending on its "shared"
-  // flag and the server's configuration.
-  ServerConfig *servConf = Configurator::getInstance()->getServerConfig();
-  bool isAlwaysShared = servConf->isAlwaysShared();
-  bool isNeverShared = servConf->isNeverShared();
+	// Checking if this client is allowed to connect, depending on its "shared"
+	// flag and the server's configuration.
+	ServerConfig *servConf = Configurator::getInstance()->getServerConfig();
+	bool isAlwaysShared = servConf->isAlwaysShared();
+	bool isNeverShared = servConf->isNeverShared();
 
-  bool isResultShared;
-  if (isAlwaysShared) {
-    isResultShared = true;
-  } else if (isNeverShared) {
-    isResultShared = false;
-  } else {
-    isResultShared = client->getSharedFlag();
-  }
+	bool isResultShared;
+	if (isAlwaysShared) {
+		isResultShared = true;
+	}
+	else if (isNeverShared) {
+		isResultShared = false;
+	}
+	else {
+		isResultShared = client->getSharedFlag();
+	}
 
-  // If the client wishes to have exclusive access then remove other clients.
-  if (!isResultShared) {
-    // Which client takes priority, existing or incoming?
-    if (servConf->isDisconnectingExistingClients()) {
-      // Incoming
-      disconnectAuthClients();
-    } else {
-      // Existing
-      if (!m_clientList.empty()) {
-        throw Exception(_T("Cannot disconnect existing clients and therefore")
-                        _T(" the client will be disconected")); // Disconnect this client
-      }
-    }
-  }
+	// If the client wishes to have exclusive access then remove other clients.
+	if (!isResultShared) {
+		// Which client takes priority, existing or incoming?
+		if (servConf->isDisconnectingExistingClients()) {
+			// Incoming
+			disconnectAuthClients();
+		}
+		else {
+			// Existing
+			if (!m_clientList.empty()) {
+				throw Exception(_T("Cannot disconnect existing clients and therefore")
+					_T(" the client will be disconected")); // Disconnect this client
+			}
+		}
+	}
 
-  // Removing the client from the non-authorized clients list.
-  for (ClientListIter iter = m_nonAuthClientList.begin();
-       iter != m_nonAuthClientList.end(); iter++) {
-    RfbClient *clientOfList = *iter;
-    if (clientOfList == client) {
-      m_nonAuthClientList.erase(iter);
-      break;
-    }
-  }
+	// Removing the client from the non-authorized clients list.
+	for (ClientListIter iter = m_nonAuthClientList.begin();
+		iter != m_nonAuthClientList.end(); iter++) {
+		RfbClient *clientOfList = *iter;
+		if (clientOfList == client) {
+			m_nonAuthClientList.erase(iter);
+			break;
+		}
+	}
 
-  // Adding to the authorized list.
-  m_clientList.push_back(client);
+	// Adding to the authorized list.
+	m_clientList.push_back(client);
 
-  if (m_desktop == 0 && !m_clientList.empty()) {
-    // Create WinDesktop and notify listeners that the first client has been
-    // connected.
-    m_desktop = m_desktopFactory->createDesktop(this, this, this, m_log);
-    vector<RfbClientManagerEventListener *>::iterator iter;
-    for (iter = m_listeners.begin(); iter != m_listeners.end(); iter++) {
-      (*iter)->afterFirstClientConnect();
-    }
-  }
-  return m_desktop;
+	if (m_desktop == 0 && !m_clientList.empty()) {
+		// Create WinDesktop and notify listeners that the first client has been
+		// connected.
+		m_desktop = m_desktopFactory->createDesktop(this, this, this, m_log);
+		vector<RfbClientManagerEventListener *>::iterator iter;
+		for (iter = m_listeners.begin(); iter != m_listeners.end(); iter++) {
+			(*iter)->afterFirstClientConnect();
+		}
+	}
+	return m_desktop;
 }
 
 bool RfbClientManager::onCheckForBan(RfbClient *client)

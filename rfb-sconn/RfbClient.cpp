@@ -29,8 +29,6 @@
 //        stoyan@cliversoft.com
 //********************************************************************************************
 
-#include "network/CisteraHandshake.h"
-
 #include "RfbClient.h"
 #include "thread/AutoLock.h"
 #include "RfbCodeRegistrator.h"
@@ -177,13 +175,11 @@ void RfbClient::cisteraHandshake()
 {
 	m_log->info(_T("Protocol stage is \"CisteraHandshake\"."));
 
-	CisteraHandshake::clientRequest cr;
-	m_socket->recvAll((char*)&cr, sizeof(cr));
+	m_socket->recvAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
-	m_log->info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cr.encrypt, cr.mpegStream, cr.mpegStreamPort, cr.rfbVideo);
+	m_log->info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.rfbVideo);
 
-	CisteraHandshake::serverResponse sr;
-	if (cr.encrypt)
+	if (cisteraClientRequest.encrypt)
 	{
 		HCRYPTPROV hProvider = 0;
 		bool filled = false;
@@ -191,17 +187,17 @@ void RfbClient::cisteraHandshake()
 			m_log->interror(_T("Could not CryptAcquireContext"));
 		else
 		{
-			if (!CryptGenRandom(hProvider, sizeof(sr.mpegStreamAesKeySalt), sr.mpegStreamAesKeySalt))
-				m_log->interror(_T("Could not CryptGenRandom"));			
+			if (!CryptGenRandom(hProvider, sizeof(cisteraServerResponse.mpegStreamAesKeySalt), cisteraServerResponse.mpegStreamAesKeySalt))
+				m_log->interror(_T("Could not CryptGenRandom"));
 			CryptReleaseContext(hProvider, 0);
 			filled = true;
 		}
-		if(!filled)
-			memcpy(sr.mpegStreamAesKeySalt, (void*)memcpy, sizeof(sr.mpegStreamAesKeySalt));
+		if (!filled)
+			memcpy(cisteraServerResponse.mpegStreamAesKeySalt, (void*)memcpy, sizeof(cisteraServerResponse.mpegStreamAesKeySalt));
 
 		m_socket->startSslSession(true);
 	}
-	m_socket->sendAll((char*)&sr, sizeof(sr));
+	m_socket->sendAll((char*)&cisteraServerResponse, sizeof(cisteraServerResponse));
 }
 
 void RfbClient::execute()
@@ -253,7 +249,8 @@ void RfbClient::execute()
 
       // Let RfbClientManager handle new authenticated connection.
       m_desktop = m_extAuthListener->onClientAuth(this);
-
+	  if (m_cisteraMode)
+		  m_desktop->turnOffRfbVideo(!cisteraClientRequest.rfbVideo);
       m_log->info(_T("View only = %d"), (int)m_viewOnly);
     } catch (Exception &e) {
       m_log->error(_T("Error during RFB initialization: %s"), e.getMessage());
@@ -315,7 +312,8 @@ void RfbClient::execute()
     m_log->info(_T("Entering normal phase of the RFB protocol"));
     dispatcher.resume();
 
-	MpegStreamer::Start(MpegStreamer::GetIp(m_socket));
+	if (m_cisteraMode && cisteraClientRequest.mpegStream)
+		MpegStreamer::Start(MpegStreamer::GetIp(m_socket), cisteraClientRequest.mpegStreamPort, cisteraServerResponse.mpegStreamAesKeySalt);
 
     connClosingEvent.waitForEvent();
   } catch (Exception &e) {

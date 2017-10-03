@@ -11,22 +11,14 @@
 #include "server-config-lib/Configurator.h"
 #include "TvnServer.h"
 #include "win-system/Process.h"
-
-/*
-WISHES:
-
-*/
+#include <list>
 
 /*
 This service creates a video stream to the client INDEPENDENTLY on RFB connection.
 */
 
-#include <list>
-
 class MpegStreamer
 {
-	typedef list<MpegStreamer *> MpegStreamerList;
-
 	class MpegStreamerConfigReloadListener : public ConfigReloadListener, public TvnServerListener
 	{
 	public:
@@ -39,7 +31,7 @@ class MpegStreamer
 public:
 	static void Initialize(LogWriter* log, TvnServer* tvnServer);
 
-	static void Start(ULONG ip);
+	static void Start(ULONG ip, USHORT port, BYTE aesKeySalt[30] = NULL);
 	static void Stop(ULONG ip);
 	static void StopAll();
 
@@ -62,6 +54,7 @@ private:
 	static HANDLE anti_zombie_job;
 	static MpegStreamer* get(ULONG ip);
 	static LocalMutex lock;
+	typedef list<MpegStreamer *> MpegStreamerList;
 	static MpegStreamerList mpegStreamerList;
 	static MpegStreamerConfigReloadListener mpegStreamerConfigReloadListener;
 	static bool initialized;

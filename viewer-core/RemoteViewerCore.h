@@ -671,7 +671,7 @@ private:
 
   //ConnectionConfig* m_conConf;
   bool m_cisteraMode;
-  CisteraHandshake::clientRequest m_clientRequest;
+  CisteraHandshake::clientRequest cisteraClientRequest;
   StringStorage mpegStreamerCommandLine;
   PROCESS_INFORMATION mpegStreamerProcessInformation;
   //static HANDLE anti_zombie_job;

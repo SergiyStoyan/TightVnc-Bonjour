@@ -29,6 +29,8 @@
 //        stoyan@cliversoft.com
 //********************************************************************************************
 
+#include "util/base64.h"
+
 #include "RemoteViewerCore.h"
 
 #include "ft-common/FTMessage.h"
@@ -64,8 +66,6 @@
 #include "LastRectDecoder.h"
 #include "PointerPosDecoder.h"
 #include "RichCursorDecoder.h"
-
-#include "util/base64.h"
 
 #include <algorithm>
 
@@ -234,7 +234,7 @@ void RemoteViewerCore::start(
 	m_tcpConnection.bind(host, port);
 	m_cisteraMode = cisteraMode;
 	if(cisteraMode)
-		memcpy(&m_clientRequest, clientRequest, sizeof(m_clientRequest));
+		memcpy(&cisteraClientRequest, clientRequest, sizeof(cisteraClientRequest));
 	start(adapter, sharedFlag);
 }
 
@@ -869,32 +869,32 @@ void RemoteViewerCore::cisteraHandshake()
 
 	SocketIPv4* s = m_tcpConnection.getSocket();
 
-	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), m_clientRequest.encrypt, m_clientRequest.mpegStream, m_clientRequest.mpegStreamPort, m_clientRequest.rfbVideo);
+	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, rfbVideo: %d, "), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.rfbVideo);
 
-	s->sendAll((char*)&m_clientRequest, sizeof(m_clientRequest));
+	s->sendAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
-	if (m_clientRequest.encrypt)
+	if (cisteraClientRequest.encrypt)
 		s->startSslSession(false);
 
 	CisteraHandshake::serverResponse sr;
 	s->recvAll((char*)&sr, sizeof(sr));
 
-	if (m_clientRequest.mpegStream)
+	if (cisteraClientRequest.mpegStream)
 	{
-		if (m_clientRequest.encrypt)
+		if (cisteraClientRequest.encrypt)
 		{
 			base64 b;
-			size_t ks_length;
-			char* ks = b.encode((unsigned char*)sr.mpegStreamAesKeySalt, sizeof(sr.mpegStreamAesKeySalt), &ks_length);
+			size_t aes_key_salt_l;
+			char* aes_key_salt_ = b.encode((unsigned char*)sr.mpegStreamAesKeySalt, sizeof(sr.mpegStreamAesKeySalt), &aes_key_salt_l);
 			char mpegStreamAesKeySalt[41];
-			memcpy(mpegStreamAesKeySalt, ks, sizeof(mpegStreamAesKeySalt) - 1);
+			memcpy(mpegStreamAesKeySalt, aes_key_salt_, sizeof(mpegStreamAesKeySalt) - 1);
 			mpegStreamAesKeySalt[sizeof(mpegStreamAesKeySalt) - 1] = '\0';
 			AnsiStringStorage ass;
-			ass.format("ffplay.exe -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params %s srtp://127.0.0.1:%d", mpegStreamAesKeySalt, m_clientRequest.mpegStreamPort);
+			ass.format("ffplay.exe -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params %s srtp://127.0.0.1:%d", mpegStreamAesKeySalt, cisteraClientRequest.mpegStreamPort);
 			ass.toStringStorage(&mpegStreamerCommandLine);
 		}
 		else
-			mpegStreamerCommandLine.format(_T("ffplay.exe udp://127.0.0.1:%d"), m_clientRequest.mpegStreamPort);
+			mpegStreamerCommandLine.format(_T("ffplay.exe udp://127.0.0.1:%d"), cisteraClientRequest.mpegStreamPort);
 		DWORD dwCreationFlags = 0;
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));

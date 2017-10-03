@@ -28,6 +28,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "win-system/Process.h"
+#include <list>
+//#include <vector>
+
 class base64
 {
 public:
@@ -38,6 +42,8 @@ public:
 
 private:
 	char decoding_table[256];
+	typedef list<void *> Buffers;
+	Buffers buffers;
 };
 
 #endif//_BASE64_H_

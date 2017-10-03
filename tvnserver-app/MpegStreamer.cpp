@@ -5,6 +5,10 @@
 //        stoyan@cliversoft.com
 //********************************************************************************************
 
+#include "util/base64.h"
+#include "util/AnsiStringStorage.h"
+#include "network/CisteraHandshake.h"
+
 #include "MpegStreamer.h"
 #include <tchar.h>
 #include <iostream>
@@ -23,7 +27,7 @@ void MpegStreamer::MpegStreamerConfigReloadListener::onTvnServerShutdown()
 MpegStreamer::MpegStreamerConfigReloadListener MpegStreamer::mpegStreamerConfigReloadListener = MpegStreamerConfigReloadListener();
 bool MpegStreamer::initialized = false;
 LogWriter* MpegStreamer::log;
-MpegStreamer::MpegStreamerList MpegStreamer::mpegStreamerList = MpegStreamerList();
+MpegStreamer::MpegStreamerList MpegStreamer::mpegStreamerList;
 LocalMutex MpegStreamer::lock;
 //ServerConfig* MpegStreamer::serverConfig;
 HANDLE MpegStreamer::anti_zombie_job;
@@ -125,7 +129,7 @@ MpegStreamer::~MpegStreamer()
 	log->message(_T("MpegStreamer: Stopped for address: %s"), ss.getString());
 }
 
-void MpegStreamer::Start(ULONG ip)
+void MpegStreamer::Start(ULONG ip, USHORT port, BYTE aesKeySalt[30])
 {
 	if (!initialized)
 	{
@@ -134,11 +138,9 @@ void MpegStreamer::Start(ULONG ip)
 	}
 	
 	ServerConfig *config = Configurator::getInstance()->getServerConfig();
-	if (!config->isMpegStreamerEnabled())
-		return;
 
-	if (config->getMpegStreamerDelayMss() > 0)
-		Sleep(config->getMpegStreamerDelayMss());
+	/*if (config->getMpegStreamerDelayMss() > 0)
+		Sleep(config->getMpegStreamerDelayMss());*/
 
 	AutoLock l(&lock);
 
@@ -146,24 +148,26 @@ void MpegStreamer::Start(ULONG ip)
 	for (ms = MpegStreamer::get(ip); ms; ms = MpegStreamer::get(ip))
 		delete(ms);
 
+	ms = new MpegStreamer(ip, port);
+	StringStorage ip_ss; 
+	ms->address.toString2(&ip_ss);
 	StringStorage command_line1;
 	command_line1.format(_T("ffmpeg.exe -f gdigrab -framerate %d"), config->getMpegStreamerFramerate());
 	StringStorage command_line2;
-	if (config->useMpegStreamerUdp())
-	{
-		ms = new MpegStreamer(ip, config->getMpegStreamerDestinationUdpPort());
-		StringStorage ipp; 
-		ms->address.toString2(&ipp);
-		command_line2.format(_T("-f mpegts udp://%s"), ipp.getString());
-	}
+	if (aesKeySalt == NULL)
+		command_line2.format(_T("-f mpegts udp://%s"), ip_ss.getString());
 	else
 	{
-		ms = new MpegStreamer(ip, config->getMpegStreamerDestinationSrtpPort());
-		StringStorage ek;
-		config->getMpegStreamerEncryptionKey(&ek);
-		StringStorage ipp;
-		ms->address.toString2(&ipp);
-		command_line2.format(_T("-f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params %s srtp://%s"), ek.getString(), ipp.getString());
+		base64 b;
+		size_t aes_key_salt_l;
+		char* aes_key_salt_ = b.encode(aesKeySalt, CisteraHandshake_AesKeySalt_SIZE, &aes_key_salt_l);
+		char mpegStreamAesKeySalt[41];
+		memcpy(mpegStreamAesKeySalt, aes_key_salt_, sizeof(mpegStreamAesKeySalt) - 1);
+		mpegStreamAesKeySalt[sizeof(mpegStreamAesKeySalt) - 1] = '\0';
+		AnsiStringStorage ass(mpegStreamAesKeySalt);
+		StringStorage aes_key_salt_ss;
+		ass.toStringStorage(&aes_key_salt_ss);
+		command_line2.format(_T("-f rtp_mpegts -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params %s srtp://%s"), aes_key_salt_ss.getString(), ip_ss.getString());
 	}
 	try
 	{

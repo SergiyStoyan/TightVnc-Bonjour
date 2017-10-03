@@ -66,6 +66,19 @@ public:
   // If view port is out of central frame buffer bounds the function will return false.
   virtual bool updateExternalFrameBuffer(FrameBuffer *fb, const Region *region,
                                          const Rect *viewPort) = 0;
+
+  void turnOffRfbVideo(bool turnOffRfbVideo)
+  {
+	  m_turnOffRfbVideo = turnOffRfbVideo;
+  }
+
+  bool turnOffRfbVideo()
+  {
+	  return m_turnOffRfbVideo;
+  }
+
+private:
+	bool m_turnOffRfbVideo;
 };
 
 #endif // __DESKTOP_H__

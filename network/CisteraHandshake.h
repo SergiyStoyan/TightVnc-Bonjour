@@ -50,10 +50,12 @@ public:
 		UINT16 mpegStreamPort = 5720;
 	};
 
+	#define CisteraHandshake_AesKeySalt_SIZE 30
+
 	struct serverResponse
 	{
 		char serverVersion[4] = "1.0";
-		byte mpegStreamAesKeySalt[30];
+		byte mpegStreamAesKeySalt[CisteraHandshake_AesKeySalt_SIZE];
 	};
 };
 
