@@ -50,5 +50,4 @@ ffplay -srtp_in_suite AES_CM_128_HMAC_SHA1_80 -srtp_in_params 123456789012345678
 
 TBD:
 
-- client port validation
 
