@@ -5,7 +5,7 @@
 	<TITLE></TITLE>
 	<META NAME="GENERATOR" CONTENT="OpenOffice 4.1.1  (Win32)">
 	<META NAME="CREATED" CONTENT="20171009;15204727">
-	<META NAME="CHANGED" CONTENT="20171009;16580339">
+	<META NAME="CHANGED" CONTENT="20171009;18013083">
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
 <DL>
@@ -43,10 +43,11 @@
 	client (see SocketIPv4.cpp) and Server as SSL server;<LI>
 	*if mpeg stream was requested, Server starts ffmpeg with the
 	parameters set by Client;<LI>
-	From this point everything is acting like with TightVNC that's
-	Server starts RFB handshake etc; 
-	<LI>*during connection, if RFB video was not requested, Server does
-	not send updates to Client (so that Client's VNC window is blank);</UL>
+	from this point everything is acting like TightVNC that's Server
+	starts RFB handshake etc; 
+	<LI>*during connection, if RFB video was not requested by Client,
+	Server does not send updates to Client (so that Client's VNC window
+	is blank);</UL>
 <DL>
 	<DT><BR>
 	<DT><BR>
@@ -55,9 +56,14 @@
 	in your case) support CisteraVNC server, you only need to insert
 	function </SPAN><FONT COLOR="#000000"><SPAN LANG="en-US">cisteraHandshake
 	(see RemoteViewverCode.cpp) after opening TCP connection to Server
-	and before RFB handshake.</SPAN></FONT></FONT></FONT><DT>
+	and before RFB handshake. Notice, the updated client cannot work
+	with a conventional VNC server unless the embedded steps are not
+	turned off.</SPAN></FONT></FONT></FONT><DT>
 	<BR>
 	<DT><BR>
+	<DT><FONT FACE="Times New Roman"><FONT SIZE=3>The following is
+	extractions from the code:</FONT></FONT><DT>
+	<BR>
 	<DT><FONT FACE="Times New Roman"><FONT SIZE=3>class CisteraHandshake</FONT></FONT><DT>
 	{<DT>
 	public:<DT>
@@ -82,11 +88,11 @@
 	};<DT>
 	<BR>
 	<DT><BR>
-	<DT>Client converts plain socket into SSL socket:<DT>
+	<DT>//Client converts plain socket into SSL socket:<DT>
 	<BR>
-	<DT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>		</FONT></FONT></FONT><FONT COLOR="#6f008a"><FONT FACE="Consolas"><FONT SIZE=2>ERR_load_crypto_strings</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>();</FONT></FONT></FONT><DT>
-	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>		</FONT></FONT></FONT><FONT COLOR="#6f008a"><FONT FACE="Consolas"><FONT SIZE=2>SSL_load_error_strings</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>();</FONT></FONT></FONT><DT>
-	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>		</FONT></FONT></FONT><FONT COLOR="#6f008a"><FONT FACE="Consolas"><FONT SIZE=2>OpenSSL_add_ssl_algorithms</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>();</FONT></FONT></FONT><DT>
+	<DT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>	</FONT></FONT></FONT><FONT COLOR="#6f008a"><FONT FACE="Consolas"><FONT SIZE=2>ERR_load_crypto_strings</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>();</FONT></FONT></FONT><DT>
+	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>	</FONT></FONT></FONT><FONT COLOR="#6f008a"><FONT FACE="Consolas"><FONT SIZE=2>SSL_load_error_strings</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>();</FONT></FONT></FONT><DT>
+	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>	</FONT></FONT></FONT><FONT COLOR="#6f008a"><FONT FACE="Consolas"><FONT SIZE=2>OpenSSL_add_ssl_algorithms</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>();</FONT></FONT></FONT><DT>
 	<BR>
 	<DT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>	</FONT></FONT></FONT><FONT COLOR="#0000ff"><FONT FACE="Consolas"><FONT SIZE=2>const</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>
 	</FONT></FONT></FONT><FONT COLOR="#2b91af"><FONT FACE="Consolas"><FONT SIZE=2>SSL_METHOD</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>*
@@ -101,21 +107,21 @@
 	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>		throwSslException();</FONT></FONT></FONT><DT>
 	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>	SSL_set_fd(m_ssl_socket,
 	m_socket);</FONT></FONT></FONT><DT>
-	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>		</FONT></FONT></FONT><FONT COLOR="#0000ff"><FONT FACE="Consolas"><FONT SIZE=2>if</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>
+	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>	</FONT></FONT></FONT><FONT COLOR="#0000ff"><FONT FACE="Consolas"><FONT SIZE=2>if</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>
 	(SSL_connect(m_ssl_socket) &lt;= 0)</FONT></FONT></FONT><DT>
-	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>			throwSslException();</FONT></FONT></FONT><DT>
+	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>		throwSslException();</FONT></FONT></FONT><DT>
 	<BR>
-	<DT><SPAN LANG="en-US">now </SPAN><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>m_ssl_socket</FONT></FONT></FONT><SPAN LANG="en-US">
+	<DT><SPAN LANG="en-US">//now </SPAN><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>m_ssl_socket</FONT></FONT></FONT><SPAN LANG="en-US">
 	can be used for reading/writing:</SPAN><DT>
 	<BR>
-	<DT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">SSL_read(m_</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>ssl_socket</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">,
+	<DT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">	SSL_read(m_</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>ssl_socket</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">,
 	</SPAN></FONT></FONT></FONT><FONT COLOR="#808080"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">buffer</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">,
 	</SPAN></FONT></FONT></FONT><FONT COLOR="#808080"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">size</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">);	</SPAN></FONT></FONT></FONT><DT>
-	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">SSL_write(m</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>_ssl_socket</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">,
+	<FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">	SSL_write(m</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2>_ssl_socket</FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">,
 	</SPAN></FONT></FONT></FONT><FONT COLOR="#808080"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">data</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">,
 	</SPAN></FONT></FONT></FONT><FONT COLOR="#808080"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">size</SPAN></FONT></FONT></FONT><FONT COLOR="#000000"><FONT FACE="Consolas"><FONT SIZE=2><SPAN LANG="en-US">);</SPAN></FONT></FONT></FONT><DT>
 	<BR>
-	<DT>When closing, it should be properly destroyed but it is not
-	necessary if the process quits as well.</DL>
+	<DT>//when closing, ssl entities should be properly destroyed but it
+	is not necessary if the process quits as well.</DL>
 </BODY>
 </HTML>
