@@ -213,20 +213,44 @@ void MpegStreamer::Start(ULONG ip, USHORT port, BYTE framerate, BYTE* aesKeySalt
 		ZeroMemory(&ms->processInformation, sizeof(ms->processInformation));
 		if (config->logMpegStreamerProcessOutput())
 		{
-			StringStorage ld, lf;
-			config->getLogFileDir(&ld);
-			lf.format(_T("%s\\ffmpeg.log"), ld.getString());
+			StringStorage log_dir;
+			config->getLogFileDir(&log_dir);
+			WIN32_FIND_DATA fd;
+			StringStorage log_pattern;
+			log_pattern.format(_T("%s\\ffmpeg*.log"), log_dir.getString());
+			HANDLE hf = FindFirstFile(log_pattern.getString(), &fd);
+			if (hf != INVALID_HANDLE_VALUE)
+			{
+				UINT32 delete_older_than_secs = 60 * 60 * 24 * 3;
+				FILETIME delete_older_than_this;
+				GetSystemTimeAsFileTime(&delete_older_than_this);
+				((ULARGE_INTEGER *)&delete_older_than_this)->QuadPart -= (delete_older_than_secs * 10000000LLU);
+				do
+				{
+					if (CompareFileTime(&delete_older_than_this, &fd.ftLastWriteTime) > 0)
+					{
+						StringStorage log;
+						log.format(_T("%s\\%s"), log_dir.getString(), fd.cFileName);
+						DeleteFile(log.getString());
+					}
+				} while (FindNextFile(hf, &fd));
+				FindClose(hf);
+			}
+			StringStorage log_file;
+			SYSTEMTIME st;
+			GetSystemTime(&st);
+			log_file.format(_T("%s\\ffmpeg_%d-%d-%d-%d-%d-%d.log"), log_dir.getString(), st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 			SECURITY_ATTRIBUTES sa;
 			sa.nLength = sizeof(sa);
 			sa.lpSecurityDescriptor = NULL;
 			sa.bInheritHandle = TRUE;
-			HANDLE h = CreateFile(lf.getString(), GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, &sa, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			HANDLE h = CreateFile(log_file.getString(), GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, &sa, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if(h == INVALID_HANDLE_VALUE)
-				log->error(_T("MpegStreamer: Could not create child process log:\r\n%s\r\nCreateFile: Error: %d"), lf.getString(), GetLastError());
+				log->error(_T("MpegStreamer: Could not create child process log:\r\n%s\r\nCreateFile: Error: %d"), log_file.getString(), GetLastError());
 			else
 			{
 				StringStorage ss;
-				log->message(_T("MpegStreamer: FFMPEG log:\r\n%s"), lf.getString());
+				log->message(_T("MpegStreamer: FFMPEG log:\r\n%s"), log_file.getString());
 				ss.format(_T("COMMAND LINE:\r\n%s\r\n\r\n"), ms->commandLine.getString(), time);
 #ifdef UNICODE
 				//TCHAR == WCHAR

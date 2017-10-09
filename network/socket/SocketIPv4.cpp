@@ -53,7 +53,7 @@ SocketIPv4::SocketIPv4()
 		throw SocketException();
 	}
 
-	m_ssl = NULL;
+	m_ssl_socket = NULL;
 }
 
 bool SocketIPv4::sslInitialized = false;
@@ -83,36 +83,36 @@ SocketIPv4::~SocketIPv4()
 
 void SocketIPv4::createSslSocket(bool server)
 {
-	if (m_ssl != NULL)
+	if (m_ssl_socket != NULL)
 		return;
 
 	sslSocketCount++;
 	if (sslSocketCount == 1)
 		initializeSsl(server);
 
-	m_ssl = SSL_new(m_sslCtx);
-	if(m_ssl == NULL)
+	m_ssl_socket = SSL_new(m_sslCtx);
+	if(m_ssl_socket == NULL)
 		throwSslException();
-	SSL_set_fd(m_ssl, m_socket);
+	SSL_set_fd(m_ssl_socket, m_socket);
 	if (server)
 	{
-		if (SSL_accept(m_ssl) <= 0)
+		if (SSL_accept(m_ssl_socket) <= 0)
 			throwSslException();
 	}
 	else
 	{
-		if (SSL_connect(m_ssl) <= 0)
+		if (SSL_connect(m_ssl_socket) <= 0)
 			throwSslException();
 	}
 }
 
 void SocketIPv4::destroySslSocket()
 {
-	if (m_ssl == NULL)
+	if (m_ssl_socket == NULL)
 		return;
 
-	SSL_free(m_ssl);
-	m_ssl = NULL;
+	SSL_free(m_ssl_socket);
+	m_ssl_socket = NULL;
 	sslSocketCount--;
 	if (sslSocketCount == 0)
 		shutdownSsl();
@@ -382,9 +382,9 @@ int SocketIPv4::send(const char *data, int size, int flags)
 {
 	int result;
 
-	if (m_ssl != NULL)
+	if (m_ssl_socket != NULL)
 	{
-		result = SSL_write(m_ssl, data, size);
+		result = SSL_write(m_ssl_socket, data, size);
 		if (result == 0)
 			throw IOException(_T("Connection has been gracefully closed"));
 		if (result < 0)
@@ -404,9 +404,9 @@ int SocketIPv4::recv(char *buffer, int size, int flags)
 {
 	int result;
 
-	if (m_ssl != NULL)
+	if (m_ssl_socket != NULL)
 	{
-		result = SSL_read(m_ssl, buffer, size);
+		result = SSL_read(m_ssl_socket, buffer, size);
 		if (result == 0)
 			throw IOException(_T("Connection has been gracefully closed"));
 		if (result < 0)
@@ -492,9 +492,4 @@ void SocketIPv4::setExclusiveAddrUse()
 	int val = 1;
 
 	setSocketOptions(SOL_SOCKET, SO_EXCLUSIVEADDRUSE, &val, sizeof(val));
-}
-
-void SocketIPv4::startSslSession(bool server)
-{
-	createSslSocket(server);
 }

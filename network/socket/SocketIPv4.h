@@ -166,7 +166,7 @@ public:
 	void enableNaggleAlgorithm(bool enabled) throw(SocketException);
 	void setExclusiveAddrUse() throw(SocketException);
 
-	void startSslSession(bool server);
+	inline void startSslSession(bool server) { createSslSocket(server); };
 
 private:
 	WsaStartup m_wsaStartup;
@@ -198,7 +198,7 @@ protected:
 	*/
 	bool m_isBound;
 
-	SSL* m_ssl;
+	SSL* m_ssl_socket;
 	void createSslSocket(bool server);
 	void destroySslSocket();
 	static SSL_CTX* m_sslCtx;
