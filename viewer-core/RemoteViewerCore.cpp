@@ -893,7 +893,7 @@ void RemoteViewerCore::cisteraHandshake()
 		AnsiStringStorage ass(serverVersion);
 		StringStorage ss;
 		ass.toStringStorage(&ss);
-		m_logWriter.info(_T("serverVersion: %s"), ass.getString());
+		m_logWriter.info(_T("serverVersion: %s"), ss.getString());
 	}
 
 	if (cisteraClientRequest.mpegStream)

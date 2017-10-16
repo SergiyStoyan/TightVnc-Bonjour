@@ -37,6 +37,7 @@
 #include "ClientAuthListener.h"
 #include "server-config-lib/Configurator.h"
 #include "tvnserver-app/MpegStreamer.h"
+#include "util/AnsiStringStorage.h"
 
 RfbClient::RfbClient(NewConnectionEvents *newConnectionEvents,
 	SocketIPv4 *socket, 
@@ -177,7 +178,15 @@ void RfbClient::cisteraHandshake()
 
 	m_socket->recvAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
-	m_log->info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+	{
+		char clientVersion[sizeof(CisteraHandshake::clientRequest::clientVersion) + 1];
+		memcpy(clientVersion, cisteraClientRequest.clientVersion, sizeof(clientVersion) - 1);
+		clientVersion[sizeof(clientVersion) - 1] = '\0';
+		AnsiStringStorage ass(clientVersion);
+		StringStorage ss;
+		ass.toStringStorage(&ss);
+		m_log->info(_T("clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+	}
 
 	if (cisteraClientRequest.encrypt)
 	{
