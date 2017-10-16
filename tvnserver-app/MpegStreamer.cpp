@@ -159,7 +159,7 @@ void MpegStreamer::Start(ULONG ip, USHORT port, BYTE framerate, BYTE* aesKeySalt
 	{
 		base64 b;
 		size_t aes_key_salt_l;
-		char* aes_key_salt_ = b.encode(aesKeySalt, CisteraHandshake::AesKeySalt_SIZE, &aes_key_salt_l);
+		char* aes_key_salt_ = b.encode(aesKeySalt, CisteraHandshake::serverResponse_mpegStreamAesKeySalt_SIZE, &aes_key_salt_l);
 		char mpegStreamAesKeySalt[41];
 		memcpy(mpegStreamAesKeySalt, aes_key_salt_, sizeof(mpegStreamAesKeySalt) - 1);
 		mpegStreamAesKeySalt[sizeof(mpegStreamAesKeySalt) - 1] = '\0';

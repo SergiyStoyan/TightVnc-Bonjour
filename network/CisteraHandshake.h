@@ -40,7 +40,7 @@
 class CisteraHandshake
 {
 public:
-
+	
 	struct clientRequest
 	{
 		char clientVersion[4] = "1.0";
@@ -51,12 +51,12 @@ public:
 		UINT16 mpegStreamPort = 5720;
 	};
 
-	static const int AesKeySalt_SIZE = 30;
+	static const int serverResponse_mpegStreamAesKeySalt_SIZE = 30;
 
 	struct serverResponse
 	{
 		char serverVersion[4] = "1.0";
-		byte mpegStreamAesKeySalt[AesKeySalt_SIZE];
+		byte mpegStreamAesKeySalt[serverResponse_mpegStreamAesKeySalt_SIZE];
 	};
 };
 

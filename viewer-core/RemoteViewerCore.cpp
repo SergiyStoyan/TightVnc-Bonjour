@@ -869,23 +869,40 @@ void RemoteViewerCore::cisteraHandshake()
 
 	SocketIPv4* s = m_tcpConnection.getSocket();
 
-	m_logWriter.info(_T("encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
-
+	{
+		char clientVersion[sizeof(CisteraHandshake::clientRequest::clientVersion) + 1];
+		memcpy(clientVersion, cisteraClientRequest.clientVersion, sizeof(clientVersion) - 1);
+		clientVersion[sizeof(clientVersion) - 1] = '\0';
+		AnsiStringStorage ass(clientVersion);
+		StringStorage ss;
+		ass.toStringStorage(&ss);
+		m_logWriter.info(_T("clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+	}
 	s->sendAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
 	if (cisteraClientRequest.encrypt)
 		s->startSslSession(false);
 
-	CisteraHandshake::serverResponse sr;
-	s->recvAll((char*)&sr, sizeof(sr));
+	CisteraHandshake::serverResponse serverResponse;
+	s->recvAll((char*)&serverResponse, sizeof(serverResponse));
+
+	{
+		char serverVersion[sizeof(CisteraHandshake::serverResponse::serverVersion) + 1];
+		memcpy(serverVersion, serverResponse.serverVersion, sizeof(serverVersion) - 1);
+		serverVersion[sizeof(serverVersion) - 1] = '\0';
+		AnsiStringStorage ass(serverVersion);
+		StringStorage ss;
+		ass.toStringStorage(&ss);
+		m_logWriter.info(_T("serverVersion: %s"), ass.getString());
+	}
 
 	if (cisteraClientRequest.mpegStream)
 	{
 		if (cisteraClientRequest.encrypt)
 		{
-			base64 b;
+			base64 b64;
 			size_t aes_key_salt_l;
-			char* aes_key_salt_ = b.encode((unsigned char*)sr.mpegStreamAesKeySalt, sizeof(sr.mpegStreamAesKeySalt), &aes_key_salt_l);
+			char* aes_key_salt_ = b64.encode((unsigned char*)serverResponse.mpegStreamAesKeySalt, sizeof(serverResponse.mpegStreamAesKeySalt), &aes_key_salt_l);
 			char mpegStreamAesKeySalt[41];
 			memcpy(mpegStreamAesKeySalt, aes_key_salt_, sizeof(mpegStreamAesKeySalt) - 1);
 			mpegStreamAesKeySalt[sizeof(mpegStreamAesKeySalt) - 1] = '\0';
@@ -899,6 +916,7 @@ void RemoteViewerCore::cisteraHandshake()
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
+		m_logWriter.info(_T("Starting process: %s"), mpegStreamerCommandLine.getString());
 		if (!CreateProcess(NULL, (LPTSTR)mpegStreamerCommandLine.getString(), NULL, NULL, TRUE, dwCreationFlags, NULL, NULL, &si, &mpegStreamerProcessInformation))
 		{
 			StringStorage errorString;
