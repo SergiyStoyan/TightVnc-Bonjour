@@ -167,6 +167,7 @@ public:
 	void setExclusiveAddrUse() throw(SocketException);
 
 	inline void startSslSession(bool server) { createSslSocket(server); };
+	static inline const char* getSslVersion() { return OPENSSL_VERSION_TEXT; };
 
 private:
 	WsaStartup m_wsaStartup;

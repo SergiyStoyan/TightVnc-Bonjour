@@ -185,11 +185,16 @@ void RfbClient::cisteraHandshake()
 		AnsiStringStorage ass(clientVersion);
 		StringStorage ss;
 		ass.toStringStorage(&ss);
-		m_log->info(_T("clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+		m_log->message(_T("clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
 	}
 
 	if (cisteraClientRequest.encrypt)
 	{
+		AnsiStringStorage ass(SocketIPv4::getSslVersion());
+		StringStorage ss;
+		ass.toStringStorage(&ss);
+		m_log->info(_T("OpenSSL: %s"), ass.getString());
+
 		HCRYPTPROV hProvider = 0;
 		bool filled = false;
 		if (!CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
@@ -236,11 +241,11 @@ void RfbClient::execute()
   try {
 	  if (m_cisteraMode)
 	  {
-		  m_log->info(_T("Mode: CisteraVNC"));
+		  m_log->message(_T("Mode: CisteraVNC"));
 		  cisteraHandshake();
 	  }
 	  else
-		  m_log->info(_T("Mode: TightVNC"));
+		  m_log->message(_T("Mode: TightVNC"));
     
 	  // First initialization phase
     try {
