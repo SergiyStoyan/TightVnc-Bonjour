@@ -894,13 +894,21 @@ void RemoteViewerCore::cisteraHandshake()
 	s->recvAll((char*)&serverResponse, sizeof(serverResponse));
 
 	{
-		char serverVersion[sizeof(CisteraHandshake::serverResponse::serverVersion) + 1];
-		memcpy(serverVersion, serverResponse.serverVersion, sizeof(serverVersion) - 1);
-		serverVersion[sizeof(serverVersion) - 1] = '\0';
-		AnsiStringStorage ass(serverVersion);
-		StringStorage ss;
-		ass.toStringStorage(&ss);
-		m_logWriter.message(_T("CisteraHandshake::serverResponse::serverVersion: %s"), ss.getString());
+		char serverVersion_[sizeof(CisteraHandshake::serverResponse::serverVersion) + 1];
+		memcpy(serverVersion_, serverResponse.serverVersion, sizeof(serverResponse.serverVersion));
+		serverVersion_[sizeof(serverVersion_) - 1] = '\0';
+		AnsiStringStorage ass(serverVersion_);
+		StringStorage serverVersion;
+		ass.toStringStorage(&serverVersion);
+		m_logWriter.message(_T("CisteraHandshake::serverResponse::serverVersion: %s"), serverVersion.getString());
+
+		if(strcmp("1.0", serverVersion_))
+		{
+			StringStorage errorString;
+			errorString.format(_T("CisteraHandshake::serverResponse::serverVersion is not supported: %s"), serverVersion.getString());
+			m_logWriter.error(errorString.getString());
+			throw Exception(errorString.getString());
+		}
 	}
 
 	if (cisteraClientRequest.mpegStream)

@@ -179,13 +179,21 @@ void RfbClient::cisteraHandshake()
 	m_socket->recvAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
 	{
-		char clientVersion[sizeof(CisteraHandshake::clientRequest::clientVersion) + 1];
-		memcpy(clientVersion, cisteraClientRequest.clientVersion, sizeof(clientVersion) - 1);
-		clientVersion[sizeof(clientVersion) - 1] = '\0';
-		AnsiStringStorage ass(clientVersion);
-		StringStorage ss;
-		ass.toStringStorage(&ss);
-		m_log->message(_T("CisteraHandshake::clientRequest::clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+		char clientVersion_[sizeof(CisteraHandshake::clientRequest::clientVersion) + 1];
+		memcpy(clientVersion_, cisteraClientRequest.clientVersion, sizeof(cisteraClientRequest.clientVersion));
+		clientVersion_[sizeof(clientVersion_) - 1] = '\0';
+		AnsiStringStorage ass(clientVersion_);
+		StringStorage clientVersion;
+		ass.toStringStorage(&clientVersion);
+		m_log->message(_T("CisteraHandshake::clientRequest::clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), clientVersion.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+
+		if (strcmp("1.0", clientVersion_))
+		{
+			StringStorage errorString;
+			errorString.format(_T("CisteraHandshake::clientRequest::clientVersion is not supported: %s"), clientVersion.getString());
+			m_log->error(errorString.getString());
+			throw Exception(errorString.getString());
+		}
 	}
 
 	if (cisteraClientRequest.encrypt)
@@ -235,8 +243,7 @@ void RfbClient::execute()
 
   FileTransferRequestHandler *fileTransfer = 0;
 
-  RfbInitializer rfbInitializer(&sockStream, m_extAuthListener, this,
-                                !m_isOutgoing);
+  RfbInitializer rfbInitializer(&sockStream, m_extAuthListener, this, !m_isOutgoing);
 
   try {
 	  if (m_cisteraMode)
