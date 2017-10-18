@@ -185,7 +185,7 @@ void RfbClient::cisteraHandshake()
 		AnsiStringStorage ass(clientVersion);
 		StringStorage ss;
 		ass.toStringStorage(&ss);
-		m_log->message(_T("clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+		m_log->message(_T("CisteraHandshake::clientRequest::clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
 	}
 
 	if (cisteraClientRequest.encrypt)
@@ -193,7 +193,7 @@ void RfbClient::cisteraHandshake()
 		AnsiStringStorage ass(SocketIPv4::getSslVersion());
 		StringStorage ss;
 		ass.toStringStorage(&ss);
-		m_log->info(_T("OpenSSL: %s"), ass.getString());
+		m_log->info(_T("OpenSSL version: %s"), ss.getString());
 
 		HCRYPTPROV hProvider = 0;
 		bool filled = false;

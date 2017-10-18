@@ -869,6 +869,13 @@ void RemoteViewerCore::cisteraHandshake()
 
 	SocketIPv4* s = m_tcpConnection.getSocket();
 
+	if (cisteraClientRequest.encrypt)	
+	{
+		AnsiStringStorage ass(SocketIPv4::getSslVersion());
+		StringStorage ss;
+		ass.toStringStorage(&ss);
+		m_logWriter.info(_T("OpenSSL version: %s"), ss.getString());
+	}
 	{
 		char clientVersion[sizeof(CisteraHandshake::clientRequest::clientVersion) + 1];
 		memcpy(clientVersion, cisteraClientRequest.clientVersion, sizeof(clientVersion) - 1);
@@ -876,7 +883,7 @@ void RemoteViewerCore::cisteraHandshake()
 		AnsiStringStorage ass(clientVersion);
 		StringStorage ss;
 		ass.toStringStorage(&ss);
-		m_logWriter.info(_T("clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
+		m_logWriter.message(_T("CisteraHandshake::clientRequest::clientVersion: %s, encrypt: %d, mpegStream: %d, mpegStreamPort: %d, mpegFramerate: %d,  rfbVideo: %d"), ss.getString(), cisteraClientRequest.encrypt, cisteraClientRequest.mpegStream, cisteraClientRequest.mpegStreamPort, cisteraClientRequest.mpegFramerate, cisteraClientRequest.rfbVideo);
 	}
 	s->sendAll((char*)&cisteraClientRequest, sizeof(cisteraClientRequest));
 
@@ -893,7 +900,7 @@ void RemoteViewerCore::cisteraHandshake()
 		AnsiStringStorage ass(serverVersion);
 		StringStorage ss;
 		ass.toStringStorage(&ss);
-		m_logWriter.info(_T("serverVersion: %s"), ss.getString());
+		m_logWriter.message(_T("CisteraHandshake::serverResponse::serverVersion: %s"), ss.getString());
 	}
 
 	if (cisteraClientRequest.mpegStream)
@@ -916,7 +923,7 @@ void RemoteViewerCore::cisteraHandshake()
 		STARTUPINFO si;
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
-		m_logWriter.info(_T("Starting process: %s"), mpegStreamerCommandLine.getString());
+		m_logWriter.message(_T("Starting process: %s"), mpegStreamerCommandLine.getString());
 		if (!CreateProcess(NULL, (LPTSTR)mpegStreamerCommandLine.getString(), NULL, NULL, TRUE, dwCreationFlags, NULL, NULL, &si, &mpegStreamerProcessInformation))
 		{
 			StringStorage errorString;
@@ -937,11 +944,11 @@ void RemoteViewerCore::execute()
 
 	if (m_cisteraMode)
 	{
-		m_logWriter.info(_T("Mode: CisteraVNC"));
+		m_logWriter.message(_T("Mode: CisteraVNC"));
 		cisteraHandshake();
 	}
 	else
-		m_logWriter.info(_T("Mode: TightVNC"));
+		m_logWriter.message(_T("Mode: TightVNC"));
 
 	// get server version and set client version
 	m_logWriter.info(_T("Protocol stage is \"Handshake\"."));
