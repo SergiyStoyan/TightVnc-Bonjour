@@ -270,7 +270,7 @@ void RfbClient::execute()
 
       // Let RfbClientManager handle new authenticated connection.
       m_desktop = m_extAuthListener->onClientAuth(this);
-	  if (m_cisteraMode)
+	  if (m_cisteraMode && cisteraClientRequest.mpegStream)
 		  m_desktop->turnOffRfbVideo(!cisteraClientRequest.rfbVideo);
       m_log->info(_T("View only = %d"), (int)m_viewOnly);
     } catch (Exception &e) {
