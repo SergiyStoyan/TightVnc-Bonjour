@@ -465,7 +465,7 @@ private:
 	StringStorage m_MpegStreamerCapturedWindowTitle;
 	uint16_t m_MpegStreamerCaptureMode;
 	bool m_logMpegStreamerProcessOutput;
-	bool m_hideMpegStreamerProcessWidnow;
+	bool m_showMpegStreamerProcessWidnow;
 
 public:
 	static const unsigned char MPEG_STREAMER_CAPTURE_MODE_DISPLAY = 1;
@@ -490,8 +490,8 @@ public:
 	bool logMpegStreamerProcessOutput();
 	void logMpegStreamerProcessOutput(bool log);
 
-	bool hideMpegStreamerProcessWidnow();
-	void hideMpegStreamerProcessWidnow(bool hide);
+	bool showMpegStreamerProcessWidnow();
+	void showMpegStreamerProcessWidnow(bool show);
 };
 
 #endif

@@ -65,7 +65,7 @@ ServerConfig::ServerConfig()
 	m_MpegStreamerCapturedAreaWidth = 0;
 	m_MpegStreamerCapturedAreaHeight = 0;
 	m_logMpegStreamerProcessOutput = false;
-	m_hideMpegStreamerProcessWidnow = true;
+	m_showMpegStreamerProcessWidnow = false;
 	m_MpegStreamerCaptureMode = MPEG_STREAMER_CAPTURE_MODE_DISPLAY;
 }
 
@@ -153,7 +153,7 @@ void ServerConfig::serialize(DataOutputStream *output)
   output->writeUTF8(m_MpegStreamerCapturedWindowTitle.getString());
   output->writeInt16(m_MpegStreamerCaptureMode);
   output->writeInt8(m_logMpegStreamerProcessOutput ? 1 : 0);
-  output->writeInt8(m_hideMpegStreamerProcessWidnow ? 1 : 0);
+  output->writeInt8(m_showMpegStreamerProcessWidnow ? 1 : 0);
 
   output->writeUTF8(m_logFilePath.getString());
 }
@@ -239,7 +239,7 @@ void ServerConfig::deserialize(DataInputStream *input)
   input->readUTF8(&m_MpegStreamerCapturedWindowTitle);
   m_MpegStreamerCaptureMode = input->readInt16();
   m_logMpegStreamerProcessOutput = input->readInt8() == 1;
-  m_hideMpegStreamerProcessWidnow = input->readInt8() == 1;
+  m_showMpegStreamerProcessWidnow = input->readInt8() == 1;
 
   input->readUTF8(&m_logFilePath);
 }
@@ -942,14 +942,14 @@ void ServerConfig::logMpegStreamerProcessOutput(bool log)
 	m_logMpegStreamerProcessOutput = log;
 }
 
-bool ServerConfig::hideMpegStreamerProcessWidnow()
+bool ServerConfig::showMpegStreamerProcessWidnow()
 {
 	AutoLock lock(&m_objectCS);
-	return m_hideMpegStreamerProcessWidnow;
+	return m_showMpegStreamerProcessWidnow;
 }
 
-void ServerConfig::hideMpegStreamerProcessWidnow(bool hide)
+void ServerConfig::showMpegStreamerProcessWidnow(bool show)
 {
 	AutoLock lock(&m_objectCS);
-	m_hideMpegStreamerProcessWidnow = hide;
+	m_showMpegStreamerProcessWidnow = show;
 }

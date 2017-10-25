@@ -953,7 +953,7 @@ bool Configurator::saveMpegStreamerConfig(SettingsManager *sm)
 	if (!sm->setBoolean(_T("logMpegStreamerProcessOutput"), m_serverConfig.logMpegStreamerProcessOutput()))
 		saveResult = false;
 
-	if (!sm->setBoolean(_T("hideMpegStreamerProcessWidnow"), m_serverConfig.hideMpegStreamerProcessWidnow()))
+	if (!sm->setBoolean(_T("showMpegStreamerProcessWidnow"), m_serverConfig.showMpegStreamerProcessWidnow()))
 		saveResult = false;
 
 	return saveResult;
@@ -1009,11 +1009,11 @@ bool Configurator::loadMpegStreamerConfig(SettingsManager *sm, ServerConfig *con
 		m_serverConfig.logMpegStreamerProcessOutput(b);
 	}
 
-	if (!sm->getBoolean(_T("hideMpegStreamerProcessWidnow"), &b))
+	if (!sm->getBoolean(_T("showMpegStreamerProcessWidnow"), &b))
 		loadResult = false;
 	else {
 		m_isConfigLoadedPartly = true;
-		m_serverConfig.hideMpegStreamerProcessWidnow(b);
+		m_serverConfig.showMpegStreamerProcessWidnow(b);
 	}
 
 	return loadResult;

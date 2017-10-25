@@ -274,7 +274,7 @@ void MpegStreamer::Start(ULONG ip, USHORT port, BYTE framerate, BYTE* aesKeySalt
 		}
 		log->message(_T("MpegStreamer: Launching:\r\n%s"), ms->commandLine.getString());
 		DWORD dwCreationFlags = 0;
-		if(config->hideMpegStreamerProcessWidnow())
+		if(!config->showMpegStreamerProcessWidnow())
 			dwCreationFlags = dwCreationFlags | CREATE_NO_WINDOW;
 		if (!CreateProcess(NULL, (LPTSTR)ms->commandLine.getString(), NULL, NULL, TRUE, dwCreationFlags, NULL, NULL, &si, &ms->processInformation))
 			throw SystemException();

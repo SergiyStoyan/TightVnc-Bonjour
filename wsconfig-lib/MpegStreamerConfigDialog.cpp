@@ -41,7 +41,7 @@ void MpegStreamerConfigDialog::initControls()
 	m_captureArea.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_AREA));
 	m_captureWindow.setWindow(GetDlgItem(dialogHwnd, IDC_RADIO_MPEG_STREAMER_WINDOW));
 	m_logProcessOutput.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE));
-	m_hideProcessWindow.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_HIDE_WINDOW));
+	m_showProcessWindow.setWindow(GetDlgItem(dialogHwnd, IDC_MPEG_STREAMER_SHOW_WINDOW));
 
 	m_openLogDir.setWindow(GetDlgItem(dialogHwnd, IDC_IDC_MPEG_STREAMER_OPEN_LOG_DIR_BUTTON));
 }
@@ -51,7 +51,7 @@ BOOL MpegStreamerConfigDialog::onCommand(UINT controlID, UINT notificationID)
 	switch (controlID)
 	{
 	case IDC_MPEG_STREAMER_WRITE_OUTPUT2FILE:
-	case IDC_MPEG_STREAMER_HIDE_WINDOW:
+	case IDC_MPEG_STREAMER_SHOW_WINDOW:
 	case IDC_RADIO_MPEG_STREAMER_MONITOR:
 	case IDC_RADIO_MPEG_STREAMER_AREA:
 	case IDC_RADIO_MPEG_STREAMER_WINDOW:
@@ -193,7 +193,7 @@ bool MpegStreamerConfigDialog::validateInput()
 void MpegStreamerConfigDialog::updateUI()
 {	
 	m_logProcessOutput.check(m_config->logMpegStreamerProcessOutput());
-	m_hideProcessWindow.check(m_config->hideMpegStreamerProcessWidnow());
+	m_showProcessWindow.check(m_config->showMpegStreamerProcessWidnow());
 
 	set_monitors();
 
@@ -362,7 +362,7 @@ void MpegStreamerConfigDialog::apply()
 	AutoLock al(m_config);
 
 	m_config->logMpegStreamerProcessOutput(m_logProcessOutput.isChecked());
-	m_config->hideMpegStreamerProcessWidnow(m_hideProcessWindow.isChecked());
+	m_config->showMpegStreamerProcessWidnow(m_showProcessWindow.isChecked());
 
 	StringStorage ss;
 	if (m_captureDisplay.isChecked())

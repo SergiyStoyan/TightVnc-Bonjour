@@ -75,7 +75,7 @@ private:
 	// Configuration
 	ServerConfig *m_config;
 	// Controls
-	CheckBox m_hideProcessWindow;
+	CheckBox m_showProcessWindow;
 	CheckBox m_logProcessOutput;
 	ComboBox m_displays;
 	TextBox m_capturedAreaLeft;
